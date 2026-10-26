@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { BellRing } from "lucide-react";
+import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/AppShell";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth/guards";
@@ -10,6 +13,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
   const sp = await searchParams;
   const user = await requireUser("/account");
   const t = await getTranslations("account");
+  const tn = await getTranslations("notifications.prefs");
   const full = await db.user.findUniqueOrThrow({ where: { id: user.id }, select: { passwordHash: true, totpSecret: true, pinHash: true, memberships: { select: { role: true } } } });
   const isSecurity = full.memberships.some((m) => m.role === "security");
   const pending = sp.totp === "setup" ? await pendingTotpSecret() : null;
@@ -81,6 +85,12 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
               <button type="submit" className="btn-secondary">{t("totp.start")}</button>
             </form>
           ) : null}
+        </section>
+
+        <section className="card space-y-3">
+          <h2 className="flex items-center gap-2 text-lg font-semibold"><Icon icon={BellRing} /> {tn("title")}</h2>
+          <p className="muted">{tn("linkHelp")}</p>
+          <Link href="/account/notifications" className="btn-secondary">{tn("link")}</Link>
         </section>
       </div>
     </AppShell>
