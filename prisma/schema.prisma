@@ -1,0 +1,527 @@
+// Airlink Visitas — data model (see CLAUDE.md).
+// Multi-site by Site. Every query from /admin, /app and /guard filters by siteId taken from
+// requireMembership(role); `admin` with siteId = null sees all sites. Ids from the browser are re-checked.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────── Sites ─────────────────────────────
+
+model Site {
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique
+  address  String?
+  timezone String  @default("America/Santo_Domingo")
+  /// { retentionDays, requireDocFor[], ndaRequiredFor[], badgeTemplate, lobbyScreenId, unannouncedTimeoutMin, ... }
+  settings Json    @default("{}")
+  active   Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  gates        Gate[]
+  areas        Area[]
+  employees    Employee[]
+  memberships  Membership[]
+  guardDevices GuardDevice[]
+  policies     VisitPolicy[]
+  passes       Pass[]
+  visits       Visit[]
+  blacklist    Blacklist[]
+  shiftLogs    ShiftLog[]
+  ndaVersions  NdaVersion[]
+  auditLogs    AuditLog[]
+}
+
+enum GateKind {
+  pedestrian
+  vehicle
+  dock
+}
+
+model Gate {
+  id       String   @id @default(cuid())
+  siteId   String
+  name     String
+  kind     GateKind @default(pedestrian)
+  active   Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  site         Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  guardDevices GuardDevice[]
+  visits       Visit[]
+  shiftLogs    ShiftLog[]
+
+  @@index([siteId])
+}
+
+model Area {
+  id             String  @id @default(cuid())
+  siteId         String
+  name           String
+  restricted     Boolean @default(false)
+  escortRequired Boolean @default(false)
+  active         Boolean @default(true)
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, name])
+}
+
+// ───────────────────────────── People ─────────────────────────────
+
+enum EmployeeSource {
+  spn
+  entra
+  manual
+}
+
+/// Read-only mirror of the host directory (SPN + Entra). Never written back to SPN.
+model Employee {
+  id         String         @id @default(cuid())
+  externalId String?        @unique
+  entraId    String?        @unique
+  email      String?        @unique
+  name       String
+  department String?
+  extension  String?
+  phone      String?
+  photoKey   String?
+  siteId     String?
+  active     Boolean        @default(true)
+  source     EmployeeSource @default(manual)
+  syncedAt   DateTime       @default(now())
+
+  site          Site?   @relation(fields: [siteId], references: [id], onDelete: SetNull)
+  user          User?
+  passesHosted  Pass[]  @relation("PassHost")
+  passesEscort  Pass[]  @relation("PassEscort")
+  visitsHosted  Visit[] @relation("VisitHost")
+  visitsEscort  Visit[] @relation("VisitEscort")
+
+  @@index([name])
+  @@index([siteId, active])
+}
+
+enum UserStatus {
+  active
+  disabled
+}
+
+/// Exists only once someone signs in (JIT from Entra) or is created locally (break-glass admin, guards).
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String
+  locale       String?
+  passwordHash String?
+  totpSecret   String?
+  /// Kiosk PIN for security staff (scrypt hash)
+  pinHash      String?
+  entraId      String?    @unique
+  employeeId   String?    @unique
+  status       UserStatus @default(active)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  lastLoginAt  DateTime?
+
+  employee          Employee?          @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  sessions          Session[]
+  memberships       Membership[]
+  passesCreated     Pass[]             @relation("PassCreatedBy")
+  passesApproved    Pass[]             @relation("PassApprovedBy")
+  visitsRequested   Visit[]            @relation("VisitRequestedBy")
+  visitsDecided     Visit[]            @relation("VisitDecidedBy")
+  blacklistCreated  Blacklist[]
+  shiftLogs         ShiftLog[]
+  auditLogs         AuditLog[]
+  notifications     Notification[]
+  pushSubscriptions PushSubscription[]
+  nativePushTokens  NativePushToken[]
+  notificationPref  NotificationPref?
+}
+
+/// DB-backed sessions. The cookie carries a random token; only its SHA-256 is stored.
+model Session {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenHash  String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  userAgent  String?
+  ip         String?
+  /// Set when the session was opened from a kiosk device with a PIN
+  guardDeviceId String?
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guardDevice GuardDevice? @relation(fields: [guardDeviceId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+enum MembershipRole {
+  admin
+  security
+  approver
+  host
+}
+
+enum MembershipStatus {
+  active
+  disabled
+}
+
+/// siteId = null means every site (used for admins and company-wide approvers).
+model Membership {
+  id        String           @id @default(cuid())
+  userId    String
+  siteId    String?
+  role      MembershipRole
+  status    MembershipStatus @default(active)
+  createdAt DateTime         @default(now())
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  site Site? @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, siteId, role])
+  @@index([siteId, role])
+}
+
+/// Enrolled kiosk (tablet/PC at a gate). The device token lives in an HttpOnly cookie; only its hash is stored.
+model GuardDevice {
+  id              String    @id @default(cuid())
+  siteId          String
+  gateId          String
+  name            String
+  deviceTokenHash String?   @unique
+  /// One-time enrollment code (hash) shown by the admin; cleared once the device is enrolled
+  enrollCodeHash  String?   @unique
+  enrollExpiresAt DateTime?
+  lastSeenAt      DateTime?
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+
+  site     Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  gate     Gate      @relation(fields: [gateId], references: [id], onDelete: Cascade)
+  sessions Session[]
+
+  @@index([siteId])
+}
+
+enum CompanyKind {
+  vendor
+  contractor
+  client
+  carrier
+  courier
+  other
+}
+
+model Company {
+  id      String      @id @default(cuid())
+  name    String
+  rnc     String?
+  kind    CompanyKind @default(other)
+  blocked Boolean     @default(false)
+  notes   String?
+  createdAt DateTime  @default(now())
+
+  passes    Pass[]
+  visits    Visit[]
+  blacklist Blacklist[]
+
+  @@unique([name])
+  @@index([kind])
+}
+
+// ───────────────────────────── Policies, passes, visits ─────────────────────────────
+
+enum VisitKind {
+  visit
+  candidate
+  contractor
+  vendor
+  auditor
+  carrier
+  delivery
+  recurring
+}
+
+/// Rules per site and visit kind. Data, never hardcoded.
+model VisitPolicy {
+  id               String          @id @default(cuid())
+  siteId           String
+  kind             VisitKind
+  requiresApproval Boolean         @default(false)
+  approverRole     MembershipRole?
+  requiresDoc      Boolean         @default(true)
+  requiresNda      Boolean         @default(false)
+  escortRequired   Boolean         @default(false)
+  badge            Boolean         @default(true)
+  allowedGateIds   String[]        @default([])
+  maxDurationMin   Int?
+  /// Visitor stays at reception (deliveries)
+  receptionOnly    Boolean         @default(false)
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, kind])
+}
+
+enum PassStatus {
+  pending_approval
+  active
+  used
+  revoked
+  expired
+  denied
+}
+
+model Pass {
+  id               String     @id @default(cuid())
+  siteId           String
+  hostEmployeeId   String
+  createdById      String
+  kind             VisitKind  @default(visit)
+  companyId        String?
+  visitorName      String
+  visitorPhone     String?
+  visitorEmail     String?
+  visitorDocHash   String?
+  visitorDocLast4  String?
+  plate            String?
+  areaIds          String[]   @default([])
+  escortEmployeeId String?
+  validFrom        DateTime
+  validUntil       DateTime
+  maxUses          Int        @default(1)
+  uses             Int        @default(0)
+  /// Recurring: { days: number[] (0=Sunday..6), from: "HH:mm", to: "HH:mm" } in Site.timezone
+  schedule         Json?
+  gateIds          String[]   @default([])
+  /// Random 128-bit token for /v/<token>
+  token            String     @unique
+  status           PassStatus @default(active)
+  approvedById     String?
+  approvedAt       DateTime?
+  ndaAcceptedAt    DateTime?
+  ndaVersion       String?
+  note             String?
+  /// Group visits share a groupId
+  groupId          String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  site       Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  host       Employee  @relation("PassHost", fields: [hostEmployeeId], references: [id])
+  escort     Employee? @relation("PassEscort", fields: [escortEmployeeId], references: [id], onDelete: SetNull)
+  createdBy  User      @relation("PassCreatedBy", fields: [createdById], references: [id])
+  approvedBy User?     @relation("PassApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  company    Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  visits     Visit[]
+
+  @@index([siteId, status, validUntil])
+  @@index([hostEmployeeId, createdAt])
+  @@index([groupId])
+}
+
+enum VisitStatus {
+  pending
+  approved
+  denied
+  inside
+  at_dock
+  left
+  timeout
+}
+
+model Visit {
+  id               String      @id @default(cuid())
+  siteId           String
+  gateId           String
+  passId           String?
+  hostEmployeeId   String?
+  companyId        String?
+  visitorName      String
+  docLast4         String?
+  docHash          String?
+  plate            String?
+  photoKey         String?
+  kind             VisitKind   @default(visit)
+  status           VisitStatus @default(pending)
+  /// Guard (user) who registered the visit
+  requestedById    String
+  decidedById      String?
+  decidedAt        DateTime?
+  enteredAt        DateTime?
+  leftAt           DateTime?
+  badgeNo          String?
+  areaIds          String[]    @default([])
+  escortEmployeeId String?
+  /// Client-generated id for offline scans; the server dedupes on it
+  scanId           String?     @unique
+  conflict         Boolean     @default(false)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  site        Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  gate        Gate      @relation(fields: [gateId], references: [id])
+  pass        Pass?     @relation(fields: [passId], references: [id], onDelete: SetNull)
+  host        Employee? @relation("VisitHost", fields: [hostEmployeeId], references: [id], onDelete: SetNull)
+  escort      Employee? @relation("VisitEscort", fields: [escortEmployeeId], references: [id], onDelete: SetNull)
+  company     Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  requestedBy User      @relation("VisitRequestedBy", fields: [requestedById], references: [id])
+  decidedBy   User?     @relation("VisitDecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@index([siteId, status, createdAt])
+  @@index([siteId, createdAt])
+  @@index([hostEmployeeId, createdAt])
+}
+
+/// siteId = null means global.
+model Blacklist {
+  id          String    @id @default(cuid())
+  siteId      String?
+  docHash     String?
+  plate       String?
+  name        String?
+  companyId   String?
+  reason      String
+  createdById String
+  until       DateTime?
+  createdAt   DateTime  @default(now())
+
+  site      Site?    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  createdBy User     @relation(fields: [createdById], references: [id])
+
+  @@index([docHash])
+  @@index([plate])
+}
+
+enum ShiftLogKind {
+  note
+  incident
+  round
+  handover
+}
+
+model ShiftLog {
+  id       String       @id @default(cuid())
+  siteId   String
+  gateId   String
+  guardId  String
+  kind     ShiftLogKind @default(note)
+  text     String
+  photoKey String?
+  at       DateTime     @default(now())
+
+  site  Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  gate  Gate @relation(fields: [gateId], references: [id])
+  guard User @relation(fields: [guardId], references: [id])
+
+  @@index([siteId, at])
+}
+
+/// Versioned visitor policy / NDA. siteId = null applies to every site.
+model NdaVersion {
+  id         String   @id @default(cuid())
+  siteId     String?
+  version    String
+  title      String
+  body       String
+  activeFrom DateTime @default(now())
+
+  site Site? @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, version])
+}
+
+// ───────────────────────────── Audit, notifications, infra ─────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  siteId     String?
+  actorId    String?
+  action     String
+  targetType String?
+  targetId   String?
+  meta       Json?
+  ip         String?
+  at         DateTime @default(now())
+
+  site  Site? @relation(fields: [siteId], references: [id], onDelete: SetNull)
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([siteId, at])
+  @@index([actorId, at])
+}
+
+/// payload = ids + ICU args; rendered in the reader's language when displayed.
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  payload   Json
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model NativePushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model NotificationPref {
+  id        String  @id @default(cuid())
+  userId    String  @unique
+  /// Quiet hours "HH:mm" in the user's local time; visit_at_gate, blacklist_hit, carrier_at_dock ignore them.
+  quietFrom String?
+  quietTo   String?
+  prefs     Json    @default("{}")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Fixed-window rate limiting shared across replicas.
+model RateLimit {
+  key         String
+  windowStart DateTime
+  count       Int      @default(0)
+
+  @@id([key, windowStart])
+  @@index([windowStart])
+}

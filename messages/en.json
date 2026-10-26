@@ -1,0 +1,165 @@
+{
+  "app": {
+    "name": "Airlink Visitas",
+    "tagline": "Visitor management for Airlink Distribution",
+    "skipToContent": "Skip to content",
+    "loading": "Loading…",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "create": "Create",
+    "actions": "Actions",
+    "none": "None",
+    "all": "All",
+    "comingSoon": "Available in the next phase."
+  },
+  "theme": { "toggle": "Toggle theme", "light": "Light", "dark": "Dark" },
+  "locale": { "switch": "Language", "es": "Español", "en": "English" },
+  "nav": {
+    "panels": "Panels",
+    "account": "My account",
+    "logout": "Sign out",
+    "admin": "Administration",
+    "guard": "Security",
+    "app": "Host",
+    "approvals": "Approvals",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "roles": { "admin": "Administration", "security": "Security", "approver": "Approver", "host": "Host" },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Use your Airlink account (Microsoft 365) or a local account.",
+    "microsoft": "Sign in with Microsoft",
+    "or": "or",
+    "email": "Email",
+    "password": "Password",
+    "totp": "Verification code",
+    "totpHelp": "Enter the 6-digit code from your authenticator app.",
+    "submit": "Sign in",
+    "errors": {
+      "invalid": "Wrong email or password.",
+      "totp": "Wrong verification code.",
+      "rateLimited": "Too many attempts. Wait a few minutes and try again.",
+      "entra": "Microsoft sign-in failed. Please try again.",
+      "disabled": "Your account is disabled. Contact IT."
+    },
+    "localOnly": "Emergency local access"
+  },
+  "selectPanel": {
+    "title": "Where to?",
+    "subtitle": "Your account can open these panels.",
+    "allSites": "All sites",
+    "empty": "Your account has no role yet. Ask IT or Security to assign one.",
+    "open": "Open"
+  },
+  "home": { "welcome": "Hi, {name}" },
+  "admin": {
+    "title": "Administration",
+    "sites": "Sites",
+    "gates": "Gates",
+    "members": "Users and roles",
+    "devices": "Kiosk devices",
+    "policies": "Visit policies",
+    "blacklist": "Blacklist",
+    "reports": "Reports",
+    "overview": "Overview",
+    "stats": { "sites": "Active sites", "users": "Users", "devices": "Enrolled kiosks", "passesToday": "Active passes" },
+    "site": { "timezone": "Time zone", "gates": "{count, plural, one {# gate} other {# gates}}", "areas": "{count, plural, one {# area} other {# areas}}" },
+    "devicesPage": {
+      "title": "Kiosk devices",
+      "intro": "Each security tablet or PC is enrolled once with a code. Afterwards guards sign in with their PIN.",
+      "name": "Device name",
+      "namePlaceholder": "Reception tablet A2",
+      "site": "Site",
+      "gate": "Gate",
+      "create": "Create device",
+      "generateCode": "Generate code",
+      "codeTitle": "Enrollment code",
+      "codeHelp": "Type it on the kiosk at /guard. Valid for 15 minutes, single use.",
+      "enrolled": "Enrolled",
+      "notEnrolled": "Not enrolled",
+      "lastSeen": "Last activity",
+      "never": "Never",
+      "empty": "No devices yet."
+    },
+    "membersPage": {
+      "title": "Users and roles",
+      "intro": "Employees sign in with Microsoft; roles are assigned here. Security staff can get an initial kiosk PIN.",
+      "email": "Email",
+      "name": "Name",
+      "role": "Role",
+      "site": "Site",
+      "pin": "Initial kiosk PIN (4 to 8 digits, optional)",
+      "add": "Add role",
+      "added": "Role added.",
+      "errors": { "pin": "The PIN must have 4 to 8 digits.", "exists": "That user already has that role at that site." },
+      "empty": "No users yet.",
+      "roles": "Roles"
+    }
+  },
+  "guard": {
+    "title": "Security",
+    "enroll": {
+      "title": "Enroll this device",
+      "intro": "Ask IT for an enrollment code and type it here.",
+      "code": "Code",
+      "submit": "Enroll",
+      "error": "Invalid or expired code."
+    },
+    "pin": {
+      "title": "Sign in with PIN",
+      "device": "Device: {device} · {site} · {gate}",
+      "who": "Who are you?",
+      "pin": "PIN",
+      "submit": "Sign in",
+      "error": "Wrong PIN.",
+      "noGuards": "No security staff with a PIN at this site. Ask IT to set one up.",
+      "rateLimited": "Too many attempts. Wait a minute."
+    },
+    "kiosk": {
+      "title": "Kiosk mode",
+      "scan": "Scan QR",
+      "unannounced": "Unannounced visit",
+      "inside": "Inside now",
+      "evacuation": "Evacuation list",
+      "log": "Shift log",
+      "lock": "Lock",
+      "signedInAs": "Session: {name} · {gate}"
+    }
+  },
+  "host": {
+    "title": "My visits",
+    "invite": "Invite a visitor",
+    "history": "History",
+    "approvals": "Pending approvals",
+    "intro": "Invite visitors and approve unannounced arrivals from here."
+  },
+  "account": {
+    "title": "My account",
+    "security": "Account security",
+    "password": { "title": "Password", "current": "Current password", "new": "New password", "confirm": "Repeat the new password", "submit": "Change password", "ok": "Password updated.", "mismatch": "Passwords do not match.", "weak": "Use at least {min} characters.", "wrong": "The current password is not correct." },
+    "pin": { "title": "Kiosk PIN", "help": "Used on the security tablets. 4 to 8 digits.", "new": "New PIN", "submit": "Save PIN", "ok": "PIN updated.", "invalid": "The PIN must have 4 to 8 digits." },
+    "totp": { "title": "Two-step verification", "enabled": "Enabled", "disabled": "Disabled", "start": "Enable", "secret": "Manual key", "uri": "Add this key to your authenticator app (Microsoft Authenticator, Google Authenticator) and confirm with a code.", "code": "Code", "confirm": "Confirm", "ok": "Two-step verification enabled.", "bad": "Wrong code." }
+  },
+  "visitor": {
+    "title": "Visitor pass",
+    "site": "Site",
+    "host": "Host",
+    "window": "Valid",
+    "from": "From",
+    "until": "Until",
+    "status": { "active": "Valid", "pending_approval": "Pending approval", "used": "Used", "revoked": "Cancelled", "expired": "Expired", "denied": "Denied" },
+    "instructions": "Show this pass and your ID at security when you arrive.",
+    "privacy": "Your data is used only for access control. Read the privacy notice.",
+    "qrSoon": "The QR code will be available in the next phase."
+  },
+  "legal": {
+    "privacy": { "title": "Privacy notice", "updated": "Last updated: {date}" },
+    "terms": { "title": "Terms of use", "updated": "Last updated: {date}" }
+  },
+  "errors": {
+    "notFound": { "title": "Page not found", "body": "Check the link or go back home.", "home": "Go home" },
+    "generic": { "title": "Something went wrong", "body": "Try again. If it keeps failing, tell IT.", "retry": "Retry" }
+  }
+}

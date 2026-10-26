@@ -1,0 +1,13 @@
+/* Airlink Dominican Republic brand tokens: black wordmark, red chevron, white space. */
+:root {
+  --brand-black: #111111;
+  --brand-red: #e4262b;
+  --brand-red-dark: #b81d21;
+  --brand-red-light: #ff5a5f;
+  --brand-red-tint: #fdeaea;
+  --brand-gray: #6b6b6b;
+  /* Partner (Assurant) accents, used sparingly for client-audit contexts */
+  --partner-blue: #1f6fd1;
+  --partner-green: #3fa63d;
+  --partner-orange: #f39a1e;
+}
