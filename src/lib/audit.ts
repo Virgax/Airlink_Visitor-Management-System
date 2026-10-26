@@ -24,6 +24,7 @@ export type AuditAction =
   | "pass.approved"
   | "pass.denied"
   | "pass.revoked"
+  | "pass.updated"
   | "nda.accepted"
   | "visit.approved"
   | "visit.denied"
