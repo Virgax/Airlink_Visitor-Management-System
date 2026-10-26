@@ -59,8 +59,9 @@ Full brief: `docs/PLAN.md`.
 ## Infra
 - GitHub `virgax/Airlink_Visitor-Management-System`: `main` (production) and `develop` (staging), both protected,
   PR + CI required.
-- Railway project `airlink-visitas`: `web`, `Postgres`, bucket `visitas-media`, cron `ops/cron` (*/5 min, `npm run cron:tick`),
-  `ops/backup` (07:00 UTC, `npm run ops:backup`, needs `pg_dump` in the image). "Wait for CI" on.
+- Railway project `airlink-visitas` (id 1942b6a4-0cd3-4fe8-b5ad-7b15c881b7bb): `web` (railway.json, deploys `main`),
+  `Postgres`, bucket `visitas-media`, `ops-cron` (railway.cron.json, */5 min, `npm run cron:tick`), `ops-backup`
+  (railway.backup.json + ops/backup.Dockerfile with pg_dump 17, 07:00 UTC). "Wait for CI" on.
   Healthcheck `/api/health/ready`. Environments `production`/`staging`.
 - Domain `visitas.airlinkdr.com` at Cloudflare (proxied, SSL Full).
 - Integrations: Entra ID app registration "Airlink Visitas"; Power Automate HTTP flow for Teams; SPN read-only;
