@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ClipboardList, Lock, QrCode, ScanLine, Siren, UserPlus } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
@@ -71,13 +72,18 @@ export default async function GuardPage({ searchParams }: { searchParams: Promis
     );
   }
 
-  const actions = [
-    { icon: ScanLine, label: t("kiosk.scan") },
-    { icon: UserPlus, label: t("kiosk.unannounced") },
-    { icon: QrCode, label: t("kiosk.inside") },
-    { icon: Siren, label: t("kiosk.evacuation") },
-    { icon: ClipboardList, label: t("kiosk.log") },
+  const [inside, waiting] = await Promise.all([
+    db.visit.count({ where: { siteId: device.siteId, status: { in: ["inside", "at_dock"] } } }),
+    db.visit.count({ where: { siteId: device.siteId, status: "pending", passId: null } }),
+  ]);
+
+  const tiles = [
+    { icon: ScanLine, label: t("kiosk.scan"), href: "/guard/scan", badge: null as number | null },
+    { icon: UserPlus, label: t("kiosk.unannounced"), href: "/guard/unannounced", badge: waiting || null },
+    { icon: QrCode, label: t("kiosk.inside"), href: "/guard/inside", badge: inside || null },
+    { icon: Siren, label: t("kiosk.evacuation"), href: "/guard/evacuation", badge: null },
   ];
+  const tileClass = "card flex min-h-32 flex-col items-center justify-center gap-2 text-center";
   return (
     <AppShell user={kioskSession} kiosk subtitle={device.site.name}>
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -88,13 +94,20 @@ export default async function GuardPage({ searchParams }: { searchParams: Promis
         </form>
       </div>
       <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
-        {actions.map((a) => (
-          <li key={a.label} className="card flex min-h-32 flex-col items-center justify-center gap-2 text-center opacity-70">
-            <Icon icon={a.icon} size={28} />
-            <span className="font-medium">{a.label}</span>
-            <span className="muted text-xs">{t("kiosk.title") === "" ? "" : "Fase 1"}</span>
+        {tiles.map((a) => (
+          <li key={a.href}>
+            <Link href={a.href} className={`${tileClass} relative hover:bg-surface-2 focus:outline-none focus:ring-2 focus:ring-ring`}>
+              <Icon icon={a.icon} size={28} />
+              <span className="font-medium">{a.label}</span>
+              {a.badge ? <span className="absolute right-3 top-3 rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-contrast">{a.badge}</span> : null}
+            </Link>
           </li>
         ))}
+        <li className={`${tileClass} opacity-60`}>
+          <Icon icon={ClipboardList} size={28} />
+          <span className="font-medium">{t("kiosk.log")}</span>
+          <span className="muted text-xs">{t("kiosk.logSoon")}</span>
+        </li>
       </ul>
     </AppShell>
   );

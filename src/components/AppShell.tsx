@@ -27,7 +27,7 @@ export async function AppShell({
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-surface focus:px-3 focus:py-2">
         {t("app.skipToContent")}
       </a>
-      <header className="border-b border-border bg-surface">
+      <header className="border-b border-border bg-surface print:hidden">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 py-3">
           <Link href="/" className="flex items-center gap-3 font-semibold text-text" aria-label={t("app.name")}>
             <Logo className="h-8 w-auto" />
@@ -61,7 +61,7 @@ export async function AppShell({
         {title ? <h1 className="mb-4 text-2xl font-semibold">{title}</h1> : null}
         {children}
       </main>
-      <footer className="border-t border-border py-4">
+      <footer className="border-t border-border py-4 print:hidden">
         <div className="mx-auto flex max-w-6xl flex-wrap gap-x-4 gap-y-1 px-4 text-xs text-text-muted">
           <span>© {new Date().getFullYear()} Airlink Distribution DR</span>
           <Link href="/legal/privacidad" className="hover:underline">{t("nav.privacy")}</Link>

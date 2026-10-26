@@ -1,5 +1,6 @@
-/* Airlink Visitas service worker: app-shell cache + offline fallback. Scan queueing lives in Phase 1 (IndexedDB). */
-const CACHE = "visitas-v1";
+/* Airlink Visitas service worker: app-shell cache + offline fallback. Kiosk pages (/guard/*) are network-first with a
+   runtime copy so the scanner and the evacuation list open offline; scan queueing lives in IndexedDB. */
+const CACHE = "visitas-v2";
 const PRECACHE = ["/offline", "/icons/icon.svg", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
@@ -20,6 +21,20 @@ self.addEventListener("fetch", (event) => {
   if (url.pathname.startsWith("/api/")) return;
 
   if (req.mode === "navigate") {
+    if (url.pathname === "/guard" || url.pathname.startsWith("/guard/")) {
+      event.respondWith(
+        fetch(req)
+          .then((res) => {
+            if (res.ok) {
+              const copy = res.clone();
+              caches.open(CACHE).then((c) => c.put(url.pathname, copy));
+            }
+            return res;
+          })
+          .catch(() => caches.match(url.pathname, { ignoreVary: true }).then((hit) => hit || caches.match("/offline"))),
+      );
+      return;
+    }
     event.respondWith(fetch(req).catch(() => caches.match("/offline")));
     return;
   }
