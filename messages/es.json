@@ -133,7 +133,147 @@
     "invite": "Invitar visitante",
     "history": "Historial",
     "approvals": "Aprobaciones pendientes",
-    "intro": "Desde aquí invitas visitantes y apruebas a quienes llegan sin aviso."
+    "intro": "Desde aquí invitas visitantes y apruebas a quienes llegan sin aviso.",
+    "nav": {
+      "passes": "Mis pases",
+      "new": "Nuevo pase",
+      "approvals": "Aprobaciones"
+    },
+    "list": {
+      "upcoming": "Próximos",
+      "past": "Anteriores",
+      "emptyUpcoming": "No tienes pases próximos. Crea uno para invitar a alguien.",
+      "emptyPast": "Todavía no hay pases anteriores.",
+      "visitor": "Visitante",
+      "company": "Empresa",
+      "kind": "Tipo",
+      "window": "Ventana",
+      "status": "Estado",
+      "group": "Grupo de {count, plural, one {# persona} other {# personas}}",
+      "open": "Ver",
+      "recurringWindow": "{days} · {from}–{to}"
+    },
+    "new": {
+      "title": "Nuevo pase",
+      "intro": "El visitante recibirá un enlace con su QR, la dirección y las indicaciones de llegada.",
+      "site": "Sitio",
+      "chooseSite": "¿Para qué sitio es la visita?",
+      "kind": "Tipo de visita",
+      "visitorName": "Nombre del visitante",
+      "company": "Empresa",
+      "companyHelp": "Escribe el nombre; si no existe se crea.",
+      "phone": "Teléfono del visitante",
+      "email": "Correo del visitante",
+      "doc": "Cédula o pasaporte",
+      "docHelp": "Solo guardamos un código de verificación y los últimos 4 dígitos. El visitante puede completarlo desde el enlace.",
+      "plate": "Placa",
+      "note": "Motivo o nota",
+      "areas": "Áreas a visitar",
+      "areaRestricted": "restringida",
+      "areaEscort": "con acompañante",
+      "escort": "Acompañante",
+      "escortNone": "Sin acompañante asignado",
+      "mode": "Vigencia",
+      "once": "Una vez",
+      "recurring": "Recurrente (días y horario)",
+      "validFrom": "Válido desde",
+      "validUntil": "Válido hasta",
+      "days": "Días",
+      "scheduleFrom": "Hora de entrada",
+      "scheduleTo": "Hora de salida",
+      "scheduleHelp": "Para pases recurrentes: el QR solo vale esos días y en ese horario, dentro de la vigencia.",
+      "gates": "Puertas permitidas",
+      "gatesHelp": "Sin selección, vale en cualquier puerta permitida por la política.",
+      "groupSize": "Tamaño del grupo",
+      "groupHelp": "Si es más de 1, se crea un pase por persona (\"Visitante 2\", \"Visitante 3\"…) que puedes renombrar después.",
+      "groupPlaceholder": "Visitante",
+      "submit": "Crear pase",
+      "pendingNotice": "Este tipo de visita requiere aprobación de {role}; el pase quedará pendiente hasta que la aprueben.",
+      "errors": {
+        "invalid": "Revisa los campos marcados.",
+        "missing_doc": "Este tipo de visita requiere la cédula o pasaporte del visitante.",
+        "missing_plate": "Los transportistas requieren placa.",
+        "gate_not_allowed": "Alguna de las puertas elegidas no está permitida para este tipo de visita.",
+        "company_blocked": "Esa empresa está bloqueada. Contacta a Seguridad.",
+        "window_order": "La fecha de fin debe ser posterior a la de inicio.",
+        "window_too_long": "La vigencia no puede superar un año.",
+        "window_past": "La vigencia ya terminó.",
+        "schedule": "Elige al menos un día y un horario válido.",
+        "site": "Elige un sitio."
+      }
+    },
+    "detail": {
+      "title": "Pase de {name}",
+      "link": "Enlace para el visitante",
+      "linkHelp": "Compártelo por WhatsApp o correo. Incluye el QR, la dirección y las indicaciones.",
+      "copy": "Copiar enlace",
+      "copied": "Enlace copiado",
+      "share": "Compartir",
+      "open": "Abrir enlace",
+      "revoke": "Cancelar pase",
+      "duplicate": "Duplicar",
+      "rename": "Cambiar nombre",
+      "name": "Nombre del visitante",
+      "save": "Guardar",
+      "status": "Estado",
+      "kind": "Tipo",
+      "site": "Sitio",
+      "host": "Anfitrión",
+      "company": "Empresa",
+      "contact": "Contacto",
+      "doc": "Documento",
+      "docEnding": "termina en {last4}",
+      "docMissing": "Pendiente (el visitante lo completa desde el enlace)",
+      "plate": "Placa",
+      "window": "Vigencia",
+      "schedule": "Horario",
+      "areas": "Áreas",
+      "gates": "Puertas",
+      "anyGate": "Cualquiera",
+      "escort": "Acompañante",
+      "note": "Nota",
+      "nda": "NDA / política de visitantes",
+      "ndaAccepted": "Aceptado {date} (v{version})",
+      "ndaPending": "Pendiente de aceptar",
+      "ndaNotRequired": "No requerido",
+      "uses": "Usos: {uses} de {max}",
+      "group": "Grupo",
+      "groupMembers": "{count, plural, one {# pase en este grupo} other {# pases en este grupo}}",
+      "created": "Creado {date}",
+      "approvedBy": "Aprobado por {name} el {date}",
+      "deniedBy": "Rechazado por {name} el {date}",
+      "pendingNotice": "Pendiente de aprobación de {role}. Te avisaremos cuando la respondan.",
+      "ok": {
+        "created": "Pase creado. Comparte el enlace con el visitante.",
+        "createdGroup": "Se crearon {count} pases. Comparte cada enlace con su visitante.",
+        "revoked": "Pase cancelado.",
+        "renamed": "Nombre actualizado."
+      },
+      "errors": {
+        "invalid": "No se pudo guardar. Revisa los datos."
+      }
+    },
+    "approvalsPage": {
+      "title": "Aprobaciones pendientes",
+      "intro": "Pases que requieren tu aprobación antes de que el visitante pueda entrar.",
+      "empty": "No hay pases pendientes.",
+      "approve": "Aprobar",
+      "deny": "Rechazar",
+      "visitor": "Visitante",
+      "kind": "Tipo",
+      "host": "Anfitrión",
+      "site": "Sitio",
+      "window": "Ventana",
+      "requested": "Solicitado",
+      "areas": "Áreas",
+      "escort": "Acompañante",
+      "role": "Como {role}",
+      "ok": {
+        "approved": "Pase aprobado. Avisamos al anfitrión.",
+        "denied": "Pase rechazado. Avisamos al anfitrión."
+      },
+      "error": "No se pudo procesar. Puede que otra persona ya lo haya respondido."
+    }
   },
   "account": {
     "title": "Mi cuenta",
@@ -149,10 +289,96 @@
     "window": "Válido",
     "from": "Desde",
     "until": "Hasta",
-    "status": { "active": "Vigente", "pending_approval": "Pendiente de aprobación", "used": "Usado", "revoked": "Cancelado", "expired": "Vencido", "denied": "Rechazado" },
+    "schedule": "Horario",
     "instructions": "Presenta este pase y tu cédula en seguridad al llegar.",
     "privacy": "Tus datos se usan solo para el control de acceso. Lee el aviso de privacidad.",
-    "qrSoon": "El código QR estará disponible en la siguiente fase."
+    "qr": {
+      "alt": "Código QR del pase",
+      "help": "Muestra este código en la entrada.",
+      "rotating": "Este código cambia cada 30 segundos; mantén la página abierta al llegar.",
+      "loading": "Generando código…",
+      "offline": "Sin conexión. Recarga la página para obtener un código nuevo.",
+      "pending": "El QR aparecerá cuando el pase sea aprobado.",
+      "unavailable": "Este pase ya no está vigente."
+    },
+    "prereg": {
+      "title": "Completa tus datos",
+      "intro": "Así tu entrada es más rápida. Solo guardamos un código de verificación de tu documento y sus últimos 4 dígitos.",
+      "doc": "Cédula o pasaporte",
+      "phone": "Teléfono",
+      "plate": "Placa del vehículo (si vienes en carro)",
+      "company": "Empresa",
+      "submit": "Guardar",
+      "ok": "Datos guardados. Gracias.",
+      "docSaved": "Documento registrado (termina en {last4})"
+    },
+    "nda": {
+      "title": "Política de visitantes",
+      "intro": "Para entrar debes aceptar esta política.",
+      "accept": "He leído y acepto la política de visitantes",
+      "name": "Escribe tu nombre completo como firma",
+      "submit": "Aceptar",
+      "ok": "Política aceptada. Gracias.",
+      "accepted": "Aceptaste la política de visitantes el {date}."
+    },
+    "errors": {
+      "invalid": "Revisa los datos e inténtalo otra vez.",
+      "rateLimited": "Demasiados intentos. Espera un momento.",
+      "closed": "Este pase ya no admite cambios."
+    }
+  },
+  "passes": {
+    "status": {
+      "active": "Vigente",
+      "pending_approval": "Pendiente de aprobación",
+      "used": "Usado",
+      "revoked": "Cancelado",
+      "expired": "Vencido",
+      "denied": "Rechazado"
+    },
+    "kinds": {
+      "visit": {
+        "label": "Visita",
+        "help": "Reunión o visita general. Cédula y gafete."
+      },
+      "candidate": {
+        "label": "Candidato",
+        "help": "Entrevista de RRHH. Gafete y acompañamiento; sin acceso a producción."
+      },
+      "contractor": {
+        "label": "Contratista",
+        "help": "Técnico, mantenimiento o construcción. Cédula, aprobación de Seguridad, acompañamiento y NDA."
+      },
+      "vendor": {
+        "label": "Proveedor",
+        "help": "Proveedor o vendedor. Cédula y gafete."
+      },
+      "auditor": {
+        "label": "Auditor",
+        "help": "Assurant, AT&T, Samsung o certificadora. Aprobación de gerencia, NDA y acompañamiento."
+      },
+      "carrier": {
+        "label": "Transportista",
+        "help": "Camión en muelle. Placa y empresa obligatorias; sin gafete."
+      },
+      "delivery": {
+        "label": "Mensajería",
+        "help": "Paquetes o comida. Sin cédula; no pasa de recepción."
+      },
+      "recurring": {
+        "label": "Recurrente",
+        "help": "Limpieza, seguridad externa, chofer fijo. Días y horario, aprobación de Seguridad y QR rotativo."
+      }
+    },
+    "weekdays": {
+      "0": "Dom",
+      "1": "Lun",
+      "2": "Mar",
+      "3": "Mié",
+      "4": "Jue",
+      "5": "Vie",
+      "6": "Sáb"
+    }
   },
   "legal": {
     "privacy": { "title": "Aviso de privacidad", "updated": "Última actualización: {date}" },

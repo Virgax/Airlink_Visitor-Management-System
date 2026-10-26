@@ -133,7 +133,147 @@
     "invite": "Invite a visitor",
     "history": "History",
     "approvals": "Pending approvals",
-    "intro": "Invite visitors and approve unannounced arrivals from here."
+    "intro": "Invite visitors and approve unannounced arrivals from here.",
+    "nav": {
+      "passes": "My passes",
+      "new": "New pass",
+      "approvals": "Approvals"
+    },
+    "list": {
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "emptyUpcoming": "You have no upcoming passes. Create one to invite someone.",
+      "emptyPast": "No past passes yet.",
+      "visitor": "Visitor",
+      "company": "Company",
+      "kind": "Kind",
+      "window": "Window",
+      "status": "Status",
+      "group": "Group of {count, plural, one {# person} other {# people}}",
+      "open": "View",
+      "recurringWindow": "{days} · {from}–{to}"
+    },
+    "new": {
+      "title": "New pass",
+      "intro": "The visitor gets a link with their QR, the address and arrival instructions.",
+      "site": "Site",
+      "chooseSite": "Which site is the visit for?",
+      "kind": "Visit kind",
+      "visitorName": "Visitor name",
+      "company": "Company",
+      "companyHelp": "Type the name; it is created if it does not exist.",
+      "phone": "Visitor phone",
+      "email": "Visitor email",
+      "doc": "ID or passport",
+      "docHelp": "We only store a verification code and the last 4 digits. The visitor can fill it in from the link.",
+      "plate": "Plate",
+      "note": "Purpose or note",
+      "areas": "Areas to visit",
+      "areaRestricted": "restricted",
+      "areaEscort": "escort required",
+      "escort": "Escort",
+      "escortNone": "No escort assigned",
+      "mode": "Validity",
+      "once": "One time",
+      "recurring": "Recurring (days and hours)",
+      "validFrom": "Valid from",
+      "validUntil": "Valid until",
+      "days": "Days",
+      "scheduleFrom": "Entry time",
+      "scheduleTo": "Exit time",
+      "scheduleHelp": "Recurring passes: the QR works only on those days and hours, within the validity range.",
+      "gates": "Allowed gates",
+      "gatesHelp": "Leave empty to allow any gate the policy permits.",
+      "groupSize": "Group size",
+      "groupHelp": "Above 1, one pass per person is created (\"Visitor 2\", \"Visitor 3\"…) which you can rename later.",
+      "groupPlaceholder": "Visitor",
+      "submit": "Create pass",
+      "pendingNotice": "This visit kind requires {role} approval; the pass stays pending until approved.",
+      "errors": {
+        "invalid": "Check the highlighted fields.",
+        "missing_doc": "This visit kind requires the visitor's ID or passport.",
+        "missing_plate": "Carriers require a plate.",
+        "gate_not_allowed": "One of the chosen gates is not allowed for this visit kind.",
+        "company_blocked": "That company is blocked. Contact Security.",
+        "window_order": "The end date must be after the start date.",
+        "window_too_long": "Validity cannot exceed one year.",
+        "window_past": "The validity window has already ended.",
+        "schedule": "Pick at least one day and a valid time range.",
+        "site": "Choose a site."
+      }
+    },
+    "detail": {
+      "title": "Pass for {name}",
+      "link": "Link for the visitor",
+      "linkHelp": "Share it on WhatsApp or email. It includes the QR, the address and instructions.",
+      "copy": "Copy link",
+      "copied": "Link copied",
+      "share": "Share",
+      "open": "Open link",
+      "revoke": "Cancel pass",
+      "duplicate": "Duplicate",
+      "rename": "Rename",
+      "name": "Visitor name",
+      "save": "Save",
+      "status": "Status",
+      "kind": "Kind",
+      "site": "Site",
+      "host": "Host",
+      "company": "Company",
+      "contact": "Contact",
+      "doc": "Document",
+      "docEnding": "ending in {last4}",
+      "docMissing": "Pending (the visitor fills it in from the link)",
+      "plate": "Plate",
+      "window": "Validity",
+      "schedule": "Schedule",
+      "areas": "Areas",
+      "gates": "Gates",
+      "anyGate": "Any",
+      "escort": "Escort",
+      "note": "Note",
+      "nda": "NDA / visitor policy",
+      "ndaAccepted": "Accepted {date} (v{version})",
+      "ndaPending": "Not accepted yet",
+      "ndaNotRequired": "Not required",
+      "uses": "Uses: {uses} of {max}",
+      "group": "Group",
+      "groupMembers": "{count, plural, one {# pass in this group} other {# passes in this group}}",
+      "created": "Created {date}",
+      "approvedBy": "Approved by {name} on {date}",
+      "deniedBy": "Denied by {name} on {date}",
+      "pendingNotice": "Pending {role} approval. We will let you know when it is answered.",
+      "ok": {
+        "created": "Pass created. Share the link with the visitor.",
+        "createdGroup": "{count} passes created. Share each link with its visitor.",
+        "revoked": "Pass cancelled.",
+        "renamed": "Name updated."
+      },
+      "errors": {
+        "invalid": "Could not save. Check the data."
+      }
+    },
+    "approvalsPage": {
+      "title": "Pending approvals",
+      "intro": "Passes that need your approval before the visitor can enter.",
+      "empty": "No pending passes.",
+      "approve": "Approve",
+      "deny": "Deny",
+      "visitor": "Visitor",
+      "kind": "Kind",
+      "host": "Host",
+      "site": "Site",
+      "window": "Window",
+      "requested": "Requested",
+      "areas": "Areas",
+      "escort": "Escort",
+      "role": "As {role}",
+      "ok": {
+        "approved": "Pass approved. The host has been notified.",
+        "denied": "Pass denied. The host has been notified."
+      },
+      "error": "Could not process it. Someone else may have answered already."
+    }
   },
   "account": {
     "title": "My account",
@@ -149,10 +289,96 @@
     "window": "Valid",
     "from": "From",
     "until": "Until",
-    "status": { "active": "Valid", "pending_approval": "Pending approval", "used": "Used", "revoked": "Cancelled", "expired": "Expired", "denied": "Denied" },
+    "schedule": "Schedule",
     "instructions": "Show this pass and your ID at security when you arrive.",
     "privacy": "Your data is used only for access control. Read the privacy notice.",
-    "qrSoon": "The QR code will be available in the next phase."
+    "qr": {
+      "alt": "Pass QR code",
+      "help": "Show this code at the entrance.",
+      "rotating": "This code changes every 30 seconds; keep the page open when you arrive.",
+      "loading": "Generating code…",
+      "offline": "Offline. Reload the page to get a fresh code.",
+      "pending": "The QR will appear once the pass is approved.",
+      "unavailable": "This pass is no longer valid."
+    },
+    "prereg": {
+      "title": "Complete your details",
+      "intro": "It makes your entry faster. We only store a verification code of your document and its last 4 digits.",
+      "doc": "ID or passport",
+      "phone": "Phone",
+      "plate": "Vehicle plate (if you drive)",
+      "company": "Company",
+      "submit": "Save",
+      "ok": "Details saved. Thank you.",
+      "docSaved": "Document registered (ending in {last4})"
+    },
+    "nda": {
+      "title": "Visitor policy",
+      "intro": "You must accept this policy to enter.",
+      "accept": "I have read and accept the visitor policy",
+      "name": "Type your full name as signature",
+      "submit": "Accept",
+      "ok": "Policy accepted. Thank you.",
+      "accepted": "You accepted the visitor policy on {date}."
+    },
+    "errors": {
+      "invalid": "Check the data and try again.",
+      "rateLimited": "Too many attempts. Wait a moment.",
+      "closed": "This pass no longer accepts changes."
+    }
+  },
+  "passes": {
+    "status": {
+      "active": "Valid",
+      "pending_approval": "Pending approval",
+      "used": "Used",
+      "revoked": "Cancelled",
+      "expired": "Expired",
+      "denied": "Denied"
+    },
+    "kinds": {
+      "visit": {
+        "label": "Visit",
+        "help": "Meeting or general visit. ID and badge."
+      },
+      "candidate": {
+        "label": "Candidate",
+        "help": "HR interview. Badge and escort; no access to production."
+      },
+      "contractor": {
+        "label": "Contractor",
+        "help": "Technician, maintenance or construction. ID, Security approval, escort and NDA."
+      },
+      "vendor": {
+        "label": "Vendor",
+        "help": "Supplier or salesperson. ID and badge."
+      },
+      "auditor": {
+        "label": "Auditor",
+        "help": "Assurant, AT&T, Samsung or certification body. Management approval, NDA and escort."
+      },
+      "carrier": {
+        "label": "Carrier",
+        "help": "Truck at the dock. Plate and company required; no badge."
+      },
+      "delivery": {
+        "label": "Delivery",
+        "help": "Parcels or food. No ID; stays at reception."
+      },
+      "recurring": {
+        "label": "Recurring",
+        "help": "Cleaning, external security, regular driver. Days and hours, Security approval and rotating QR."
+      }
+    },
+    "weekdays": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
+    }
   },
   "legal": {
     "privacy": { "title": "Privacy notice", "updated": "Last updated: {date}" },
