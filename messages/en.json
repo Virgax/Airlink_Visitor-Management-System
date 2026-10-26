@@ -161,5 +161,135 @@
   "errors": {
     "notFound": { "title": "Page not found", "body": "Check the link or go back home.", "home": "Go home" },
     "generic": { "title": "Something went wrong", "body": "Try again. If it keeps failing, tell IT.", "retry": "Retry" }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "bell": "Notifications",
+    "unreadCount": "{count, plural, =0 {No new notifications} one {# unread notification} other {# unread notifications}}",
+    "empty": "You have no notifications.",
+    "unread": "New",
+    "open": "Open",
+    "markRead": "Mark as read",
+    "markAllRead": "Mark all as read",
+    "preferences": "Preferences",
+    "visit": {
+      "approve": "Approve",
+      "deny": "Deny",
+      "onMyWay": "On my way",
+      "pending": "Waiting for your answer",
+      "status": "{status, select, approved {Visit approved} denied {Visit denied} timeout {No answer in time} inside {Visitor inside} left {Visitor left} at_dock {At the dock} other {Visit resolved}}"
+    },
+    "ok": {
+      "approved": "Visit approved. Security has been told.",
+      "denied": "Visit denied.",
+      "onMyWay": "Visit approved; Security knows you are on your way.",
+      "read": "Notifications marked as read."
+    },
+    "error": {
+      "gone": "This visit was already resolved or timed out.",
+      "forbidden": "You cannot decide on this visit.",
+      "invalid": "Invalid request."
+    },
+    "prefs": {
+      "title": "Notification preferences",
+      "intro": "Choose when and how you get alerts. Visitor-at-gate, blacklist and carrier-at-dock alerts always arrive.",
+      "quietTitle": "Quiet hours",
+      "quietHelp": "During these hours (site local time) you get no push or email, except urgent alerts. Leave both empty to turn it off.",
+      "quietFrom": "From",
+      "quietTo": "Until",
+      "quietActive": "Quiet from {from} to {to}.",
+      "quietNone": "No quiet hours.",
+      "emailTitle": "Email",
+      "emailFallback": "Email me when I have no active push notifications",
+      "save": "Save preferences",
+      "saved": "Preferences saved.",
+      "invalid": "Enter both times (from and until) as HH:mm, or leave both empty.",
+      "back": "Back to my account",
+      "link": "Notifications",
+      "linkHelp": "Quiet hours, email and push on this device."
+    },
+    "push": {
+      "title": "Push on this device",
+      "help": "Get alerts on this device even when the app is closed.",
+      "enable": "Enable notifications on this device",
+      "disable": "Disable on this device",
+      "enabled": "Notifications are active on this device.",
+      "disabled": "Notifications are off on this device.",
+      "unsupported": "This browser does not support push notifications.",
+      "notConfigured": "Push notifications are not configured on the server.",
+      "denied": "The browser blocked notifications. Allow them in the site settings.",
+      "error": "Could not enable them. Try again.",
+      "working": "One moment…"
+    },
+    "teams": {
+      "confirmVisit": "{decision, select, approved {Approve the visit of {name}?} other {Deny the visit of {name}?}}",
+      "confirmPass": "{decision, select, approved {Approve the pass for {name}?} other {Deny the pass for {name}?}}",
+      "confirm": "Confirm",
+      "done": "{decision, select, approved {Approved. Security has been told.} other {Denied.}}",
+      "gone": "This request was already resolved or expired.",
+      "invalid": "The link is not valid or has expired.",
+      "rateLimited": "Too many requests. Wait a minute.",
+      "approve": "Approve",
+      "deny": "Deny",
+      "openApp": "Open Airlink Visitas",
+      "site": "Site",
+      "gate": "Gate",
+      "host": "Host",
+      "company": "Company"
+    },
+    "email": {
+      "footer": "Airlink Visitas · You got this email because you have no active push notifications or it is a scheduled report.",
+      "open": "Open in Airlink Visitas"
+    },
+    "types": {
+      "visit_at_gate": {
+        "title": "{escalated, select, true {No answer: visitor at the gate} other {Visitor at the gate}}",
+        "body": "{visitorName}{hasCompany, select, yes { ({company})} other {}} is at {gateName}{hasHost, select, yes { asking for {hostName}} other {}}. {escalated, select, true {The host did not answer in time.} other {Approve or deny the visit.}}"
+      },
+      "visit_entered": {
+        "title": "Your visitor is in",
+        "body": "{visitorName}{hasCompany, select, yes { ({company})} other {}} came in through {gateName}."
+      },
+      "visit_left": {
+        "title": "Your visitor left",
+        "body": "{visitorName}{hasCompany, select, yes { ({company})} other {}} left the site."
+      },
+      "pass_pending_approval": {
+        "title": "Pass pending approval",
+        "body": "{hostName} requests a pass for {visitorName}{hasCompany, select, yes { ({company})} other {}}."
+      },
+      "pass_approved": {
+        "title": "Pass approved",
+        "body": "The pass for {visitorName}{hasCompany, select, yes { ({company})} other {}} was approved."
+      },
+      "pass_denied": {
+        "title": "Pass denied",
+        "body": "The pass for {visitorName}{hasCompany, select, yes { ({company})} other {}} was denied{hasReason, select, yes {: {reason}} other {.}}"
+      },
+      "delivery_at_gate": {
+        "title": "Delivery at reception",
+        "body": "{hasCompany, select, yes {{company}} other {A courier}} brought a delivery for you to {gateName}."
+      },
+      "carrier_at_dock": {
+        "title": "Carrier at the dock",
+        "body": "{hasCompany, select, yes {{company}} other {A carrier}}{hasPlate, select, yes { (plate {plate})} other {}} is at {gateName}."
+      },
+      "blacklist_hit": {
+        "title": "Alert: blacklisted person",
+        "body": "{visitorName} tried to enter through {gateName}{hasReason, select, yes {. Reason: {reason}} other {.}}"
+      },
+      "visitor_overstay": {
+        "title": "Visit exceeded the allowed time",
+        "body": "{visitorName}{hasCompany, select, yes { ({company})} other {}} has been inside for {minutes, plural, one {# minute} other {# minutes}}; the maximum is {maxMinutes}."
+      },
+      "daily_report": {
+        "title": "Daily visits report",
+        "body": "{count, plural, =0 {No visits} one {# visit} other {# visits}} at {siteName} on {date}."
+      },
+      "evacuation_list": {
+        "title": "Evacuation list",
+        "body": "{count, plural, =0 {Nobody inside} one {# person inside} other {# people inside}} at {siteName}."
+      }
+    }
   }
 }
