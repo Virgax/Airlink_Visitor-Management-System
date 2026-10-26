@@ -1,12 +1,15 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { requireMembership } from "@/lib/auth/guards";
+import { fmtNumber } from "@/lib/format";
+import { siteDashboardCounts } from "@/lib/server/reports";
 
 export default async function AdminHome() {
   const tenant = await requireMembership("admin", "/admin");
   const t = await getTranslations("admin");
+  const locale = await getLocale();
   const [sites, users, devices, passes] = await Promise.all([
-    db.site.findMany({ where: { active: true, ...tenant.siteFilter.siteId ? { id: tenant.siteFilter.siteId as string } : {} }, include: { _count: { select: { gates: true, areas: true } } }, orderBy: { name: "asc" } }),
+    db.site.findMany({ where: { active: true, ...(tenant.siteFilter.siteId ? { id: tenant.siteFilter.siteId } : {}) }, include: { _count: { select: { gates: true, areas: true } } }, orderBy: { name: "asc" } }),
     db.user.count({ where: { status: "active" } }),
     db.guardDevice.count({ where: { active: true, deviceTokenHash: { not: null }, ...tenant.siteFilter } }),
     db.pass.count({ where: { status: "active", validUntil: { gte: new Date() }, ...tenant.siteFilter } }),
@@ -17,6 +20,8 @@ export default async function AdminHome() {
     [t("stats.devices"), devices],
     [t("stats.passesToday"), passes],
   ] as const;
+  const today = await Promise.all(sites.map(async (s) => ({ site: s, counts: await siteDashboardCounts(s) })));
+  const countKeys = ["insideNow", "enteredToday", "pendingApprovals", "incidentsToday"] as const;
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">{t("overview")}</h1>
@@ -28,6 +33,24 @@ export default async function AdminHome() {
           </div>
         ))}
       </dl>
+      <section>
+        <h2 className="mb-3 text-lg font-semibold">{t("dashboard.title")}</h2>
+        <ul className="grid gap-3 lg:grid-cols-2" data-testid="dashboard-today">
+          {today.map(({ site, counts }) => (
+            <li key={site.id} className="card">
+              <p className="mb-2 font-medium">{site.name}</p>
+              <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {countKeys.map((k) => (
+                  <div key={k} className="rounded-lg bg-surface-2 px-3 py-2">
+                    <dt className="muted text-xs">{t(`dashboard.${k}`)}</dt>
+                    <dd className={`text-xl font-semibold tabular-nums ${k === "incidentsToday" && counts[k] > 0 ? "text-danger" : ""}`}>{fmtNumber(counts[k], locale)}</dd>
+                  </div>
+                ))}
+              </dl>
+            </li>
+          ))}
+        </ul>
+      </section>
       <section>
         <h2 className="mb-3 text-lg font-semibold">{t("sites")}</h2>
         <ul className="grid gap-3 sm:grid-cols-2">
