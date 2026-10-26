@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ClipboardList, Lock, QrCode, ScanLine, Siren, UserPlus } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
@@ -76,7 +77,7 @@ export default async function GuardPage({ searchParams }: { searchParams: Promis
     { icon: UserPlus, label: t("kiosk.unannounced") },
     { icon: QrCode, label: t("kiosk.inside") },
     { icon: Siren, label: t("kiosk.evacuation") },
-    { icon: ClipboardList, label: t("kiosk.log") },
+    { icon: ClipboardList, label: t("kiosk.log"), href: "/guard/log" },
   ];
   return (
     <AppShell user={kioskSession} kiosk subtitle={device.site.name}>
@@ -88,13 +89,22 @@ export default async function GuardPage({ searchParams }: { searchParams: Promis
         </form>
       </div>
       <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
-        {actions.map((a) => (
-          <li key={a.label} className="card flex min-h-32 flex-col items-center justify-center gap-2 text-center opacity-70">
-            <Icon icon={a.icon} size={28} />
-            <span className="font-medium">{a.label}</span>
-            <span className="muted text-xs">{t("kiosk.title") === "" ? "" : "Fase 1"}</span>
-          </li>
-        ))}
+        {actions.map((a) =>
+          a.href ? (
+            <li key={a.label}>
+              <Link href={a.href} className="card flex min-h-32 flex-col items-center justify-center gap-2 text-center hover:bg-surface-2">
+                <Icon icon={a.icon} size={28} />
+                <span className="font-medium">{a.label}</span>
+              </Link>
+            </li>
+          ) : (
+            <li key={a.label} className="card flex min-h-32 flex-col items-center justify-center gap-2 text-center opacity-70">
+              <Icon icon={a.icon} size={28} />
+              <span className="font-medium">{a.label}</span>
+              <span className="muted text-xs">{t("kiosk.title") === "" ? "" : "Fase 1"}</span>
+            </li>
+          ),
+        )}
       </ul>
     </AppShell>
   );

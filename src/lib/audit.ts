@@ -31,7 +31,9 @@ export type AuditAction =
   | "visit.left"
   | "blacklist.hit"
   | "blacklist.added"
-  | "blacklist.removed";
+  | "blacklist.removed"
+  | "shift.incident"
+  | "report.exported";
 
 /** Writes an audit entry; never throws (audit must not break the main action). */
 export async function audit(input: {

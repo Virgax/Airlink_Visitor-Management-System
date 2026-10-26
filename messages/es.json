@@ -65,6 +65,7 @@
     "reports": "Reportes",
     "overview": "Resumen",
     "stats": { "sites": "Sitios activos", "users": "Usuarios", "devices": "Kioscos enrolados", "passesToday": "Pases activos" },
+    "dashboard": {"title": "Hoy por sitio", "insideNow": "Dentro ahora", "enteredToday": "Entraron hoy", "pendingApprovals": "Aprobaciones pendientes", "incidentsToday": "Incidentes hoy"},
     "site": { "timezone": "Zona horaria", "gates": "{count, plural, one {# puerta} other {# puertas}}", "areas": "{count, plural, one {# área} other {# áreas}}" },
     "devicesPage": {
       "title": "Dispositivos de kiosco",
@@ -126,7 +127,8 @@
       "log": "Bitácora",
       "lock": "Bloquear",
       "signedInAs": "Sesión: {name} · {gate}"
-    }
+    },
+    "log": {"title": "Bitácora de turno", "back": "Volver", "context": "{gate} · {name}", "add": "Nueva entrada", "kind": "Tipo", "text": "Descripción", "textPlaceholder": "¿Qué pasó? Sé breve y concreto.", "photo": "Foto (opcional)", "photoHelp": "PNG o JPEG, hasta 3 MB.", "photoDisabled": "Las fotos no están habilitadas en este entorno; la entrada se guarda sin foto.", "submit": "Guardar entrada", "saved": "Entrada guardada.", "savedNoPhoto": "Entrada guardada sin foto: el almacenamiento de fotos no está configurado.", "today": "{count, plural, =0 {Hoy no hay entradas} one {Hoy: # entrada} other {Hoy: # entradas}}", "empty": "Todavía no hay entradas en este turno.", "openPhoto": "Ver foto", "errors": {"invalid": "Revisa el tipo y el texto.", "photoType": "La foto debe ser PNG o JPEG.", "photoSize": "La foto no puede pasar de 3 MB.", "rateLimited": "Demasiadas entradas seguidas. Espera un momento."}}
   },
   "host": {
     "title": "Mis visitas",
@@ -157,6 +159,26 @@
   "legal": {
     "privacy": { "title": "Aviso de privacidad", "updated": "Última actualización: {date}" },
     "terms": { "title": "Términos de uso", "updated": "Última actualización: {date}" }
+  },
+  "reports": {
+    "title": "Reportes",
+    "nav": {"visits": "Visitas", "audit": "Auditoría", "shifts": "Bitácora de turno"},
+    "intro": {"visits": "Visitas por fecha, sitio, puerta, tipo, anfitrión, área y empresa. Exporta a CSV para Excel.", "audit": "Evidencia para ISO y auditorías de clientes: quién estuvo en qué área, NDA aceptado, acompañante y aprobaciones.", "shifts": "Novedades, incidentes, rondas y relevos registrados por seguridad en cada puerta."},
+    "filters": {"from": "Desde", "to": "Hasta", "site": "Sitio", "gate": "Puerta", "kind": "Tipo", "status": "Estado", "host": "Anfitrión", "hostPlaceholder": "Nombre del anfitrión", "area": "Área", "company": "Empresa", "companyPlaceholder": "Nombre de la empresa", "guard": "Guardia", "guardPlaceholder": "Nombre del guardia", "all": "Todos", "apply": "Filtrar", "clear": "Limpiar", "export": "Exportar CSV", "exportHelp": "Mismos filtros, hasta {max} filas.", "timeZone": "Horas en {tz}."},
+    "columns": {"date": "Fecha", "visitor": "Visitante", "company": "Empresa", "host": "Anfitrión", "kind": "Tipo", "site": "Sitio", "gate": "Puerta", "status": "Estado", "enteredAt": "Entrada", "leftAt": "Salida", "duration": "Duración", "badgeNo": "Gafete", "areas": "Áreas", "escort": "Acompañante", "nda": "NDA", "passApproval": "Aprobación del pase", "visitDecision": "Decisión en puerta", "blacklistHits": "Lista negra", "at": "Hora", "guard": "Guardia", "text": "Texto", "photo": "Foto"},
+    "csv": {"date": "Fecha", "visitor": "Visitante", "docLast4": "Cédula (últimos 4)", "plate": "Placa", "company": "Empresa", "host": "Anfitrión", "kind": "Tipo", "site": "Sitio", "gate": "Puerta", "status": "Estado", "enteredAt": "Entrada", "leftAt": "Salida", "durationMin": "Duración (min)", "badgeNo": "Gafete", "escort": "Acompañante", "areas": "Áreas", "ndaVersion": "Versión NDA", "ndaAcceptedAt": "NDA aceptado el", "passApprovedBy": "Pase aprobado por", "passApprovedAt": "Pase aprobado el", "visitDecidedBy": "Visita decidida por", "visitDecidedAt": "Visita decidida el", "blacklistHits": "Alertas de lista negra", "at": "Hora", "guard": "Guardia", "text": "Texto", "photo": "Foto"},
+    "totals": {"visits": "{count, plural, one {# visita} other {# visitas}}", "entries": "{count, plural, one {# entrada} other {# entradas}}", "inside": "Dentro", "left": "Salieron", "pending": "Pendientes", "denied": "Rechazadas", "incidents": "Incidentes"},
+    "pagination": {"page": "Página {page} de {pages}", "prev": "Anterior", "next": "Siguiente"},
+    "empty": "No hay registros con estos filtros.",
+    "minutes": "{count} min",
+    "open": "En curso",
+    "none": "—",
+    "noNda": "No aplica",
+    "by": "{name} · {date}",
+    "viewPhoto": "Ver foto",
+    "kinds": {"visit": "Visita", "candidate": "Candidato", "contractor": "Contratista", "vendor": "Proveedor", "auditor": "Auditor", "carrier": "Transportista", "delivery": "Delivery", "recurring": "Recurrente"},
+    "statuses": {"pending": "Pendiente", "approved": "Aprobada", "denied": "Rechazada", "inside": "Dentro", "at_dock": "En muelle", "left": "Salió", "timeout": "Sin respuesta"},
+    "shiftKinds": {"note": "Novedad", "incident": "Incidente", "round": "Ronda", "handover": "Relevo"}
   },
   "errors": {
     "notFound": { "title": "No encontramos esta página", "body": "Revisa el enlace o vuelve al inicio.", "home": "Ir al inicio" },
