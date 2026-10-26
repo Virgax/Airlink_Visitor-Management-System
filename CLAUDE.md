@@ -59,10 +59,12 @@ Full brief: `docs/PLAN.md`.
 ## Infra
 - GitHub `virgax/Airlink_Visitor-Management-System`: `main` (production) and `develop` (staging), both protected,
   PR + CI required.
-- Railway project `airlink-visitas` (id 1942b6a4-0cd3-4fe8-b5ad-7b15c881b7bb): `web` (railway.json, deploys `main`),
-  `Postgres`, bucket `visitas-media`, `ops-cron` (railway.cron.json, */5 min, `npm run cron:tick`), `ops-backup`
-  (railway.backup.json + ops/backup.Dockerfile with pg_dump 17, 07:00 UTC). "Wait for CI" on.
-  Healthcheck `/api/health/ready`. Environments `production`/`staging`.
+- Railway project `airlink-visitas` (id 1942b6a4-0cd3-4fe8-b5ad-7b15c881b7bb), described in `.railway/railway.ts`
+  (IaC; `railway config plan/apply`). Services: `web` (deploys `main`, `npm run build` / `npm run start:prod`,
+  healthcheck `/api/health/ready`), `Postgres`, bucket `visitas-media` (iad), `ops-cron` (*/5 min, `npm run cron:tick`),
+  `ops-backup` (07:00 UTC, ops/backup.Dockerfile with pg_dump 17, `npm run ops:backup`). Cron schedules and the
+  Dockerfile path live on the services (not in the SDK yet). railway.json is deprecated by Railway; do not add one.
+  Environments `production` (main) / `staging` (develop).
 - Domain `visitas.airlinkdr.com` at Cloudflare (proxied, SSL Full).
 - Integrations: Entra ID app registration "Airlink Visitas"; Power Automate HTTP flow for Teams; SPN read-only;
   Zebra printers; AirlinkCast lobby screen (phase 2).
@@ -76,7 +78,8 @@ Full brief: `docs/PLAN.md`.
 ## Phase status
 - Phase 0 ✅ repo, CI, schema + migration, auth (local + TOTP, Entra OIDC, kiosk device + PIN), multi-site
   memberships, panel selector, i18n es/en, light/dark + brand, PWA, health, cron tick, backup script, seed.
-  ⏳ Railway project + variables, domain, Sentry DSN, Entra app registration (Jaime).
+  Railway project, Postgres, bucket, crons and non-secret variables ✅.
+  ⏳ Jaime: secret variables (see .env.example), custom domain DNS, Sentry DSN, Entra app registration.
 - Phase 1 ⏳ sites/directory, passes + QR, guard kiosk + offline, notifications, logs/reports.
 - Phase 2 · badges, recurring/carrier/delivery, blacklist, shifts, PDF, AirlinkCast.
 - Phase 3 · AI doc/plate reading, access hardware, self-service kiosk.
