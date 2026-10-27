@@ -91,3 +91,9 @@ body {
 .alert-error { @apply rounded-lg border border-danger/30 bg-danger-bg px-3 py-2 text-sm text-danger; }
 .alert-ok { @apply rounded-lg border border-success/30 bg-success-bg px-3 py-2 text-sm text-success; }
 .muted { @apply text-sm text-text-muted; }
+
+@media print {
+  .print-hidden { display: none !important; }
+  html, body { background: #fff; color: #000; }
+  .card { box-shadow: none; border-color: #999; }
+}

@@ -13,8 +13,16 @@
     "all": "Todos",
     "comingSoon": "Disponible en la siguiente fase."
   },
-  "theme": { "toggle": "Cambiar tema", "light": "Claro", "dark": "Oscuro" },
-  "locale": { "switch": "Idioma", "es": "Español", "en": "English" },
+  "theme": {
+    "toggle": "Cambiar tema",
+    "light": "Claro",
+    "dark": "Oscuro"
+  },
+  "locale": {
+    "switch": "Idioma",
+    "es": "Español",
+    "en": "English"
+  },
   "nav": {
     "panels": "Paneles",
     "account": "Mi cuenta",
@@ -26,7 +34,12 @@
     "privacy": "Privacidad",
     "terms": "Términos"
   },
-  "roles": { "admin": "Administración", "security": "Seguridad", "approver": "Aprobador", "host": "Anfitrión" },
+  "roles": {
+    "admin": "Administración",
+    "security": "Seguridad",
+    "approver": "Aprobador",
+    "host": "Anfitrión"
+  },
   "login": {
     "title": "Inicia sesión",
     "subtitle": "Usa tu cuenta de Airlink (Microsoft 365) o una cuenta local.",
@@ -53,7 +66,9 @@
     "empty": "Tu cuenta no tiene ningún rol asignado todavía. Pide a IT o a Seguridad que te lo asigne.",
     "open": "Abrir"
   },
-  "home": { "welcome": "Hola, {name}" },
+  "home": {
+    "welcome": "Hola, {name}"
+  },
   "admin": {
     "title": "Administración",
     "sites": "Sitios",
@@ -66,9 +81,24 @@
     "companies": "Empresas",
     "employees": "Directorio",
     "overview": "Resumen",
-    "stats": { "sites": "Sitios activos", "users": "Usuarios", "devices": "Kioscos enrolados", "passesToday": "Pases activos" },
-    "dashboard": {"title": "Hoy por sitio", "insideNow": "Dentro ahora", "enteredToday": "Entraron hoy", "pendingApprovals": "Aprobaciones pendientes", "incidentsToday": "Incidentes hoy"},
-    "site": { "timezone": "Zona horaria", "gates": "{count, plural, one {# puerta} other {# puertas}}", "areas": "{count, plural, one {# área} other {# áreas}}" },
+    "stats": {
+      "sites": "Sitios activos",
+      "users": "Usuarios",
+      "devices": "Kioscos enrolados",
+      "passesToday": "Pases activos"
+    },
+    "dashboard": {
+      "title": "Hoy por sitio",
+      "insideNow": "Dentro ahora",
+      "enteredToday": "Entraron hoy",
+      "pendingApprovals": "Aprobaciones pendientes",
+      "incidentsToday": "Incidentes hoy"
+    },
+    "site": {
+      "timezone": "Zona horaria",
+      "gates": "{count, plural, one {# puerta} other {# puertas}}",
+      "areas": "{count, plural, one {# área} other {# áreas}}"
+    },
     "devicesPage": {
       "title": "Dispositivos de kiosco",
       "intro": "Cada tablet o PC de seguridad se enrola una vez con un código. Después, el guardia entra con su PIN.",
@@ -96,7 +126,10 @@
       "pin": "PIN inicial de kiosco (4 a 8 dígitos, opcional)",
       "add": "Agregar rol",
       "added": "Rol agregado.",
-      "errors": { "pin": "El PIN debe tener de 4 a 8 dígitos.", "exists": "Ese usuario ya tiene ese rol en ese sitio." },
+      "errors": {
+        "pin": "El PIN debe tener de 4 a 8 dígitos.",
+        "exists": "Ese usuario ya tiene ese rol en ese sitio."
+      },
       "empty": "No hay usuarios todavía.",
       "roles": "Roles"
     },
@@ -316,9 +349,170 @@
       "evacuation": "Lista de evacuación",
       "log": "Bitácora",
       "lock": "Bloquear",
-      "signedInAs": "Sesión: {name} · {gate}"
+      "signedInAs": "Sesión: {name} · {gate}",
+      "logSoon": "Bitácora · próximamente"
     },
-    "log": {"title": "Bitácora de turno", "back": "Volver", "context": "{gate} · {name}", "add": "Nueva entrada", "kind": "Tipo", "text": "Descripción", "textPlaceholder": "¿Qué pasó? Sé breve y concreto.", "photo": "Foto (opcional)", "photoHelp": "PNG o JPEG, hasta 3 MB.", "photoDisabled": "Las fotos no están habilitadas en este entorno; la entrada se guarda sin foto.", "submit": "Guardar entrada", "saved": "Entrada guardada.", "savedNoPhoto": "Entrada guardada sin foto: el almacenamiento de fotos no está configurado.", "today": "{count, plural, =0 {Hoy no hay entradas} one {Hoy: # entrada} other {Hoy: # entradas}}", "empty": "Todavía no hay entradas en este turno.", "openPhoto": "Ver foto", "errors": {"invalid": "Revisa el tipo y el texto.", "photoType": "La foto debe ser PNG o JPEG.", "photoSize": "La foto no puede pasar de 3 MB.", "rateLimited": "Demasiadas entradas seguidas. Espera un momento."}}
+    "log": {
+      "title": "Bitácora de turno",
+      "back": "Volver",
+      "context": "{gate} · {name}",
+      "add": "Nueva entrada",
+      "kind": "Tipo",
+      "text": "Descripción",
+      "textPlaceholder": "¿Qué pasó? Sé breve y concreto.",
+      "photo": "Foto (opcional)",
+      "photoHelp": "PNG o JPEG, hasta 3 MB.",
+      "photoDisabled": "Las fotos no están habilitadas en este entorno; la entrada se guarda sin foto.",
+      "submit": "Guardar entrada",
+      "saved": "Entrada guardada.",
+      "savedNoPhoto": "Entrada guardada sin foto: el almacenamiento de fotos no está configurado.",
+      "today": "{count, plural, =0 {Hoy no hay entradas} one {Hoy: # entrada} other {Hoy: # entradas}}",
+      "empty": "Todavía no hay entradas en este turno.",
+      "openPhoto": "Ver foto",
+      "errors": {
+        "invalid": "Revisa el tipo y el texto.",
+        "photoType": "La foto debe ser PNG o JPEG.",
+        "photoSize": "La foto no puede pasar de 3 MB.",
+        "rateLimited": "Demasiadas entradas seguidas. Espera un momento."
+      }
+    },
+    "kinds": {
+      "visit": "Visita",
+      "candidate": "Candidato",
+      "contractor": "Contratista",
+      "vendor": "Proveedor",
+      "auditor": "Auditor",
+      "carrier": "Transportista",
+      "delivery": "Entrega",
+      "recurring": "Recurrente"
+    },
+    "status": {
+      "pending": "Esperando al anfitrión",
+      "approved": "Aprobada",
+      "denied": "Rechazada",
+      "inside": "Dentro",
+      "at_dock": "En muelle",
+      "left": "Salió",
+      "timeout": "Sin respuesta"
+    },
+    "reasons": {
+      "malformed": "El código no es un pase de Airlink Visitas.",
+      "bad_signature": "La firma del código no es válida.",
+      "qr_expired": "El código QR venció.",
+      "qr_stale": "El código QR es antiguo. Pide al visitante que actualice la pantalla.",
+      "wrong_site": "Este pase es de otro sitio.",
+      "pending_approval": "El pase todavía no está aprobado.",
+      "revoked": "El pase fue cancelado por el anfitrión.",
+      "denied": "El pase fue rechazado.",
+      "used": "El pase ya fue usado.",
+      "expired": "El pase venció.",
+      "not_yet_valid": "El pase todavía no es válido.",
+      "outside_schedule": "Fuera del horario permitido.",
+      "no_uses_left": "El pase no tiene entradas disponibles.",
+      "gate_not_allowed": "Este pase no es válido en esta puerta.",
+      "blacklisted": "Persona o vehículo en lista negra. Avisa a Seguridad.",
+      "company_blocked": "La empresa está bloqueada.",
+      "nda_required": "El visitante debe aceptar la política de visitantes antes de entrar.",
+      "not_found": "No encontramos este pase.",
+      "rate_limited": "Demasiados escaneos. Espera un momento.",
+      "invalid_body": "Solicitud inválida.",
+      "network": "Sin conexión con el servidor."
+    },
+    "warnings": {
+      "escort": "Debe ir acompañado",
+      "nda": "NDA / política de visitantes",
+      "receptionOnly": "Solo recepción",
+      "noBadge": "Sin gafete"
+    },
+    "scan": {
+      "title": "Escanear QR",
+      "intro": "Apunta la cámara al código del visitante o pega el código abajo.",
+      "cameraStart": "Encender cámara",
+      "cameraStop": "Apagar cámara",
+      "cameraUnavailable": "No se pudo usar la cámara. Usa el código manual.",
+      "manual": "Código manual",
+      "manualPlaceholder": "Pega el contenido del QR",
+      "manualSubmit": "Validar",
+      "online": "En línea",
+      "offline": "Sin conexión",
+      "queued": "{count, plural, =0 {Sin escaneos pendientes} one {# escaneo pendiente de enviar} other {# escaneos pendientes de enviar}}",
+      "cacheAge": "Pases en caché: {count} · {time}",
+      "cacheNone": "Sin pases en caché",
+      "entered": "Entrada registrada",
+      "left": "Salida registrada",
+      "denied": "No puede entrar",
+      "provisional": "Entrada provisional",
+      "provisionalHelp": "Sin conexión: se validó con la caché y se enviará al servidor al reconectar.",
+      "duplicate": "Este escaneo ya estaba registrado.",
+      "conflict": "Conflicto: el pase ya no tenía entradas. Verifica con el anfitrión.",
+      "host": "Anfitrión",
+      "company": "Empresa",
+      "areas": "Áreas",
+      "document": "Documento",
+      "plate": "Placa",
+      "kind": "Tipo",
+      "atDock": "Transportista en muelle",
+      "scanAgain": "Escanear otro",
+      "pending": "Validando…",
+      "hint": "El segundo escaneo del mismo pase registra la salida."
+    },
+    "unannounced": {
+      "title": "Visita no anunciada",
+      "intro": "Busca al anfitrión y registra al visitante. Le avisamos para que apruebe desde su celular.",
+      "host": "Anfitrión",
+      "hostSearch": "Buscar por nombre o departamento",
+      "hostPlaceholder": "Ej. Pérez, Logística",
+      "hostNone": "Sin resultados",
+      "hostSelected": "Anfitrión seleccionado",
+      "hostChange": "Cambiar",
+      "hostSearching": "Buscando…",
+      "visitor": "Nombre del visitante",
+      "company": "Empresa",
+      "kind": "Tipo de visita",
+      "doc": "Cédula o pasaporte",
+      "docHelp": "Solo guardamos los últimos 4 dígitos.",
+      "plate": "Placa",
+      "submit": "Avisar al anfitrión",
+      "ok": "Visita registrada. El anfitrión fue avisado.",
+      "errors": {
+        "invalid": "Revisa los datos del formulario.",
+        "host": "Selecciona un anfitrión.",
+        "blacklisted": "Persona o vehículo en lista negra. Avisa a Seguridad.",
+        "company_blocked": "La empresa está bloqueada."
+      },
+      "pending": "En espera en la puerta",
+      "empty": "No hay visitas esperando.",
+      "approveInPerson": "Aprobado en persona",
+      "deny": "Rechazar",
+      "enter": "Registrar entrada",
+      "since": "Desde {time}",
+      "refresh": "Se actualiza cada {seconds} s."
+    },
+    "inside": {
+      "title": "Dentro ahora",
+      "count": "{count, plural, =0 {Nadie dentro} one {# visitante dentro} other {# visitantes dentro}}",
+      "empty": "No hay visitantes dentro en este momento.",
+      "checkout": "Marcar salida",
+      "dockLeft": "Salió del muelle",
+      "enteredAt": "Entró",
+      "gate": "Puerta",
+      "conflict": "Conflicto",
+      "ok": "Salida registrada.",
+      "error": "No se pudo registrar la salida."
+    },
+    "evacuation": {
+      "title": "Lista de evacuación",
+      "intro": "Personas dentro del sitio agrupadas por área y anfitrión.",
+      "count": "{count, plural, =0 {Nadie dentro} one {# persona dentro} other {# personas dentro}}",
+      "generatedAt": "Generada: {time}",
+      "print": "Imprimir",
+      "offlineCopy": "Sin conexión: mostrando la última copia guardada en este dispositivo.",
+      "empty": "No hay nadie dentro.",
+      "noArea": "Sin área asignada",
+      "host": "Anfitrión",
+      "since": "desde {time}",
+      "visitor": "Visitante"
+    }
   },
   "host": {
     "title": "Mis visitas",
@@ -470,9 +664,37 @@
   "account": {
     "title": "Mi cuenta",
     "security": "Seguridad de la cuenta",
-    "password": { "title": "Contraseña", "current": "Contraseña actual", "new": "Nueva contraseña", "confirm": "Repite la nueva contraseña", "submit": "Cambiar contraseña", "ok": "Contraseña actualizada.", "mismatch": "Las contraseñas no coinciden.", "weak": "Usa al menos {min} caracteres.", "wrong": "La contraseña actual no es correcta." },
-    "pin": { "title": "PIN de kiosco", "help": "Lo usas en las tablets de seguridad. De 4 a 8 dígitos.", "new": "Nuevo PIN", "submit": "Guardar PIN", "ok": "PIN actualizado.", "invalid": "El PIN debe tener de 4 a 8 dígitos." },
-    "totp": { "title": "Verificación en dos pasos", "enabled": "Activada", "disabled": "Desactivada", "start": "Activar", "secret": "Clave manual", "uri": "Agrega esta clave en tu app de autenticación (Microsoft Authenticator, Google Authenticator) y confirma con un código.", "code": "Código", "confirm": "Confirmar", "ok": "Verificación en dos pasos activada.", "bad": "Código incorrecto." }
+    "password": {
+      "title": "Contraseña",
+      "current": "Contraseña actual",
+      "new": "Nueva contraseña",
+      "confirm": "Repite la nueva contraseña",
+      "submit": "Cambiar contraseña",
+      "ok": "Contraseña actualizada.",
+      "mismatch": "Las contraseñas no coinciden.",
+      "weak": "Usa al menos {min} caracteres.",
+      "wrong": "La contraseña actual no es correcta."
+    },
+    "pin": {
+      "title": "PIN de kiosco",
+      "help": "Lo usas en las tablets de seguridad. De 4 a 8 dígitos.",
+      "new": "Nuevo PIN",
+      "submit": "Guardar PIN",
+      "ok": "PIN actualizado.",
+      "invalid": "El PIN debe tener de 4 a 8 dígitos."
+    },
+    "totp": {
+      "title": "Verificación en dos pasos",
+      "enabled": "Activada",
+      "disabled": "Desactivada",
+      "start": "Activar",
+      "secret": "Clave manual",
+      "uri": "Agrega esta clave en tu app de autenticación (Microsoft Authenticator, Google Authenticator) y confirma con un código.",
+      "code": "Código",
+      "confirm": "Confirmar",
+      "ok": "Verificación en dos pasos activada.",
+      "bad": "Código incorrecto."
+    }
   },
   "visitor": {
     "title": "Pase de visitante",
@@ -517,7 +739,16 @@
       "invalid": "Revisa los datos e inténtalo otra vez.",
       "rateLimited": "Demasiados intentos. Espera un momento.",
       "closed": "Este pase ya no admite cambios."
-    }
+    },
+    "status": {
+      "active": "Vigente",
+      "pending_approval": "Pendiente de aprobación",
+      "used": "Usado",
+      "revoked": "Cancelado",
+      "expired": "Vencido",
+      "denied": "Rechazado"
+    },
+    "qrSoon": "El código QR estará disponible en la siguiente fase."
   },
   "passes": {
     "status": {
@@ -573,18 +804,115 @@
     }
   },
   "legal": {
-    "privacy": { "title": "Aviso de privacidad", "updated": "Última actualización: {date}" },
-    "terms": { "title": "Términos de uso", "updated": "Última actualización: {date}" }
+    "privacy": {
+      "title": "Aviso de privacidad",
+      "updated": "Última actualización: {date}"
+    },
+    "terms": {
+      "title": "Términos de uso",
+      "updated": "Última actualización: {date}"
+    }
   },
   "reports": {
     "title": "Reportes",
-    "nav": {"visits": "Visitas", "audit": "Auditoría", "shifts": "Bitácora de turno"},
-    "intro": {"visits": "Visitas por fecha, sitio, puerta, tipo, anfitrión, área y empresa. Exporta a CSV para Excel.", "audit": "Evidencia para ISO y auditorías de clientes: quién estuvo en qué área, NDA aceptado, acompañante y aprobaciones.", "shifts": "Novedades, incidentes, rondas y relevos registrados por seguridad en cada puerta."},
-    "filters": {"from": "Desde", "to": "Hasta", "site": "Sitio", "gate": "Puerta", "kind": "Tipo", "status": "Estado", "host": "Anfitrión", "hostPlaceholder": "Nombre del anfitrión", "area": "Área", "company": "Empresa", "companyPlaceholder": "Nombre de la empresa", "guard": "Guardia", "guardPlaceholder": "Nombre del guardia", "all": "Todos", "apply": "Filtrar", "clear": "Limpiar", "export": "Exportar CSV", "exportHelp": "Mismos filtros, hasta {max} filas.", "timeZone": "Horas en {tz}."},
-    "columns": {"date": "Fecha", "visitor": "Visitante", "company": "Empresa", "host": "Anfitrión", "kind": "Tipo", "site": "Sitio", "gate": "Puerta", "status": "Estado", "enteredAt": "Entrada", "leftAt": "Salida", "duration": "Duración", "badgeNo": "Gafete", "areas": "Áreas", "escort": "Acompañante", "nda": "NDA", "passApproval": "Aprobación del pase", "visitDecision": "Decisión en puerta", "blacklistHits": "Lista negra", "at": "Hora", "guard": "Guardia", "text": "Texto", "photo": "Foto"},
-    "csv": {"date": "Fecha", "visitor": "Visitante", "docLast4": "Cédula (últimos 4)", "plate": "Placa", "company": "Empresa", "host": "Anfitrión", "kind": "Tipo", "site": "Sitio", "gate": "Puerta", "status": "Estado", "enteredAt": "Entrada", "leftAt": "Salida", "durationMin": "Duración (min)", "badgeNo": "Gafete", "escort": "Acompañante", "areas": "Áreas", "ndaVersion": "Versión NDA", "ndaAcceptedAt": "NDA aceptado el", "passApprovedBy": "Pase aprobado por", "passApprovedAt": "Pase aprobado el", "visitDecidedBy": "Visita decidida por", "visitDecidedAt": "Visita decidida el", "blacklistHits": "Alertas de lista negra", "at": "Hora", "guard": "Guardia", "text": "Texto", "photo": "Foto"},
-    "totals": {"visits": "{count, plural, one {# visita} other {# visitas}}", "entries": "{count, plural, one {# entrada} other {# entradas}}", "inside": "Dentro", "left": "Salieron", "pending": "Pendientes", "denied": "Rechazadas", "incidents": "Incidentes"},
-    "pagination": {"page": "Página {page} de {pages}", "prev": "Anterior", "next": "Siguiente"},
+    "nav": {
+      "visits": "Visitas",
+      "audit": "Auditoría",
+      "shifts": "Bitácora de turno"
+    },
+    "intro": {
+      "visits": "Visitas por fecha, sitio, puerta, tipo, anfitrión, área y empresa. Exporta a CSV para Excel.",
+      "audit": "Evidencia para ISO y auditorías de clientes: quién estuvo en qué área, NDA aceptado, acompañante y aprobaciones.",
+      "shifts": "Novedades, incidentes, rondas y relevos registrados por seguridad en cada puerta."
+    },
+    "filters": {
+      "from": "Desde",
+      "to": "Hasta",
+      "site": "Sitio",
+      "gate": "Puerta",
+      "kind": "Tipo",
+      "status": "Estado",
+      "host": "Anfitrión",
+      "hostPlaceholder": "Nombre del anfitrión",
+      "area": "Área",
+      "company": "Empresa",
+      "companyPlaceholder": "Nombre de la empresa",
+      "guard": "Guardia",
+      "guardPlaceholder": "Nombre del guardia",
+      "all": "Todos",
+      "apply": "Filtrar",
+      "clear": "Limpiar",
+      "export": "Exportar CSV",
+      "exportHelp": "Mismos filtros, hasta {max} filas.",
+      "timeZone": "Horas en {tz}."
+    },
+    "columns": {
+      "date": "Fecha",
+      "visitor": "Visitante",
+      "company": "Empresa",
+      "host": "Anfitrión",
+      "kind": "Tipo",
+      "site": "Sitio",
+      "gate": "Puerta",
+      "status": "Estado",
+      "enteredAt": "Entrada",
+      "leftAt": "Salida",
+      "duration": "Duración",
+      "badgeNo": "Gafete",
+      "areas": "Áreas",
+      "escort": "Acompañante",
+      "nda": "NDA",
+      "passApproval": "Aprobación del pase",
+      "visitDecision": "Decisión en puerta",
+      "blacklistHits": "Lista negra",
+      "at": "Hora",
+      "guard": "Guardia",
+      "text": "Texto",
+      "photo": "Foto"
+    },
+    "csv": {
+      "date": "Fecha",
+      "visitor": "Visitante",
+      "docLast4": "Cédula (últimos 4)",
+      "plate": "Placa",
+      "company": "Empresa",
+      "host": "Anfitrión",
+      "kind": "Tipo",
+      "site": "Sitio",
+      "gate": "Puerta",
+      "status": "Estado",
+      "enteredAt": "Entrada",
+      "leftAt": "Salida",
+      "durationMin": "Duración (min)",
+      "badgeNo": "Gafete",
+      "escort": "Acompañante",
+      "areas": "Áreas",
+      "ndaVersion": "Versión NDA",
+      "ndaAcceptedAt": "NDA aceptado el",
+      "passApprovedBy": "Pase aprobado por",
+      "passApprovedAt": "Pase aprobado el",
+      "visitDecidedBy": "Visita decidida por",
+      "visitDecidedAt": "Visita decidida el",
+      "blacklistHits": "Alertas de lista negra",
+      "at": "Hora",
+      "guard": "Guardia",
+      "text": "Texto",
+      "photo": "Foto"
+    },
+    "totals": {
+      "visits": "{count, plural, one {# visita} other {# visitas}}",
+      "entries": "{count, plural, one {# entrada} other {# entradas}}",
+      "inside": "Dentro",
+      "left": "Salieron",
+      "pending": "Pendientes",
+      "denied": "Rechazadas",
+      "incidents": "Incidentes"
+    },
+    "pagination": {
+      "page": "Página {page} de {pages}",
+      "prev": "Anterior",
+      "next": "Siguiente"
+    },
     "empty": "No hay registros con estos filtros.",
     "minutes": "{count} min",
     "open": "En curso",
@@ -592,12 +920,42 @@
     "noNda": "No aplica",
     "by": "{name} · {date}",
     "viewPhoto": "Ver foto",
-    "kinds": {"visit": "Visita", "candidate": "Candidato", "contractor": "Contratista", "vendor": "Proveedor", "auditor": "Auditor", "carrier": "Transportista", "delivery": "Delivery", "recurring": "Recurrente"},
-    "statuses": {"pending": "Pendiente", "approved": "Aprobada", "denied": "Rechazada", "inside": "Dentro", "at_dock": "En muelle", "left": "Salió", "timeout": "Sin respuesta"},
-    "shiftKinds": {"note": "Novedad", "incident": "Incidente", "round": "Ronda", "handover": "Relevo"}
+    "kinds": {
+      "visit": "Visita",
+      "candidate": "Candidato",
+      "contractor": "Contratista",
+      "vendor": "Proveedor",
+      "auditor": "Auditor",
+      "carrier": "Transportista",
+      "delivery": "Delivery",
+      "recurring": "Recurrente"
+    },
+    "statuses": {
+      "pending": "Pendiente",
+      "approved": "Aprobada",
+      "denied": "Rechazada",
+      "inside": "Dentro",
+      "at_dock": "En muelle",
+      "left": "Salió",
+      "timeout": "Sin respuesta"
+    },
+    "shiftKinds": {
+      "note": "Novedad",
+      "incident": "Incidente",
+      "round": "Ronda",
+      "handover": "Relevo"
+    }
   },
   "errors": {
-    "notFound": { "title": "No encontramos esta página", "body": "Revisa el enlace o vuelve al inicio.", "home": "Ir al inicio" },
-    "generic": { "title": "Algo salió mal", "body": "Inténtalo de nuevo. Si el problema sigue, avisa a IT.", "retry": "Reintentar" }
+    "notFound": {
+      "title": "No encontramos esta página",
+      "body": "Revisa el enlace o vuelve al inicio.",
+      "home": "Ir al inicio"
+    },
+    "generic": {
+      "title": "Algo salió mal",
+      "body": "Inténtalo de nuevo. Si el problema sigue, avisa a IT.",
+      "retry": "Reintentar"
+    }
   }
 }

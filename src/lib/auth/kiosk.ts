@@ -1,10 +1,12 @@
 import "server-only";
 import { cookies } from "next/headers";
-import type { GuardDevice } from "@prisma/client";
+import { redirect } from "next/navigation";
+import type { GateKind, GuardDevice, Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { randomToken, sha256 } from "@/lib/crypto/tokens";
 import { isProd } from "@/lib/env";
-import { DEVICE_COOKIE } from "@/lib/auth/session";
+import { DEVICE_COOKIE, getSessionUser, type SessionUser } from "@/lib/auth/session";
+import { AuthError } from "@/lib/auth/guards";
 
 const DEVICE_COOKIE_DAYS = 365;
 const ENROLL_CODE_MINUTES = 15;
@@ -39,17 +41,52 @@ export async function enrollDevice(code: string): Promise<GuardDevice | null> {
   return updated;
 }
 
+export type KioskSite = { id: string; name: string; timezone: string; settings: Prisma.JsonValue };
+export type KioskGate = { id: string; name: string; kind: GateKind };
+export type EnrolledDevice = GuardDevice & { site: KioskSite; gate: KioskGate };
+
 /** The enrolled device for this browser, or null. */
-export async function getDevice(): Promise<(GuardDevice & { site: { id: string; name: string }; gate: { id: string; name: string } }) | null> {
+export async function getDevice(): Promise<EnrolledDevice | null> {
   const jar = await cookies();
   const token = jar.get(DEVICE_COOKIE)?.value;
   if (!token) return null;
   const device = await db.guardDevice.findUnique({
     where: { deviceTokenHash: sha256(token) },
-    include: { site: { select: { id: true, name: true } }, gate: { select: { id: true, name: true } } },
+    include: {
+      site: { select: { id: true, name: true, timezone: true, settings: true } },
+      gate: { select: { id: true, name: true, kind: true } },
+    },
   });
-  if (!device || !device.active) return null;
+  if (!device || !device.active || !device.site || !device.gate) return null;
   return device;
+}
+
+export type KioskContext = { user: SessionUser; device: EnrolledDevice; site: KioskSite; gate: KioskGate };
+
+/**
+ * The kiosk session for this browser: an enrolled device plus a security session opened on it with a PIN.
+ * Null when either is missing. Everything under /guard/* must use this and scope queries by `site.id`.
+ */
+export async function getKiosk(): Promise<KioskContext | null> {
+  const device = await getDevice();
+  if (!device) return null;
+  const user = await getSessionUser();
+  if (!user || user.guardDeviceId !== device.id) return null;
+  return { user, device, site: device.site, gate: device.gate };
+}
+
+/** Kiosk pages: redirects to /guard (enroll or PIN screen) when there is no kiosk session. */
+export async function requireKiosk(): Promise<KioskContext> {
+  const kiosk = await getKiosk();
+  if (!kiosk) redirect("/guard");
+  return kiosk;
+}
+
+/** Kiosk route handlers and server actions: throws instead of redirecting. */
+export async function getKioskOrThrow(): Promise<KioskContext> {
+  const kiosk = await getKiosk();
+  if (!kiosk) throw new AuthError("unauthenticated");
+  return kiosk;
 }
 
 export async function touchDevice(deviceId: string): Promise<void> {
