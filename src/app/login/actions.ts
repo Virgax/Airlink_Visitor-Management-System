@@ -10,7 +10,8 @@ import { clientIp, createSession } from "@/lib/auth/session";
 import { listPanels } from "@/lib/auth/guards";
 import { rateLimit, resetRateLimit } from "@/lib/rateLimit";
 import { audit } from "@/lib/audit";
-import { env, isProd } from "@/lib/env";
+import { isProd } from "@/lib/env";
+import { getSecret } from "@/lib/secrets";
 import { signValue, verifyValue } from "@/lib/crypto/tokens";
 
 const PENDING_COOKIE = "visitas_pending";
@@ -55,7 +56,7 @@ export async function loginAction(formData: FormData): Promise<void> {
 
   if (user.totpSecret) {
     const jar = await cookies();
-    jar.set(PENDING_COOKIE, signValue(JSON.stringify({ userId: user.id, next }), env().SESSION_SECRET, 300), {
+    jar.set(PENDING_COOKIE, signValue(JSON.stringify({ userId: user.id, next }), await getSecret("SESSION_SECRET"), 300), {
       httpOnly: true,
       secure: isProd(),
       sameSite: "lax",
@@ -72,7 +73,7 @@ const totpSchema = z.object({ code: z.string().trim().min(6).max(7) });
 export async function totpAction(formData: FormData): Promise<void> {
   const parsed = totpSchema.safeParse(Object.fromEntries(formData));
   const jar = await cookies();
-  const pending = verifyValue(jar.get(PENDING_COOKIE)?.value, env().SESSION_SECRET);
+  const pending = verifyValue(jar.get(PENDING_COOKIE)?.value, await getSecret("SESSION_SECRET"));
   if (!pending) redirect("/login?error=invalid");
   const { userId, next } = JSON.parse(pending) as { userId: string; next: string | null };
   if (!parsed.success) redirect("/login?step=totp&error=totp");

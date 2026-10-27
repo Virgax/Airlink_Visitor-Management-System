@@ -5,10 +5,12 @@ const schema = z.object({
   DATABASE_URL: z.string().min(1),
   APP_URL: z.string().url().default("http://localhost:3000"),
   CANONICAL_HOST: z.string().optional(),
-  APP_ENCRYPTION_KEY: z.string().min(32),
-  PASS_SIGNING_KEY: z.string().min(32),
-  DOC_HASH_KEY: z.string().min(32),
-  SESSION_SECRET: z.string().min(32),
+  // Signing keys and shared secrets: optional here; `getSecret()` in src/lib/secrets.ts falls back to
+  // server-generated values stored in SystemSecret when a variable is not set.
+  APP_ENCRYPTION_KEY: z.string().min(16).optional(),
+  PASS_SIGNING_KEY: z.string().min(16).optional(),
+  DOC_HASH_KEY: z.string().min(16).optional(),
+  SESSION_SECRET: z.string().min(16).optional(),
   CRON_SECRET: z.string().min(8).optional(),
   SYNC_SECRET: z.string().optional(),
   PRINT_AGENT_SECRET: z.string().optional(),

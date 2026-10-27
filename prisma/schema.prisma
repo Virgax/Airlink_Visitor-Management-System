@@ -525,3 +525,11 @@ model RateLimit {
   @@id([key, windowStart])
   @@index([windowStart])
 }
+
+/// Server-generated secrets (signing keys, VAPID pair, cron secret) created on first boot when the
+/// matching Railway variable is not set. A variable with the same name always takes precedence.
+model SystemSecret {
+  name      String   @id
+  value     String
+  createdAt DateTime @default(now())
+}

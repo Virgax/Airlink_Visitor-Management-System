@@ -8,7 +8,8 @@ import { getSessionUser } from "@/lib/auth/session";
 import { hashPassword, PASSWORD_MIN_LENGTH, verifyPassword } from "@/lib/auth/password";
 import { generateTotpSecret, verifyTotp } from "@/lib/auth/totp";
 import { signValue, verifyValue } from "@/lib/crypto/tokens";
-import { env, isProd } from "@/lib/env";
+import { isProd } from "@/lib/env";
+import { getSecret } from "@/lib/secrets";
 import { audit } from "@/lib/audit";
 
 const TOTP_PENDING = "visitas_totp_pending";
@@ -44,14 +45,14 @@ export async function totpStartAction(): Promise<void> {
   await me();
   const secret = generateTotpSecret();
   const jar = await cookies();
-  jar.set(TOTP_PENDING, signValue(secret, env().SESSION_SECRET, 600), { httpOnly: true, secure: isProd(), sameSite: "lax", path: "/account", maxAge: 600 });
+  jar.set(TOTP_PENDING, signValue(secret, await getSecret("SESSION_SECRET"), 600), { httpOnly: true, secure: isProd(), sameSite: "lax", path: "/account", maxAge: 600 });
   redirect("/account?totp=setup");
 }
 
 export async function totpConfirmAction(formData: FormData): Promise<void> {
   const user = await me();
   const jar = await cookies();
-  const secret = verifyValue(jar.get(TOTP_PENDING)?.value, env().SESSION_SECRET);
+  const secret = verifyValue(jar.get(TOTP_PENDING)?.value, await getSecret("SESSION_SECRET"));
   const code = String(formData.get("code") ?? "");
   if (!secret || !verifyTotp(secret, code)) redirect("/account?totp=setup&error=totp");
   await db.user.update({ where: { id: user.id }, data: { totpSecret: secret } });
@@ -63,5 +64,5 @@ export async function totpConfirmAction(formData: FormData): Promise<void> {
 /** Only for rendering the setup screen. */
 export async function pendingTotpSecret(): Promise<string | null> {
   const jar = await cookies();
-  return verifyValue(jar.get(TOTP_PENDING)?.value, env().SESSION_SECRET);
+  return verifyValue(jar.get(TOTP_PENDING)?.value, await getSecret("SESSION_SECRET"));
 }

@@ -48,7 +48,9 @@ Full brief: `docs/PLAN.md`.
   tokens in `src/styles/brand.css` (black wordmark + red chevron; white/red in light, black/red in dark).
   Wordmark `<Logo>` and square `<LogoMark>` in `src/components/Logo.tsx`; PWA icons in `public/icons`
   (regenerate with `node scripts/make-icons.mjs public/icons/icon.svg public/icons`).
-- Secrets live only in Railway variables; `.env.example` lists names without values. Never print secrets in chat or files.
+- Secrets: signing keys, shared secrets and the VAPID pair come from `getSecret(name)` (`src/lib/secrets.ts`): a Railway
+  variable wins, otherwise a value generated on first boot and stored in `SystemSecret` (seed pre-generates them).
+  Never read them with `env()` directly, never print them in chat, logs or files. `.env.example` lists names only.
 
 ## Commands
 - `npm run dev` · `build` · `lint` · `typecheck` · `test` · `test:e2e` · `db:migrate` · `db:deploy` · `db:seed`
@@ -79,7 +81,7 @@ Full brief: `docs/PLAN.md`.
 - Phase 0 ✅ repo, CI, schema + migration, auth (local + TOTP, Entra OIDC, kiosk device + PIN), multi-site
   memberships, panel selector, i18n es/en, light/dark + brand, PWA, health, cron tick, backup script, seed.
   Railway project, Postgres, bucket, crons and non-secret variables ✅.
-  ⏳ Jaime: secret variables (see .env.example), custom domain DNS, Sentry DSN, Entra app registration.
+  Secrets self-generated on first boot ✅. ⏳ Jaime: custom domain DNS, Sentry DSN, Entra app registration.
 - Phase 1 ⏳ sites/directory, passes + QR, guard kiosk + offline, notifications, logs/reports.
 - Phase 2 · badges, recurring/carrier/delivery, blacklist, shifts, PDF, AirlinkCast.
 - Phase 3 · AI doc/plate reading, access hardware, self-service kiosk.

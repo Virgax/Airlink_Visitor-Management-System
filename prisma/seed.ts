@@ -4,7 +4,7 @@
  * and the break-glass admin from SEED_ADMIN_EMAIL (+ SEED_ADMIN_PASSWORD on first creation).
  */
 import "dotenv/config";
-import { PrismaClient, type VisitKind } from "@prisma/client";
+import { PrismaClient, type Prisma, type VisitKind } from "@prisma/client";
 import { randomBytes, scrypt as scryptCb } from "node:crypto";
 
 const db = new PrismaClient();
@@ -83,22 +83,24 @@ async function seedNda() {
   });
 }
 
+const DEFAULT_ADMIN_EMAIL = "admin@airlinkdr.com";
+
 async function seedAdmin() {
-  const email = process.env.SEED_ADMIN_EMAIL?.toLowerCase();
-  if (!email) {
-    console.log("[seed] SEED_ADMIN_EMAIL not set; skipping admin");
-    return;
-  }
+  const email = (process.env.SEED_ADMIN_EMAIL ?? DEFAULT_ADMIN_EMAIL).toLowerCase();
   let user = await db.user.findUnique({ where: { email } });
   if (!user) {
-    const password = process.env.SEED_ADMIN_PASSWORD;
+    let password = process.env.SEED_ADMIN_PASSWORD;
+    let generated = false;
     if (!password) {
-      console.warn("[seed] SEED_ADMIN_PASSWORD not set; admin will be able to sign in only with Microsoft");
+      password = randomBytes(12).toString("base64url");
+      generated = true;
     }
-    user = await db.user.create({
-      data: { email, name: "Administrador", passwordHash: password ? await hashPassword(password) : null },
-    });
+    user = await db.user.create({ data: { email, name: "Administrador", passwordHash: await hashPassword(password) } });
     console.log(`[seed] created admin ${email}`);
+    if (generated) {
+      // Printed exactly once, at creation. Change it in /account right after the first sign-in.
+      console.log(`[seed] initial admin password (change it now): ${password}`);
+    }
   }
   await db.membership.upsert({
     where: { userId_siteId_role: { userId: user.id, siteId: null as unknown as string, role: "admin" } },
@@ -111,6 +113,23 @@ async function seedAdmin() {
   });
 }
 
+/** Pre-generates the server secrets so the first request does not have to. Env variables take precedence. */
+async function seedSecrets(tx: Prisma.TransactionClient) {
+  const names = ["APP_ENCRYPTION_KEY", "PASS_SIGNING_KEY", "DOC_HASH_KEY", "SESSION_SECRET", "CRON_SECRET", "SYNC_SECRET", "PRINT_AGENT_SECRET", "TEAMS_ACTION_SECRET"];
+  const existing = new Set((await tx.systemSecret.findMany({ select: { name: true } })).map((r) => r.name));
+  const data = names.filter((n) => !existing.has(n) && !process.env[n]).map((name) => ({ name, value: randomBytes(32).toString("base64") }));
+  if (!existing.has("VAPID_PUBLIC_KEY") && !process.env.VAPID_PUBLIC_KEY) {
+    const wp = await import("web-push");
+    const generateVAPIDKeys = (wp as { generateVAPIDKeys?: typeof wp.default.generateVAPIDKeys }).generateVAPIDKeys ?? wp.default.generateVAPIDKeys;
+    const pair = generateVAPIDKeys();
+    data.push({ name: "VAPID_PUBLIC_KEY", value: pair.publicKey }, { name: "VAPID_PRIVATE_KEY", value: pair.privateKey });
+  }
+  if (data.length) {
+    await tx.systemSecret.createMany({ data, skipDuplicates: true });
+    console.log(`[seed] generated ${data.length} server secrets`);
+  }
+}
+
 async function main() {
   // 63-bit lock id for "seed"
   const locked = await db.$transaction(async (tx) => {
@@ -119,6 +138,7 @@ async function main() {
     await seedSites();
     await seedNda();
     await seedAdmin();
+    await seedSecrets(tx);
     return true;
   }, { timeout: 120_000 });
   console.log(locked ? "[seed] done" : "[seed] skipped (another replica is seeding)");
