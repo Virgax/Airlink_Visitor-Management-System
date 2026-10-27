@@ -98,6 +98,12 @@ export async function alertOverstays(now = new Date()): Promise<number> {
         security = await securityUserIds(policy.siteId);
         securityCache.set(policy.siteId, security);
       }
+      const hostUser = visit.hostEmployeeId ? await db.user.findFirst({ where: { employeeId: visit.hostEmployeeId, status: "active" }, select: { id: true } }) : null;
+      if (security.length === 0 && !hostUser) {
+        // No stored notification would mark this visit as alerted, so a Teams card would repeat every tick.
+        log.warn("overstay.no_recipients", { visitId: visit.id, siteId: policy.siteId });
+        continue;
+      }
       const minutes = visit.enteredAt ? Math.floor((now.getTime() - visit.enteredAt.getTime()) / 60_000) : maxMinutes;
       const res = await notify({
         type: "visitor_overstay",

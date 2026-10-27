@@ -1,3 +1,4 @@
+import { db } from "@/lib/db";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { kioskRoute } from "@/lib/guard/route";
@@ -19,6 +20,13 @@ const actionSchema = z.object({
   action: z.enum(["approve_in_person", "deny", "enter", "checkout"]),
 });
 
+/** "Enter" on a still-pending unannounced visit is an in-person approval, so it goes through decideVisit. */
+async function enterOrApprove(visitId: string, siteId: string, userId: string) {
+  const current = await db.visit.findFirst({ where: { id: visitId, siteId }, select: { status: true } });
+  if (current?.status === "pending") return decideVisit(visitId, "approved", userId, { siteId, enter: true, via: "kiosk" });
+  return enterVisit(visitId, siteId, userId);
+}
+
 /** Guard actions on a visit of the kiosk's site. */
 export async function POST(request: NextRequest): Promise<Response> {
   return kioskRoute(async ({ user, site }) => {
@@ -28,7 +36,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const visit =
       action === "approve_in_person" ? await decideVisit(visitId, "approved", user.id, { siteId: site.id, enter: true })
       : action === "deny" ? await decideVisit(visitId, "denied", user.id, { siteId: site.id })
-      : action === "enter" ? await enterVisit(visitId, site.id, user.id)
+      : action === "enter" ? await enterOrApprove(visitId, site.id, user.id)
       : await checkoutVisit(visitId, site.id, user.id);
     if (!visit) return Response.json({ ok: false, error: "bad_state" }, { status: 409 });
     return Response.json({ ok: true, visit: visitJson(visit) });

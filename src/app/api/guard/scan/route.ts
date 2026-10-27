@@ -47,6 +47,12 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     const passId = passIdFromPayload(payload);
     const pass = passId ? await loadPass(passId) : null;
+    if (pass && pass.siteId !== site.id) {
+      // Another site's pass: deny without revealing who it belongs to.
+      await audit({ action: "visit.denied", siteId: site.id, actorId: user.id, targetType: "Pass", targetId: pass.id, meta: { reason: "wrong_site", gateId: gate.id, scanId } });
+      log.info("guard.scan_denied", { reason: "wrong_site", passId: pass.id, deviceId: device.id });
+      return Response.json({ ok: false, reason: "wrong_site" } satisfies ScanResponse);
+    }
     const info = pass ? await passInfo(pass, site.id) : null;
 
     const blacklist = pass && (pass.visitorDocHash || pass.plate)
@@ -140,7 +146,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
         const dup = await db.visit.findUnique({ where: { scanId }, select: visitSummarySelect });
-        if (dup) return Response.json({ ok: true, action: "entered", duplicate: true, visit: visitJson(dup), pass: info } satisfies ScanResponse);
+        if (dup && dup.siteId === site.id) return Response.json({ ok: true, action: "entered", duplicate: true, visit: visitJson(dup), pass: info } satisfies ScanResponse);
       }
       throw err;
     }

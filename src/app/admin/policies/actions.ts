@@ -14,7 +14,7 @@ const KINDS = ["visit", "candidate", "contractor", "vendor", "auditor", "carrier
 const schema = z.object({
   siteId: z.string().min(1),
   kind: z.enum(KINDS),
-  approverRole: z.enum(["", "admin", "security", "approver", "host"]).default(""),
+  approverRole: z.enum(["", "security", "approver"]).default(""),
   maxDurationMin: z.union([z.literal(""), z.coerce.number().int().min(5).max(7 * 24 * 60)]).default(""),
 });
 

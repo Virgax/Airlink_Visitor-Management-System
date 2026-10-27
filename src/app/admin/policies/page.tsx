@@ -8,7 +8,7 @@ import { listManagedSites } from "@/lib/server/sites";
 import { resetPolicyAction, savePolicyAction } from "./actions";
 
 const KINDS: VisitKind[] = ["visit", "candidate", "contractor", "vendor", "auditor", "carrier", "delivery", "recurring"];
-const ROLES = ["security", "approver", "admin", "host"] as const;
+const ROLES = ["security", "approver"] as const;
 
 export default async function PoliciesPage({ searchParams }: { searchParams: Promise<{ site?: string; ok?: string; error?: string }> }) {
   const sp = await searchParams;

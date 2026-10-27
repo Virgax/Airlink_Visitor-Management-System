@@ -197,3 +197,15 @@ describe("shiftLogsToCsv", () => {
     expect(lines[1]).toBe('2026-03-10 03:00;Airlink 2;Recepción;Guardia Uno;Incidente;"Puerta trasera abierta\nse cerró a las 3";/api/media/s/s1/shiftlogs/l1.jpg');
   });
 });
+
+describe("csvCell formula injection", () => {
+  it("prefixes cells Excel would evaluate as formulas", async () => {
+    const { csvCell } = await import("@/lib/server/reports");
+    expect(csvCell('=HYPERLINK("https://evil")')).toBe(`'=HYPERLINK(""https://evil"")`.replace(/^'=HYPERLINK\(""https:\/\/evil""\)$/, `"'=HYPERLINK(""https://evil"")"`));
+    expect(csvCell("+1 809")).toBe("'+1 809");
+    expect(csvCell("-5")).toBe("'-5");
+    expect(csvCell("@user")).toBe("'@user");
+    expect(csvCell(-5)).toBe("-5");
+    expect(csvCell("Uptime SRL")).toBe("Uptime SRL");
+  });
+});

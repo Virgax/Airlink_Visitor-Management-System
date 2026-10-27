@@ -70,10 +70,11 @@ export async function securityRecipientIds(siteId: string): Promise<string[]> {
 }
 
 /** Marks a visit as entered (inside, or at_dock for carriers), audits and notifies the host. */
-export async function enterVisit(visitId: string, siteId: string, actorId: string, at = new Date()): Promise<VisitSummary> {
+export async function enterVisit(visitId: string, siteId: string, actorId: string, at = new Date(), opts: { allowPending?: boolean } = {}): Promise<VisitSummary> {
   const current = await db.visit.findFirst({ where: { id: visitId, siteId }, select: { id: true, status: true, kind: true } });
   if (!current) throw new VisitError("not_found");
-  if (current.status !== "approved" && current.status !== "pending") throw new VisitError("bad_state");
+  // A pending (unannounced) visit only enters through decideVisit(..., { enter: true }) so the approval is audited.
+  if (current.status !== "approved" && !(current.status === "pending" && opts.allowPending)) throw new VisitError("bad_state");
   const status = entryStatus(current.kind);
   const visit = await db.visit.update({
     where: { id: visitId },
@@ -155,7 +156,7 @@ export async function decideVisit(
     targetId: visit.id,
     meta: { via: opts.via ?? "app", inPerson: Boolean(opts.enter), reason: opts.reason ?? null, ...(opts.note ? { note: opts.note } : {}) },
   });
-  if (decision === "approved" && opts.enter && byUserId) return enterVisit(visit.id, visit.siteId, byUserId, now);
+  if (decision === "approved" && opts.enter && byUserId) return enterVisit(visit.id, visit.siteId, byUserId, now, { allowPending: false });
   return visit;
 }
 

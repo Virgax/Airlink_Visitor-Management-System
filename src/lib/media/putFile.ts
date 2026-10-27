@@ -6,7 +6,7 @@ import { log } from "@/lib/log";
 /**
  * Private media in the S3-compatible bucket (Railway `visitas-media`). Keys are `s/<siteId>/<kind>/<id>.<ext>` so the
  * access check in `/api/media` can derive the site from the key. Nothing is ever public: the only reader is that route.
- * Phase 1 scope: PNG/JPEG only, sniffed by magic bytes; re-encoding and metadata stripping come with the full `putFile`.
+ * PNG/JPEG only: sniffed by magic bytes, then re-encoded with sharp (rotation applied, metadata stripped).
  */
 
 export type ImageType = "image/png" | "image/jpeg";
@@ -55,10 +55,20 @@ export function siteIdFromKey(key: string): string | null {
 }
 
 /** Stores bytes under `key`. Throws when the bucket is not configured; callers check `mediaConfigured()` first. */
+/** Re-encodes an image with sharp: applies EXIF rotation, drops all metadata (GPS, device), caps the size. */
+export async function reencodeImage(body: Uint8Array, contentType: ImageType): Promise<Uint8Array> {
+  const sharp = (await import("sharp")).default;
+  const pipeline = sharp(body, { failOn: "error", limitInputPixels: 40_000_000 }).rotate().resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true });
+  const out = contentType === "image/png" ? await pipeline.png({ compressionLevel: 8 }).toBuffer() : await pipeline.jpeg({ quality: 85, mozjpeg: true }).toBuffer();
+  return new Uint8Array(out);
+}
+
+/** Stores an image in the private bucket after sniffing (caller) and re-encoding (here). */
 export async function putFile(key: string, body: Uint8Array, contentType: ImageType): Promise<void> {
   const e = env();
-  await s3().send(new PutObjectCommand({ Bucket: e.S3_BUCKET, Key: key, Body: body, ContentType: contentType, CacheControl: "private, max-age=0" }));
-  log.info("media.put", { key, bytes: body.byteLength });
+  const clean = await reencodeImage(body, contentType);
+  await s3().send(new PutObjectCommand({ Bucket: e.S3_BUCKET, Key: key, Body: clean, ContentType: contentType, CacheControl: "private, max-age=0" }));
+  log.info("media.put", { key, bytes: clean.byteLength });
 }
 
 /** Reads an object; null when it does not exist. */

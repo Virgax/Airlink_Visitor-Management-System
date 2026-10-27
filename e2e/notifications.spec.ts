@@ -123,16 +123,16 @@ test("preferences page saves quiet hours and email fallback, and validates parti
   await expect(page.getByTestId("push-subscribe")).toBeVisible();
 });
 
-test("/api/push/public-key reflects the VAPID configuration", async ({ request }) => {
-  const expected = process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY ? process.env.VAPID_PUBLIC_KEY : null;
+test("/api/push/public-key always serves a VAPID key (variable or server-generated)", async ({ request }) => {
   const res = await request.get("/api/push/public-key");
-  if (expected) {
-    expect(res.status()).toBe(200);
-    expect((await res.json()).publicKey).toBe(expected);
-  } else {
-    expect(res.status()).toBe(404);
-    expect((await res.json()).error).toBe("push_not_configured");
-  }
+  expect(res.status()).toBe(200);
+  const { publicKey } = await res.json();
+  expect(typeof publicKey).toBe("string");
+  // Uncompressed P-256 point, base64url: 65 bytes → 87 characters.
+  expect(publicKey).toMatch(/^[A-Za-z0-9_-]{87}$/);
+  if (process.env.VAPID_PUBLIC_KEY) expect(publicKey).toBe(process.env.VAPID_PUBLIC_KEY);
+  // Stable across calls: the generated pair is persisted, not re-created.
+  expect((await (await request.get("/api/push/public-key")).json()).publicKey).toBe(publicKey);
 });
 
 test("/api/push/subscribe requires a session and stores the subscription", async ({ page, request }) => {

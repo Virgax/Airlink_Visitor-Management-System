@@ -18,9 +18,11 @@ export const PANEL_PATHS: Record<MembershipRole, string> = {
   host: "/app",
 };
 
+/** Web session required. A kiosk (PIN) session is valid only for /guard and is sent back there. */
 export async function requireUser(nextPath?: string): Promise<SessionUser> {
   const user = await getSessionUser();
   if (!user) redirect(nextPath ? `/login?next=${encodeURIComponent(nextPath)}` : "/login");
+  if (user.guardDeviceId) redirect("/guard");
   return user;
 }
 
@@ -78,7 +80,7 @@ export async function requireMembership(role: MembershipRole, nextPath?: string)
 /** Same as requireMembership but throws (route handlers and server actions). */
 export async function getMembershipOrThrow(role: MembershipRole): Promise<Tenant> {
   const user = await getSessionUser();
-  if (!user) throw new AuthError("unauthenticated");
+  if (!user || user.guardDeviceId) throw new AuthError("unauthenticated");
   const tenant = await resolveTenant(user, role);
   if (!tenant) throw new AuthError("forbidden");
   return tenant;

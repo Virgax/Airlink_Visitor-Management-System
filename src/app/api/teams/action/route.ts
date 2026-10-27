@@ -7,6 +7,7 @@ import { clientIp } from "@/lib/auth/session";
 import { rateLimit } from "@/lib/rateLimit";
 import { verifyTeamsAction, type TeamsAction } from "@/lib/notifications/teamsAction";
 import { decideVisit } from "@/lib/server/visits";
+import { getSecret } from "@/lib/secrets";
 import { decidePassFromTeams } from "@/lib/server/pass-decision";
 import { log } from "@/lib/log";
 
@@ -77,8 +78,8 @@ async function tokenFrom(request: NextRequest): Promise<string | null> {
   return fromQuery;
 }
 
-function verify(token: string | null): TeamsAction | null {
-  const secret = process.env.TEAMS_ACTION_SECRET;
+async function verify(token: string | null): Promise<TeamsAction | null> {
+  const secret = await getSecret("TEAMS_ACTION_SECRET");
   if (!secret) return null;
   return verifyTeamsAction(token, secret);
 }
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
   const locale = pickLocale(request);
   const tr = t(locale);
   const token = await tokenFrom(request);
-  const action = verify(token);
+  const action = await verify(token);
   if (!action || !token) return page(locale, tr("invalid"), `<h1>${escapeHtml(tr("invalid"))}</h1>`, 400);
   const subject = await subjectName(action);
   if (!subject || !subject.pending) return page(locale, tr("gone"), `<h1>${escapeHtml(tr("gone"))}</h1>`, 410);
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
   const ip = clientIp(request.headers) ?? "unknown";
   const limit = await rateLimit(`teams:action:${ip}`, 60, 60);
   if (!limit.ok) return page(locale, tr("rateLimited"), `<h1>${escapeHtml(tr("rateLimited"))}</h1>`, 429);
-  const action = verify(await tokenFrom(request));
+  const action = await verify(await tokenFrom(request));
   if (!action) return page(locale, tr("invalid"), `<h1>${escapeHtml(tr("invalid"))}</h1>`, 400);
 
   const result = action.kind === "visit" ? await decideVisit(action.id, action.decision, null, { via: "teams" }) : await decidePassFromTeams(action.id, action.decision, null);

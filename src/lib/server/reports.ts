@@ -184,10 +184,14 @@ export async function siteDashboardCounts(site: { id: string; timezone: string }
 export const CSV_SEPARATOR = ";";
 export const CSV_BOM = "﻿";
 
-/** Quotes a cell when it holds the separator, a comma, quotes or line breaks; doubles inner quotes. */
+/**
+ * Quotes a cell when it holds the separator, a comma, quotes or line breaks; doubles inner quotes.
+ * Cells that would be read as formulas by Excel (= + - @ or a leading tab/CR) are prefixed with an apostrophe.
+ */
 export function csvCell(value: string | number | null | undefined): string {
   if (value === null || value === undefined) return "";
-  const s = String(value);
+  let s = String(value);
+  if (typeof value === "string" && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   return /[",;\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 

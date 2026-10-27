@@ -4,6 +4,7 @@ import es from "../../../messages/es.json";
 import en from "../../../messages/en.json";
 import { db } from "@/lib/db";
 import { log } from "@/lib/log";
+import { getSecret } from "@/lib/secrets";
 import { emailChannel } from "@/lib/notifications/channels/email";
 import { pushChannel } from "@/lib/notifications/channels/push";
 import { teamsChannel, type TeamsFact } from "@/lib/notifications/channels/teams";
@@ -42,8 +43,8 @@ function teamsFacts(payload: Record<string, unknown>, siteName: string | null): 
   return facts;
 }
 
-function teamsActions(type: NotificationType, payload: Record<string, unknown>, now: Date): { approveUrl: string; denyUrl: string } | undefined {
-  const secret = process.env.TEAMS_ACTION_SECRET;
+async function teamsActions(type: NotificationType, payload: Record<string, unknown>, now: Date): Promise<{ approveUrl: string; denyUrl: string } | undefined> {
+  const secret = await getSecret("TEAMS_ACTION_SECRET");
   if (!secret) return undefined;
   const visitId = str(payload.visitId);
   const passId = str(payload.passId);
@@ -60,7 +61,7 @@ async function sendTeams(input: DispatchInput, siteName: string | null, now: Dat
   const res = await teamsChannel.send(message, {
     facts: teamsFacts(input.payload, siteName),
     labels: { approve: teamsT("approve"), deny: teamsT("deny"), openApp: teamsT("openApp") },
-    actions: teamsActions(input.type, input.payload, now),
+    actions: await teamsActions(input.type, input.payload, now),
   });
   if (!res.ok) log.warn("notify.channel_failed", { channel: "teams", type: input.type, error: res.error });
 }

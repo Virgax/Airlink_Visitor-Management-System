@@ -17,6 +17,7 @@ const TOTP_PENDING = "visitas_totp_pending";
 async function me() {
   const user = await getSessionUser();
   if (!user) redirect("/login?next=/account");
+  if (user.guardDeviceId) redirect("/guard");
   return user;
 }
 

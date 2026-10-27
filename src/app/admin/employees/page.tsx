@@ -18,7 +18,9 @@ export default async function EmployeesPage({ searchParams }: { searchParams: Pr
   const siteName = new Map(sites.map((s) => [s.id, s.name]));
   const [employees, editing, lastSync] = await Promise.all([
     searchEmployees(tenant.site?.id ?? null, q, { limit: 100, includeInactive: true }),
-    sp.edit ? db.employee.findUnique({ where: { id: sp.edit } }) : Promise.resolve(null),
+    sp.edit
+      ? db.employee.findFirst({ where: { id: sp.edit, ...(isGlobal ? {} : { OR: [{ siteId: null }, { siteId: { in: sites.map((s) => s.id) } }] }) } })
+      : Promise.resolve(null),
     db.employee.findFirst({ where: { source: { not: "manual" } }, orderBy: { syncedAt: "desc" }, select: { syncedAt: true } }),
   ]);
   const editable = editing && editing.source === "manual" && (!editing.siteId || isGlobal || sites.some((s) => s.id === editing.siteId)) ? editing : null;

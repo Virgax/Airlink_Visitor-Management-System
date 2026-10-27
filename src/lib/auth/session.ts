@@ -69,9 +69,18 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   return { ...session.user, guardDeviceId: session.guardDeviceId };
 }
 
+/**
+ * Client IP for rate limits and audit. Behind Cloudflare `cf-connecting-ip` is authoritative; otherwise the LAST
+ * `x-forwarded-for` entry is the one appended by the trusted proxy (the first is client-controlled).
+ */
 export function clientIp(h: Headers): string | null {
+  const cf = h.get("cf-connecting-ip");
+  if (cf) return cf.trim();
   const fwd = h.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0]?.trim() ?? null;
+  if (fwd) {
+    const parts = fwd.split(",").map((p) => p.trim()).filter(Boolean);
+    return parts[parts.length - 1] ?? null;
+  }
   return h.get("x-real-ip");
 }
 

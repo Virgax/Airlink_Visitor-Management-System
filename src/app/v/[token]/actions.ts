@@ -40,8 +40,9 @@ export async function preregisterAction(formData: FormData): Promise<void> {
     data.visitorDocHash = docHash(d.doc, await getSecret("DOC_HASH_KEY"));
     data.visitorDocLast4 = docLast4(d.doc);
   }
-  if (d.phone) data.visitorPhone = d.phone;
-  if (d.plate) data.plate = normalizePlate(d.plate);
+  // Write-once like the document: what the host registered (and what the blacklist is matched against) stays.
+  if (d.phone && !pass.visitorPhone) data.visitorPhone = d.phone;
+  if (d.plate && !pass.plate) data.plate = normalizePlate(d.plate);
   if (d.company && !pass.companyId) data.companyId = (await upsertCompanyByName(d.company, pass.kind)).id;
   if (Object.keys(data).length > 0) await db.pass.update({ where: { id: pass.id }, data });
   redirect(`/v/${pass.token}?ok=prereg`);
@@ -55,8 +56,11 @@ export async function acceptNdaAction(formData: FormData): Promise<void> {
   if (!parsed.success) redirect(`/v/${String(formData.get("token") ?? "")}?error=invalid`);
   const d = parsed.data;
   const pass = await loadOpenPass(d.token, "nda");
-  const nda = await db.ndaVersion.findFirst({ where: { id: d.ndaId, OR: [{ siteId: pass.siteId }, { siteId: null }] } });
-  if (!nda) redirect(`/v/${pass.token}?error=invalid`);
+  const nda = await db.ndaVersion.findFirst({
+    where: { OR: [{ siteId: pass.siteId }, { siteId: null }], activeFrom: { lte: new Date() } },
+    orderBy: [{ siteId: { sort: "desc", nulls: "last" } }, { activeFrom: "desc" }],
+  });
+  if (!nda || nda.id !== d.ndaId) redirect(`/v/${pass.token}?error=invalid`);
   if (!pass.ndaAcceptedAt) {
     await db.pass.update({ where: { id: pass.id }, data: { ndaAcceptedAt: new Date(), ndaVersion: nda.version } });
     await audit({ action: "nda.accepted", siteId: pass.siteId, targetType: "Pass", targetId: pass.id, meta: { ndaVersionId: nda.id, version: nda.version, signedName: d.name } });
