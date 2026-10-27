@@ -30,6 +30,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       : action === "deny" ? await decideVisit(visitId, "denied", user.id, { siteId: site.id })
       : action === "enter" ? await enterVisit(visitId, site.id, user.id)
       : await checkoutVisit(visitId, site.id, user.id);
+    if (!visit) return Response.json({ ok: false, error: "bad_state" }, { status: 409 });
     return Response.json({ ok: true, visit: visitJson(visit) });
   });
 }

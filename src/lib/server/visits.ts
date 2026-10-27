@@ -117,35 +117,56 @@ export async function checkoutVisit(visitId: string, siteId: string, actorId: st
 
 export type VisitDecision = "approved" | "denied";
 
+export type DecideOptions = {
+  siteId?: string;
+  /** Guard override: register the entry right after approving. */
+  enter?: boolean;
+  reason?: string;
+  /** Host note, e.g. "on_my_way" (slice D). */
+  note?: string;
+  /** Where the decision came from. */
+  via?: "app" | "teams" | "kiosk";
+};
+
 /**
- * Host/approver or guard decision on a pending (unannounced) visit. Shared with slice D (host-side approve/deny):
- * `decideVisit(visitId, "approved", hostUserId)`. With `enter: true` the guard override registers the entry at once.
+ * Host/approver, Teams or guard decision on a pending (unannounced) visit. The transition is atomic
+ * (`updateMany … WHERE status = pending`): returns null when the visit was no longer pending (already decided
+ * or timed out) or does not exist. Audits `visit.approved` / `visit.denied`. With `enter: true` the guard
+ * override registers the entry at once. `byUserId` is null for signed Teams actions.
  */
 export async function decideVisit(
   visitId: string,
   decision: VisitDecision,
-  byUserId: string,
-  opts: { siteId?: string; enter?: boolean; reason?: string } = {},
-): Promise<VisitSummary> {
-  const current = await db.visit.findFirst({ where: { id: visitId, ...(opts.siteId ? { siteId: opts.siteId } : {}) }, select: { id: true, siteId: true, status: true } });
-  if (!current) throw new VisitError("not_found");
-  if (current.status !== "pending") throw new VisitError("bad_state");
+  byUserId: string | null,
+  opts: DecideOptions = {},
+): Promise<VisitSummary | null> {
   const now = new Date();
-  const visit = await db.visit.update({
-    where: { id: visitId },
+  const res = await db.visit.updateMany({
+    where: { id: visitId, status: "pending", ...(opts.siteId ? { siteId: opts.siteId } : {}) },
     data: { status: decision, decidedById: byUserId, decidedAt: now },
-    select: visitSummarySelect,
   });
+  if (res.count === 0) return null;
+  const visit = await db.visit.findUniqueOrThrow({ where: { id: visitId }, select: visitSummarySelect });
   await audit({
     action: decision === "approved" ? "visit.approved" : "visit.denied",
-    siteId: current.siteId,
+    siteId: visit.siteId,
     actorId: byUserId,
     targetType: "Visit",
     targetId: visit.id,
-    meta: { inPerson: Boolean(opts.enter), reason: opts.reason ?? null },
+    meta: { via: opts.via ?? "app", inPerson: Boolean(opts.enter), reason: opts.reason ?? null, ...(opts.note ? { note: opts.note } : {}) },
   });
-  if (decision === "approved" && opts.enter) return enterVisit(visit.id, current.siteId, byUserId, now);
+  if (decision === "approved" && opts.enter && byUserId) return enterVisit(visit.id, visit.siteId, byUserId, now);
   return visit;
+}
+
+/** Whether `user` may decide on `visit`: its host (linked employee) or security/admin staff of that site. */
+export async function canDecideVisit(user: { id: string; employeeId: string | null }, visit: { siteId: string; hostEmployeeId: string | null }): Promise<boolean> {
+  if (visit.hostEmployeeId && user.employeeId === visit.hostEmployeeId) return true;
+  const staff = await db.membership.findFirst({
+    where: { userId: user.id, status: "active", role: { in: ["security", "admin"] }, OR: [{ siteId: visit.siteId }, { siteId: null }] },
+    select: { id: true },
+  });
+  return staff !== null;
 }
 
 const OPEN_STATUSES: VisitStatus[] = ["inside", "at_dock"];

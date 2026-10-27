@@ -957,5 +957,135 @@
       "body": "Inténtalo de nuevo. Si el problema sigue, avisa a IT.",
       "retry": "Reintentar"
     }
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "bell": "Notificaciones",
+    "unreadCount": "{count, plural, =0 {Sin notificaciones nuevas} one {# notificación sin leer} other {# notificaciones sin leer}}",
+    "empty": "No tienes notificaciones.",
+    "unread": "Nueva",
+    "open": "Abrir",
+    "markRead": "Marcar como leída",
+    "markAllRead": "Marcar todas como leídas",
+    "preferences": "Preferencias",
+    "visit": {
+      "approve": "Aprobar",
+      "deny": "Rechazar",
+      "onMyWay": "Voy en camino",
+      "pending": "Pendiente de tu respuesta",
+      "status": "{status, select, approved {Visita aprobada} denied {Visita rechazada} timeout {Sin respuesta a tiempo} inside {Visitante adentro} left {Visitante salió} at_dock {En muelle} other {Visita resuelta}}"
+    },
+    "ok": {
+      "approved": "Visita aprobada. Seguridad ya lo sabe.",
+      "denied": "Visita rechazada.",
+      "onMyWay": "Visita aprobada; avisamos a Seguridad que vas en camino.",
+      "read": "Notificaciones marcadas como leídas."
+    },
+    "error": {
+      "gone": "Esta visita ya fue resuelta o venció.",
+      "forbidden": "No puedes decidir sobre esta visita.",
+      "invalid": "Solicitud inválida."
+    },
+    "prefs": {
+      "title": "Preferencias de notificaciones",
+      "intro": "Elige cuándo y cómo recibir avisos. Las alertas de visitante en portería, lista negra y transportista en muelle llegan siempre.",
+      "quietTitle": "Horario de silencio",
+      "quietHelp": "En este horario (hora local del sitio) no recibirás push ni correo, salvo alertas urgentes. Deja ambas horas vacías para desactivarlo.",
+      "quietFrom": "Desde",
+      "quietTo": "Hasta",
+      "quietActive": "Silencio de {from} a {to}.",
+      "quietNone": "Sin horario de silencio.",
+      "emailTitle": "Correo",
+      "emailFallback": "Enviarme un correo cuando no tenga notificaciones push activas",
+      "save": "Guardar preferencias",
+      "saved": "Preferencias guardadas.",
+      "invalid": "Indica ambas horas (desde y hasta) en formato HH:mm, o deja las dos vacías.",
+      "back": "Volver a mi cuenta",
+      "link": "Notificaciones",
+      "linkHelp": "Horario de silencio, correo y push en este dispositivo."
+    },
+    "push": {
+      "title": "Push en este dispositivo",
+      "help": "Recibe avisos en este dispositivo aunque la app esté cerrada.",
+      "enable": "Activar notificaciones en este dispositivo",
+      "disable": "Desactivar en este dispositivo",
+      "enabled": "Notificaciones activas en este dispositivo.",
+      "disabled": "Notificaciones desactivadas en este dispositivo.",
+      "unsupported": "Este navegador no admite notificaciones push.",
+      "notConfigured": "Las notificaciones push no están configuradas en el servidor.",
+      "denied": "El navegador bloqueó las notificaciones. Permítelas en la configuración del sitio.",
+      "error": "No se pudieron activar. Inténtalo de nuevo.",
+      "working": "Un momento…"
+    },
+    "teams": {
+      "confirmVisit": "{decision, select, approved {¿Aprobar la visita de {name}?} other {¿Rechazar la visita de {name}?}}",
+      "confirmPass": "{decision, select, approved {¿Aprobar el pase de {name}?} other {¿Rechazar el pase de {name}?}}",
+      "confirm": "Confirmar",
+      "done": "{decision, select, approved {Aprobado. Seguridad ya lo sabe.} other {Rechazado.}}",
+      "gone": "Esta solicitud ya fue resuelta o venció.",
+      "invalid": "El enlace no es válido o expiró.",
+      "rateLimited": "Demasiadas solicitudes. Espera un minuto.",
+      "approve": "Aprobar",
+      "deny": "Rechazar",
+      "openApp": "Abrir Airlink Visitas",
+      "site": "Sitio",
+      "gate": "Puerta",
+      "host": "Anfitrión",
+      "company": "Empresa"
+    },
+    "email": {
+      "footer": "Airlink Visitas · Este correo se envió porque no tienes notificaciones push activas o es un reporte programado.",
+      "open": "Abrir en Airlink Visitas"
+    },
+    "types": {
+      "visit_at_gate": {
+        "title": "{escalated, select, true {Sin respuesta: visitante en portería} other {Visitante en portería}}",
+        "body": "{visitorName}{hasCompany, select, yes { ({company})} other {}} está en {gateName}{hasHost, select, yes { y busca a {hostName}} other {}}. {escalated, select, true {El anfitrión no respondió a tiempo.} other {Aprueba o rechaza la visita.}}"
+      },
+      "visit_entered": {
+        "title": "Tu visitante ya entró",
+        "body": "{visitorName}{hasCompany, select, yes { ({company})} other {}} ya pasó por {gateName}."
+      },
+      "visit_left": {
+        "title": "Tu visitante salió",
+        "body": "{visitorName}{hasCompany, select, yes { ({company})} other {}} salió del sitio."
+      },
+      "pass_pending_approval": {
+        "title": "Pase pendiente de aprobación",
+        "body": "{hostName} solicita un pase para {visitorName}{hasCompany, select, yes { ({company})} other {}}."
+      },
+      "pass_approved": {
+        "title": "Pase aprobado",
+        "body": "El pase de {visitorName}{hasCompany, select, yes { ({company})} other {}} fue aprobado."
+      },
+      "pass_denied": {
+        "title": "Pase rechazado",
+        "body": "El pase de {visitorName}{hasCompany, select, yes { ({company})} other {}} fue rechazado{hasReason, select, yes {: {reason}} other {.}}"
+      },
+      "delivery_at_gate": {
+        "title": "Entrega en recepción",
+        "body": "{hasCompany, select, yes {{company}} other {Un mensajero}} trajo una entrega para ti a {gateName}."
+      },
+      "carrier_at_dock": {
+        "title": "Transportista en muelle",
+        "body": "{hasCompany, select, yes {{company}} other {Un transportista}}{hasPlate, select, yes { (placa {plate})} other {}} está en {gateName}."
+      },
+      "blacklist_hit": {
+        "title": "Alerta: persona en lista negra",
+        "body": "{visitorName} intentó entrar por {gateName}{hasReason, select, yes {. Motivo: {reason}} other {.}}"
+      },
+      "visitor_overstay": {
+        "title": "Visita excedió el tiempo permitido",
+        "body": "{visitorName}{hasCompany, select, yes { ({company})} other {}} lleva {minutes, plural, one {# minuto} other {# minutos}} adentro; el máximo es {maxMinutes}."
+      },
+      "daily_report": {
+        "title": "Reporte diario de visitas",
+        "body": "{count, plural, =0 {Sin visitas} one {# visita} other {# visitas}} en {siteName} el {date}."
+      },
+      "evacuation_list": {
+        "title": "Lista de evacuación",
+        "body": "{count, plural, =0 {Nadie adentro} one {# persona adentro} other {# personas adentro}} en {siteName}."
+      }
+    }
   }
 }

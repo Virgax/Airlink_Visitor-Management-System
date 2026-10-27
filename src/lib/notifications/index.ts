@@ -1,47 +1,20 @@
 import "server-only";
-import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { log } from "@/lib/log";
+import { dispatchChannels } from "@/lib/notifications/dispatch";
+import { URGENT_TYPES, type NotificationType, type NotifyInput, type NotifyResult } from "@/lib/notifications/types";
 
 /**
  * Notification types. Payload = ids + ICU args only; the text is rendered in the reader's language when shown
- * (messages/*.json → `notifications.<type>`). Slice D (feat/notifications) implements the channels
- * (Web Push, Teams, email) behind this same function; other slices only call `notify`.
+ * (messages/*.json → `notifications.types.<type>`, `render.ts`). Other slices only call `notify`.
  */
-export type NotificationType =
-  | "visit_at_gate"
-  | "visit_entered"
-  | "visit_left"
-  | "pass_pending_approval"
-  | "pass_approved"
-  | "pass_denied"
-  | "delivery_at_gate"
-  | "carrier_at_dock"
-  | "blacklist_hit"
-  | "visitor_overstay"
-  | "daily_report"
-  | "evacuation_list";
-
-/** Types delivered even during the recipient's quiet hours. */
-export const URGENT_TYPES: ReadonlySet<NotificationType> = new Set(["visit_at_gate", "blacklist_hit", "carrier_at_dock"]);
-
-export type NotifyInput = {
-  type: NotificationType;
-  /** Recipients. Either users directly or employees (resolved to their linked user, if any). */
-  userIds?: string[];
-  employeeIds?: string[];
-  siteId?: string | null;
-  /** Ids and ICU arguments for the message, e.g. { visitId, visitorName, company, gateName }. */
-  payload: Prisma.InputJsonObject;
-  /** Deep link opened from the notification. */
-  url?: string;
-};
-
-export type NotifyResult = { stored: number };
+export type { NotificationType, NotifyInput, NotifyResult };
+export { URGENT_TYPES };
 
 /**
- * Stores one Notification row per recipient. Channel delivery (push/Teams/email) is added by slice D;
- * when NOTIFY_FAKE=1 nothing leaves the process (tests).
+ * Stores one Notification row per recipient, then delivers through the channels (Web Push, Teams, email;
+ * `dispatch.ts`). Channel failures are logged and never thrown. When NOTIFY_FAKE=1 nothing leaves the
+ * process: channels only record what they would have sent (`fake.ts`, `__fakeOutbox`).
  */
 export async function notify(input: NotifyInput): Promise<NotifyResult> {
   const userIds = new Set(input.userIds ?? []);
@@ -52,14 +25,16 @@ export async function notify(input: NotifyInput): Promise<NotifyResult> {
     });
     for (const u of users) userIds.add(u.id);
   }
+  const payload = { ...input.payload, ...(input.url ? { url: input.url } : {}), siteId: input.siteId ?? null };
   if (userIds.size === 0) {
     log.info("notify.no_recipients", { type: input.type, siteId: input.siteId ?? null });
-    return { stored: 0 };
+  } else {
+    await db.notification.createMany({
+      data: [...userIds].map((userId) => ({ userId, type: input.type, payload })),
+    });
+    log.info("notify.stored", { type: input.type, recipients: userIds.size });
   }
-  const payload = { ...input.payload, ...(input.url ? { url: input.url } : {}), siteId: input.siteId ?? null };
-  await db.notification.createMany({
-    data: [...userIds].map((userId) => ({ userId, type: input.type, payload })),
-  });
-  log.info("notify.stored", { type: input.type, recipients: userIds.size });
+  // Teams is a shared channel: the card goes out even when no user is a direct recipient (e.g. blacklist hits).
+  await dispatchChannels({ type: input.type, siteId: input.siteId ?? null, payload, userIds: [...userIds] });
   return { stored: userIds.size };
 }

@@ -5,6 +5,7 @@ import { Icon } from "@/components/Icon";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { NotificationBell } from "@/components/NotificationBell";
 import type { SessionUser } from "@/lib/auth/session";
 
 export async function AppShell({
@@ -39,6 +40,7 @@ export async function AppShell({
             <ThemeToggle label={t("theme.toggle")} />
             {user && !kiosk ? (
               <>
+                <NotificationBell userId={user.id} />
                 <Link href="/select-panel" className="btn-secondary px-2 py-2" title={t("nav.panels")} aria-label={t("nav.panels")}>
                   <Icon icon={LayoutGrid} />
                 </Link>
