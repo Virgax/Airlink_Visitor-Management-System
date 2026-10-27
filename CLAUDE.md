@@ -31,8 +31,11 @@ Full brief: `docs/PLAN.md`.
   (`src/lib/crypto/docHash.ts`); photos private in the bucket (`s/<siteId>/visits/…`), served by `/api/media`
   with an access check, purged after `settings.retentionDays`.
 - Guard app works offline: scans queued in IndexedDB, blacklist + evacuation list cached, server dedupes by `Visit.scanId`.
-- Badges: ZPL in `src/lib/badges/zpl.ts` (snapshot-tested); printing through `tools/print-agent` (port 9100, HMAC
-  `PRINT_AGENT_SECRET`) or Zebra Browser Print. Badge number = `Visit.badgeNo`.
+- Badges: 4" × 2" direct-thermal label on Zebra ZP450 (203 dpi, 812 × 406 dots, ZPL II), printed at entry and used as
+  the active badge: visit QR, visitor/company/host/area, warnings, optional dithered B&W photo from the kiosk camera.
+  Spec in `docs/BADGES.md`. ZPL in `src/lib/badges/zpl.ts` (pure, snapshot-tested); printing through
+  `tools/print-agent` (USB raw or port 9100, HMAC `PRINT_AGENT_SECRET`) or Zebra Browser Print. Badge number =
+  `Visit.badgeNo` (`<gate>-<daily seq>`).
 - Notifications: payload = ids + ICU args, rendered in the reader's language. Channels: Teams (Power Automate webhook,
   Adaptive Cards; actions call `/api/teams/action` signed with `TEAMS_ACTION_SECRET`), Web Push, email.
   `visit_at_gate`, `blacklist_hit`, `carrier_at_dock` ignore quiet hours. `NOTIFY_FAKE=1` in tests.
