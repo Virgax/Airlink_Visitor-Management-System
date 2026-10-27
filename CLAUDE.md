@@ -82,6 +82,10 @@ Full brief: `docs/PLAN.md`.
   memberships, panel selector, i18n es/en, light/dark + brand, PWA, health, cron tick, backup script, seed.
   Railway project, Postgres, bucket, crons and non-secret variables ✅.
   Secrets self-generated on first boot ✅. ⏳ Jaime: custom domain DNS, Sentry DSN, Entra app registration.
-- Phase 1 ⏳ sites/directory, passes + QR, guard kiosk + offline, notifications, logs/reports.
+- Phase 1 ✅ merged into `develop` (slices A–E, see `docs/PHASE1_SLICES.md`): admin CRUD (sites, gates, areas,
+  policies, companies, blacklist, employees) + SPN sync endpoint/agent; host passes + approvals + `/v/<token>` with
+  static/rotating QR, pre-registration and NDA; kiosk scanner, unannounced visits, inside/evacuation lists, offline
+  queue; notification channels (push, Teams, email) + in-app list + quiet hours + cron escalation; shift log and
+  reports with CSV. ⏳ production pilot feedback, Entra sign-in test with real tenant, SPN agent on the file server.
 - Phase 2 · badges, recurring/carrier/delivery, blacklist, shifts, PDF, AirlinkCast.
 - Phase 3 · AI doc/plate reading, access hardware, self-service kiosk.
