@@ -8,6 +8,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const t = await getTranslations("admin");
   const items = [
     { href: "/admin", label: t("overview") },
+    { href: "/admin/sites", label: t("sites") },
+    { href: "/admin/policies", label: t("policies") },
+    { href: "/admin/employees", label: t("employees") },
+    { href: "/admin/companies", label: t("companies") },
+    { href: "/admin/blacklist", label: t("blacklist") },
     { href: "/admin/members", label: t("members") },
     { href: "/admin/devices", label: t("devices") },
   ];

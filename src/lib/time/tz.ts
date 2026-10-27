@@ -27,3 +27,23 @@ export function parseHHmm(value: string): number | null {
   if (h > 24 || min > 59) return null;
   return h * 60 + min;
 }
+
+/** Offset of `timeZone` from UTC at `date`, in minutes (e.g. -240 for Santo Domingo). */
+export function tzOffsetMinutes(date: Date, timeZone: string): number {
+  const { ymd, minutes } = localParts(date, timeZone);
+  const [y, m, d] = ymd.split("-").map(Number) as [number, number, number];
+  const asUtc = Date.UTC(y, m - 1, d) + minutes * 60_000;
+  const truncated = Math.floor(date.getTime() / 60_000) * 60_000;
+  return Math.round((asUtc - truncated) / 60_000);
+}
+
+/** The instant for a wall-clock date and time ("YYYY-MM-DD", minutes since midnight) in `timeZone`. */
+export function zonedToUtc(ymd: string, minutesOfDay: number, timeZone: string): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd.trim());
+  if (!m) return null;
+  const guess = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) + minutesOfDay * 60_000;
+  if (Number.isNaN(guess)) return null;
+  const first = guess - tzOffsetMinutes(new Date(guess), timeZone) * 60_000;
+  // Second pass handles DST edges where the offset changes between the guess and the result.
+  return new Date(guess - tzOffsetMinutes(new Date(first), timeZone) * 60_000);
+}
