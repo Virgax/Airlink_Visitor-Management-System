@@ -45,8 +45,13 @@ and, when the kiosk has a camera, a quick black-and-white photo taken on site.
   `BadgeData` (HTML, same layout) and the optional photo capture step.
 - Reprint from `/guard/inside` (audited `badge.reprinted`).
 
+## Confirmed by Jaime (2026-10-27)
+- Reception PCs are **Windows**, each ZP450 connected by **USB directly**. `tools/print-agent` therefore runs as a
+  Windows service/startup script and writes raw ZPL to the Zebra driver's shared printer with `RAW` datatype
+  (Win32 spooler, e.g. through PowerShell `Out-Printer` is NOT raw; use the `winspool` API via a small helper or
+  `copy /b file.zpl \\localhost\ZP450`, with the printer shared under a fixed name). Pass-through mode
+  must be enabled in the ZDesigner driver ("Use printer settings" off, raw passthrough on).
+- Labels are **pre-cut with gaps** → `^MNY` (web/gap sensing). Run auto-calibration once per roll change.
+
 ## Open points for Jaime
-- Which reception PCs have the ZP450 attached, and are they Windows (USB driver name) or is there a network print
-  server?
-- Label stock reference (4" × 2" direct thermal, gap or black-mark) so `^MN` is right.
 - Photo consent text to add to the visitor policy (NDA v1.1).
