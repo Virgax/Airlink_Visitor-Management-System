@@ -1,7 +1,7 @@
 import { createHmac } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { env } from "@/lib/env";
+import { getSecret } from "@/lib/secrets";
 import { safeEqual } from "@/lib/crypto/tokens";
 import { clientIp } from "@/lib/auth/session";
 import { rateLimit } from "@/lib/rateLimit";
@@ -28,7 +28,7 @@ const payloadSchema = z.object({
  * Body: `{ rows: object[], full?: boolean, source?: "spn" | "entra" }` or a bare array of rows.
  */
 export async function POST(request: NextRequest) {
-  const secret = env().SYNC_SECRET;
+  const secret = await getSecret("SYNC_SECRET");
   if (!secret) {
     log.warn("sync.employees.disabled", { reason: "SYNC_SECRET not set" });
     return Response.json({ ok: false, error: "sync_disabled" }, { status: 503 });

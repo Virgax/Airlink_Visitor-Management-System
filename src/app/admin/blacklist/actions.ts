@@ -5,9 +5,9 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { assertSiteAllowed, getMembershipOrThrow } from "@/lib/auth/guards";
 import { audit } from "@/lib/audit";
-import { env } from "@/lib/env";
 import { docHash, docLast4, normalizeDoc, normalizePlate } from "@/lib/crypto/docHash";
-import { zonedToUtc } from "@/lib/time/tz";
+import { zonedDayMinutesToUtc } from "@/lib/time/tz";
+import { getSecret } from "@/lib/secrets";
 
 const schema = z.object({
   type: z.enum(["doc", "plate"]),
@@ -28,11 +28,11 @@ export async function addBlacklistAction(formData: FormData): Promise<void> {
   // A site-bound admin cannot add global entries.
   if (!siteId && tenant.membership.siteId !== null) redirect("/admin/blacklist?error=forbidden");
 
-  const match = type === "doc" ? { docHash: normalizeDoc(value).length >= 4 ? docHash(value, env().DOC_HASH_KEY) : null, plate: null } : { docHash: null, plate: normalizePlate(value).length >= 3 ? normalizePlate(value) : null };
+  const match = type === "doc" ? { docHash: normalizeDoc(value).length >= 4 ? docHash(value, await getSecret("DOC_HASH_KEY")) : null, plate: null } : { docHash: null, plate: normalizePlate(value).length >= 3 ? normalizePlate(value) : null };
   if (!match.docHash && !match.plate) redirect("/admin/blacklist?error=value");
 
   const site = siteId ? await db.site.findUnique({ where: { id: siteId }, select: { timezone: true } }) : null;
-  const untilAt = until ? zonedToUtc(until, 23 * 60 + 59, site?.timezone ?? "America/Santo_Domingo") : null;
+  const untilAt = until ? zonedDayMinutesToUtc(until, 23 * 60 + 59, site?.timezone ?? "America/Santo_Domingo") : null;
   if (until && !untilAt) redirect("/admin/blacklist?error=invalid");
 
   const duplicate = await db.blacklist.findFirst({
