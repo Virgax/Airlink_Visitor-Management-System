@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { AppShell } from "@/components/AppShell";
-import { requireMembership } from "@/lib/auth/guards";
+import { requireReportsTenant } from "@/lib/auth/reports-access";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const tenant = await requireMembership("admin", "/admin");
+  // Admins see everything; security staff only the reports (each page still enforces its own role).
+  const tenant = await requireReportsTenant("/admin");
   const t = await getTranslations("admin");
-  const items = [
+  const adminItems = [
     { href: "/admin", label: t("overview") },
     { href: "/admin/sites", label: t("sites") },
     { href: "/admin/policies", label: t("policies") },
@@ -15,7 +16,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/blacklist", label: t("blacklist") },
     { href: "/admin/members", label: t("members") },
     { href: "/admin/devices", label: t("devices") },
+    { href: "/admin/reports", label: t("reports") },
   ];
+  const items = tenant.role === "admin" ? adminItems : [{ href: "/admin/reports", label: t("reports") }];
   return (
     <AppShell user={tenant.user} subtitle={t("title")}>
       <nav aria-label={t("title")} className="mb-6 flex flex-wrap gap-2">

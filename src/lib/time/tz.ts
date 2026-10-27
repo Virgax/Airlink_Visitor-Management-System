@@ -97,3 +97,30 @@ export function zonedDayMinutesToUtc(ymd: string, minutesOfDay: number, timeZone
   // Second pass handles DST edges where the offset changes between the guess and the result.
   return new Date(guess - tzOffsetMinutes(new Date(first), timeZone) * 60_000);
 }
+
+export const DEFAULT_TIME_ZONE = "America/Santo_Domingo";
+
+/** The UTC instant at which the local day `ymd` ("YYYY-MM-DD") starts in `timeZone`. */
+export function zonedStartOfDay(ymd: string, timeZone: string): Date {
+  const [y, m, d] = ymd.split("-").map(Number);
+  const localMidnight = Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1);
+  let guess = localMidnight;
+  for (let i = 0; i < 2; i++) guess = localMidnight - tzOffsetMinutes(new Date(guess), timeZone) * 60_000;
+  return new Date(guess);
+}
+
+/** Adds whole days to a "YYYY-MM-DD" string (calendar arithmetic, no time zone involved). */
+export function addDaysYmd(ymd: string, days: number): string {
+  const [y, m, d] = ymd.split("-").map(Number);
+  const t = new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, (d ?? 1) + days));
+  return t.toISOString().slice(0, 10);
+}
+
+/** Days between two "YYYY-MM-DD" strings (b - a). */
+export function diffDaysYmd(a: string, b: string): number {
+  const toUtc = (s: string) => {
+    const [y, m, d] = s.split("-").map(Number);
+    return Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1);
+  };
+  return Math.round((toUtc(b) - toUtc(a)) / 86_400_000);
+}

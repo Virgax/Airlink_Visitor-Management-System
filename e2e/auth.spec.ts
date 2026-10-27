@@ -24,7 +24,7 @@ test("admin signs in, lands on the admin panel and signs out", async ({ page }) 
   }
   await expect(page).toHaveURL(/\/admin/);
   await expect(page.getByRole("heading", { name: "Resumen" })).toBeVisible();
-  await expect(page.getByText("Airlink 2")).toBeVisible();
+  await expect(page.getByText("Airlink 2").first()).toBeVisible();
   await page.getByRole("button", { name: "Cerrar sesión" }).click();
   await expect(page).toHaveURL(/\/login/);
   await page.goto("/admin");

@@ -67,6 +67,7 @@
     "employees": "Directory",
     "overview": "Overview",
     "stats": { "sites": "Active sites", "users": "Users", "devices": "Enrolled kiosks", "passesToday": "Active passes" },
+    "dashboard": {"title": "Today by site", "insideNow": "Inside now", "enteredToday": "Entered today", "pendingApprovals": "Pending approvals", "incidentsToday": "Incidents today"},
     "site": { "timezone": "Time zone", "gates": "{count, plural, one {# gate} other {# gates}}", "areas": "{count, plural, one {# area} other {# areas}}" },
     "devicesPage": {
       "title": "Kiosk devices",
@@ -316,7 +317,8 @@
       "log": "Shift log",
       "lock": "Lock",
       "signedInAs": "Session: {name} · {gate}"
-    }
+    },
+    "log": {"title": "Shift log", "back": "Back", "context": "{gate} · {name}", "add": "New entry", "kind": "Kind", "text": "Description", "textPlaceholder": "What happened? Keep it short and specific.", "photo": "Photo (optional)", "photoHelp": "PNG or JPEG, up to 3 MB.", "photoDisabled": "Photos are not enabled in this environment; the entry is saved without one.", "submit": "Save entry", "saved": "Entry saved.", "savedNoPhoto": "Entry saved without the photo: photo storage is not configured.", "today": "{count, plural, =0 {No entries today} one {Today: # entry} other {Today: # entries}}", "empty": "No entries in this shift yet.", "openPhoto": "View photo", "errors": {"invalid": "Check the kind and the text.", "photoType": "The photo must be a PNG or JPEG.", "photoSize": "The photo cannot exceed 3 MB.", "rateLimited": "Too many entries in a row. Wait a moment."}}
   },
   "host": {
     "title": "My visits",
@@ -573,6 +575,26 @@
   "legal": {
     "privacy": { "title": "Privacy notice", "updated": "Last updated: {date}" },
     "terms": { "title": "Terms of use", "updated": "Last updated: {date}" }
+  },
+  "reports": {
+    "title": "Reports",
+    "nav": {"visits": "Visits", "audit": "Audit", "shifts": "Shift log"},
+    "intro": {"visits": "Visits by date, site, gate, kind, host, area and company. Export to CSV for Excel.", "audit": "Evidence for ISO and client audits: who was in which area, NDA accepted, escort and approvals.", "shifts": "Notes, incidents, rounds and handovers recorded by security at each gate."},
+    "filters": {"from": "From", "to": "To", "site": "Site", "gate": "Gate", "kind": "Kind", "status": "Status", "host": "Host", "hostPlaceholder": "Host name", "area": "Area", "company": "Company", "companyPlaceholder": "Company name", "guard": "Guard", "guardPlaceholder": "Guard name", "all": "All", "apply": "Filter", "clear": "Clear", "export": "Export CSV", "exportHelp": "Same filters, up to {max} rows.", "timeZone": "Times in {tz}."},
+    "columns": {"date": "Date", "visitor": "Visitor", "company": "Company", "host": "Host", "kind": "Kind", "site": "Site", "gate": "Gate", "status": "Status", "enteredAt": "Entered", "leftAt": "Left", "duration": "Duration", "badgeNo": "Badge", "areas": "Areas", "escort": "Escort", "nda": "NDA", "passApproval": "Pass approval", "visitDecision": "Gate decision", "blacklistHits": "Blacklist", "at": "Time", "guard": "Guard", "text": "Text", "photo": "Photo"},
+    "csv": {"date": "Date", "visitor": "Visitor", "docLast4": "ID (last 4)", "plate": "Plate", "company": "Company", "host": "Host", "kind": "Kind", "site": "Site", "gate": "Gate", "status": "Status", "enteredAt": "Entered", "leftAt": "Left", "durationMin": "Duration (min)", "badgeNo": "Badge", "escort": "Escort", "areas": "Areas", "ndaVersion": "NDA version", "ndaAcceptedAt": "NDA accepted at", "passApprovedBy": "Pass approved by", "passApprovedAt": "Pass approved at", "visitDecidedBy": "Visit decided by", "visitDecidedAt": "Visit decided at", "blacklistHits": "Blacklist hits", "at": "Time", "guard": "Guard", "text": "Text", "photo": "Photo"},
+    "totals": {"visits": "{count, plural, one {# visit} other {# visits}}", "entries": "{count, plural, one {# entry} other {# entries}}", "inside": "Inside", "left": "Left", "pending": "Pending", "denied": "Denied", "incidents": "Incidents"},
+    "pagination": {"page": "Page {page} of {pages}", "prev": "Previous", "next": "Next"},
+    "empty": "No records match these filters.",
+    "minutes": "{count} min",
+    "open": "Open",
+    "none": "—",
+    "noNda": "Not required",
+    "by": "{name} · {date}",
+    "viewPhoto": "View photo",
+    "kinds": {"visit": "Visit", "candidate": "Candidate", "contractor": "Contractor", "vendor": "Vendor", "auditor": "Auditor", "carrier": "Carrier", "delivery": "Delivery", "recurring": "Recurring"},
+    "statuses": {"pending": "Pending", "approved": "Approved", "denied": "Denied", "inside": "Inside", "at_dock": "At dock", "left": "Left", "timeout": "Timed out"},
+    "shiftKinds": {"note": "Note", "incident": "Incident", "round": "Round", "handover": "Handover"}
   },
   "errors": {
     "notFound": { "title": "Page not found", "body": "Check the link or go back home.", "home": "Go home" },
