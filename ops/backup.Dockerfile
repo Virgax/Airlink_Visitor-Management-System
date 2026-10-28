@@ -1,6 +1,6 @@
 # ops/backup: pg_dump (matching the Railway Postgres major version) + the repo's backup script.
 FROM node:22-bookworm-slim
-ARG PG_MAJOR=17
+ARG PG_MAJOR=18
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl gnupg \
   && install -d /usr/share/postgresql-common/pgdg \
   && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \

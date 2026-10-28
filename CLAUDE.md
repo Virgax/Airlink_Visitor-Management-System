@@ -67,7 +67,7 @@ Full brief: `docs/PLAN.md`.
 - Railway project `airlink-visitas` (id 1942b6a4-0cd3-4fe8-b5ad-7b15c881b7bb), described in `.railway/railway.ts`
   (IaC; `railway config plan/apply`). Services: `web` (deploys `main`, `npm run build` / `npm run start:prod`,
   healthcheck `/api/health/ready`), `Postgres`, bucket `visitas-media` (iad), `ops-cron` (*/5 min, `npm run cron:tick`),
-  `ops-backup` (07:00 UTC, ops/backup.Dockerfile with pg_dump 17, `npm run ops:backup`). Cron schedules and the
+  `ops-backup` (07:00 UTC, ops/backup.Dockerfile with pg_dump 18 (Railway Postgres is 18.x), `npm run ops:backup`). Cron schedules and the
   Dockerfile path live on the services (not in the SDK yet). railway.json is deprecated by Railway; do not add one.
   Environments `production` (main) / `staging` (develop).
 - Domain `visitas.airlinkdr.com` at Cloudflare (proxied, SSL Full).
