@@ -8,9 +8,10 @@ import { ownPassWhere } from "@/lib/server/host-passes";
 import { evaluatePolicy } from "@/lib/policies/evaluate";
 import { enabledKinds } from "@/lib/server/policies";
 import { toLocalInput } from "@/lib/time/tz";
-import { createPassAction } from "../actions";
+import { FrequentPicker } from "@/components/passes/FrequentPicker";
+import { createPassAction, searchFrequentAction } from "../actions";
 
-type Search = { siteId?: string; from?: string; error?: string };
+type Search = { siteId?: string; from?: string; error?: string; frequent?: string };
 const ERRORS = ["invalid", "missing_doc", "missing_plate", "gate_not_allowed", "company_blocked", "window_order", "window_too_long", "window_past", "schedule", "site"];
 const WEEK = [1, 2, 3, 4, 5, 6, 0];
 
@@ -44,13 +45,15 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
     );
   }
 
-  const [areas, gates, employees, policies, from, VISIT_KINDS] = await Promise.all([
+  const tp = await getTranslations("people");
+  const [areas, gates, employees, policies, from, VISIT_KINDS, frequent] = await Promise.all([
     db.area.findMany({ where: { siteId: site.id, active: true }, orderBy: { name: "asc" } }),
     db.gate.findMany({ where: { siteId: site.id, active: true }, orderBy: { name: "asc" } }),
     db.employee.findMany({ where: { active: true, OR: [{ siteId: site.id }, { siteId: null }] }, orderBy: { name: "asc" }, take: 300, select: { id: true, name: true, department: true } }),
     db.visitPolicy.findMany({ where: { siteId: site.id } }),
     sp.from ? db.pass.findFirst({ where: { id: sp.from, ...ownPassWhere(tenant) } }) : null,
     enabledKinds(site.id), // kinds disabled in /admin/policies are hidden here (existing passes keep working)
+    sp.frequent ? db.frequentVisitor.findFirst({ where: { id: sp.frequent, siteId: site.id, active: true }, include: { company: { select: { name: true } } } }) : null,
   ]);
   const approvalByKind = Object.fromEntries(
     VISIT_KINDS.map((kind) => [kind, evaluatePolicy(policies.find((p) => p.kind === kind) ?? null, { kind }).approverRole] as const),
@@ -68,10 +71,15 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
       <p className="muted">{t("intro")}</p>
       {errorKey ? <p className="alert-error" role="alert">{t(`errors.${errorKey}`)}</p> : null}
 
+      <div className="card">
+        <FrequentPicker siteId={site.id} selected={frequent ? { id: frequent.id, name: frequent.name, company: frequent.company?.name ?? null } : null} search={searchFrequentAction} />
+        {frequent ? <input type="hidden" name="frequentId" value={frequent.id} /> : null}
+      </div>
+
       <div className="card grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label className="label" htmlFor="kind">{t("kind")}</label>
-          <select id="kind" name="kind" className="input" defaultValue={from && VISIT_KINDS.includes(from.kind) ? from.kind : VISIT_KINDS[0]} required>
+          <select id="kind" name="kind" className="input" defaultValue={from && VISIT_KINDS.includes(from.kind) ? from.kind : frequent && VISIT_KINDS.includes("recurring") ? "recurring" : VISIT_KINDS[0]} required>
             {VISIT_KINDS.map((k) => <option key={k} value={k}>{tk(`kinds.${k}.label`)}</option>)}
           </select>
           <ul className="muted mt-2 grid gap-1 sm:grid-cols-2">
@@ -85,16 +93,16 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
         </div>
         <div>
           <label className="label" htmlFor="visitorName">{t("visitorName")}</label>
-          <input id="visitorName" name="visitorName" required minLength={2} maxLength={120} className="input" defaultValue={from?.visitorName ?? ""} />
+          <input id="visitorName" name="visitorName" required minLength={2} maxLength={120} className="input" defaultValue={from?.visitorName ?? frequent?.name ?? ""} />
         </div>
         <div>
           <label className="label" htmlFor="company">{t("company")}</label>
-          <input id="company" name="company" maxLength={120} className="input" defaultValue={fromCompany?.name ?? ""} />
+          <input id="company" name="company" maxLength={120} className="input" defaultValue={fromCompany?.name ?? frequent?.company?.name ?? ""} />
           <p className="muted mt-1">{t("companyHelp")}</p>
         </div>
         <div>
           <label className="label" htmlFor="phone">{t("phone")}</label>
-          <input id="phone" name="phone" type="tel" maxLength={40} className="input" defaultValue={from?.visitorPhone ?? ""} />
+          <input id="phone" name="phone" type="tel" maxLength={40} className="input" defaultValue={from?.visitorPhone ?? frequent?.phone ?? ""} />
         </div>
         <div>
           <label className="label" htmlFor="email">{t("email")}</label>
@@ -103,7 +111,7 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
         <div>
           <label className="label" htmlFor="doc">{t("doc")}</label>
           <input id="doc" name="doc" maxLength={40} className="input" autoComplete="off" />
-          <p className="muted mt-1">{t("docHelp")}</p>
+          <p className="muted mt-1">{frequent?.docLast4 ? tp("frequent.form.docKeep", { last4: frequent.docLast4 }) : t("docHelp")}</p>
         </div>
         <div>
           <label className="label" htmlFor="plate">{t("plate")}</label>
@@ -112,6 +120,11 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
         <div className="sm:col-span-2">
           <label className="label" htmlFor="note">{t("note")}</label>
           <textarea id="note" name="note" maxLength={500} rows={2} className="input" defaultValue={from?.note ?? ""} />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="flex items-start gap-2 text-sm">
+            <input type="checkbox" name="generatePin" className="mt-1" data-testid="generate-pin" /> <span>{tp("pin.generate")}<span className="muted block">{tp("pin.generateHelp")}</span></span>
+          </label>
         </div>
       </div>
 

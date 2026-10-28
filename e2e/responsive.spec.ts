@@ -13,7 +13,7 @@ for (const width of widths) {
       expect(overflow, `${path} at ${width}px`).toBeLessThanOrEqual(0);
     }
     await loginAsAdmin(page);
-    for (const path of ["/select-panel", "/admin", "/admin/sites", "/admin/policies", "/admin/employees", "/admin/companies", "/admin/blacklist", "/admin/members", "/admin/devices", "/account"]) {
+    for (const path of ["/select-panel", "/admin", "/admin/sites", "/admin/policies", "/admin/people", "/admin/frequent", "/admin/companies", "/admin/blacklist", "/admin/devices", "/admin/reports/invites", "/app/evacuacion", "/account"]) {
       await page.goto(path);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, `${path} at ${width}px`).toBeLessThanOrEqual(0);

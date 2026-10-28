@@ -5,6 +5,7 @@ import { getSecret } from "@/lib/secrets";
 import { audit } from "@/lib/audit";
 import { notify } from "@/lib/notifications/index";
 import { randomToken } from "@/lib/crypto/tokens";
+import { hashPassword } from "@/lib/auth/password";
 import { docHash, docLast4, normalizePlate } from "@/lib/crypto/docHash";
 import { evaluatePolicy, type PolicyInput } from "@/lib/policies/evaluate";
 import type { Schedule } from "@/lib/passes/validate";
@@ -90,6 +91,17 @@ export type CreatePassInput = {
   groupSize: number;
   /** Placeholder for numbered group members, in the host's language. */
   groupPlaceholder?: string;
+  /** Already-hashed document (frequent visitor): used when `doc` is empty. */
+  visitorDoc?: { hash: string; last4: string } | null;
+  /** Plain 6-digit PIN the visitor may type at the kiosk; only its scrypt hash is stored. */
+  pin?: string | null;
+  /**
+   * Skip the policy's approval step (frequent-visitor passes issued by an admin): the pass starts active and no
+   * approver is notified. Recorded in the audit entry.
+   */
+  skipApproval?: boolean;
+  /** Extra fields for the `pass.created` audit entry (e.g. `{ frequent: true }`). */
+  auditMeta?: Prisma.InputJsonObject;
 };
 
 export type CreatePassError = "missing_doc" | "missing_plate" | "gate_not_allowed" | "company_blocked";
@@ -106,8 +118,8 @@ export type CreatePassResult =
 export async function createPass(input: CreatePassInput): Promise<CreatePassResult> {
   const key = await getSecret("DOC_HASH_KEY");
   const doc = input.doc?.trim() ? input.doc.trim() : null;
-  const visitorDocHash = doc ? docHash(doc, key) : null;
-  const visitorDocLast4 = doc ? docLast4(doc) : null;
+  const visitorDocHash = doc ? docHash(doc, key) : (input.visitorDoc?.hash ?? null);
+  const visitorDocLast4 = doc ? docLast4(doc) : (input.visitorDoc?.last4 ?? null);
   const plate = input.plate?.trim() ? normalizePlate(input.plate) : null;
 
   const policy = await loadPolicy(input.siteId, input.kind);
@@ -126,7 +138,8 @@ export async function createPass(input: CreatePassInput): Promise<CreatePassResu
   const names = groupVisitorNames(input.visitorName, input.groupSize, input.groupPlaceholder);
   const groupId = names.length > 1 ? randomToken(8) : null;
   const schedule = input.schedule ?? null;
-  const status = evaluation.initialStatus;
+  const status = input.skipApproval ? "active" : evaluation.initialStatus;
+  const pinHash = input.pin ? await hashPassword(input.pin) : null;
 
   const rows: Prisma.PassCreateManyInput[] = names.map((visitorName) => ({
     siteId: input.siteId,
@@ -151,6 +164,7 @@ export async function createPass(input: CreatePassInput): Promise<CreatePassResu
     status,
     note: input.note?.trim() || null,
     groupId,
+    pinHash,
   }));
 
   const passes = await db.$transaction(async (tx) => {
@@ -167,7 +181,7 @@ export async function createPass(input: CreatePassInput): Promise<CreatePassResu
       actorId: input.createdById,
       targetType: "Pass",
       targetId: pass.id,
-      meta: { kind: pass.kind, status: pass.status, groupId, warnings: evaluation.warnings },
+      meta: { kind: pass.kind, status: pass.status, groupId, warnings: evaluation.warnings, pin: Boolean(pinHash), ...(input.skipApproval ? { skipApproval: true } : {}), ...(input.auditMeta ?? {}) },
     });
   }
 

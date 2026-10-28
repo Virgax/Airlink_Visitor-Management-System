@@ -44,7 +44,7 @@ function s3(): S3Client {
 }
 
 /** Key for a media object; `siteId` is the first path segment after `s/` and is what the media route authorizes on. */
-export function mediaKey(siteId: string, kind: "visits" | "shiftlogs", id: string, type: ImageType): string {
+export function mediaKey(siteId: string, kind: "visits" | "shiftlogs" | "frequent", id: string, type: ImageType): string {
   return `s/${siteId}/${kind}/${id}.${extensionFor(type)}`;
 }
 
@@ -55,7 +55,7 @@ export function badgePhotoKey(siteId: string, visitId: string): string {
 
 /** Site id encoded in a media key, or null for a malformed key (print jobs are never served by /api/media). */
 export function siteIdFromKey(key: string): string | null {
-  const m = /^s\/([A-Za-z0-9_-]+)\/(visits|shiftlogs)\/[A-Za-z0-9_-]+(?:\/badge)?\.(png|jpg)$/.exec(key);
+  const m = /^s\/([A-Za-z0-9_-]+)\/(visits|shiftlogs|frequent)\/[A-Za-z0-9_-]+(?:\/badge)?\.(png|jpg)$/.exec(key);
   return m?.[1] ?? null;
 }
 

@@ -5,9 +5,9 @@ import { Icon } from "@/components/Icon";
 import { EXPORT_MAX_ROWS } from "@/lib/server/reports";
 import { filtersToQuery, PAGE_SIZES, QUICK_RANGES, REPORT_PAGE_SIZE, type QuickRange } from "@/lib/server/reports-filters";
 
-export type ReportKey = "visits" | "audit" | "shifts";
+export type ReportKey = "visits" | "audit" | "shifts" | "invites";
 
-export const REPORT_PATHS: Record<ReportKey, string> = { visits: "/admin/reports", audit: "/admin/reports/audit", shifts: "/admin/reports/shifts" };
+export const REPORT_PATHS: Record<ReportKey, string> = { visits: "/admin/reports", audit: "/admin/reports/audit", shifts: "/admin/reports/shifts", invites: "/admin/reports/invites" };
 
 /** Tabs between the three reports. */
 export async function ReportNav({ active }: { active: ReportKey }) {

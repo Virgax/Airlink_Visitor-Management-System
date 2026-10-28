@@ -171,6 +171,21 @@ export function validatePass(payload: string, pass: PassForValidation | null, ct
   if (!qr.ok) return { ok: false, reason: qr.reason };
   if (qr.qr.passId !== pass.id) return { ok: false, reason: "bad_signature" };
 
+  const state = validatePassState(pass, ctx);
+  if (!state.ok) return state;
+  return { ok: true, qr: qr.qr };
+}
+
+export type PassStateValidation = { ok: true } | { ok: false; reason: DenyReason };
+
+/**
+ * The non-QR part of `validatePass`: blacklist, status, uses, window/schedule, gate and NDA. Shared by the QR scan
+ * and the kiosk PIN entry (which has no payload to verify). Order is the same as `validatePass`.
+ */
+export function validatePassState(pass: PassForValidation, ctx: Omit<ValidationContext, "key"> & { key?: string }): PassStateValidation {
+  if (pass.siteId !== ctx.siteId) return { ok: false, reason: "wrong_site" };
+  const now = ctx.now ?? new Date();
+
   if (ctx.blacklisted) return { ok: false, reason: "blacklisted" };
   if (ctx.companyBlocked) return { ok: false, reason: "company_blocked" };
 
@@ -189,5 +204,5 @@ export function validatePass(payload: string, pass: PassForValidation | null, ct
 
   if (ctx.policy?.requiresNda && !pass.ndaAcceptedAt) return { ok: false, reason: "nda_required" };
 
-  return { ok: true, qr: qr.qr };
+  return { ok: true };
 }
