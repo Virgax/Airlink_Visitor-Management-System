@@ -1,6 +1,7 @@
 import "server-only";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { listAnswers, readAnswers } from "@/lib/forms/schema";
 import { assignBadgeNo } from "@/lib/server/badges";
 import { audit } from "@/lib/audit";
 import { notify } from "@/lib/notifications/index";
@@ -40,11 +41,12 @@ export async function passInfo(pass: LoadedPass, siteId: string): Promise<ScanPa
     warnings: passWarnings(policy, areas),
     docLast4: pass.visitorDocLast4,
     plate: pass.plate,
+    answers: listAnswers(readAnswers(pass.extra)).map((a) => ({ id: a.id, label: a.label, value: a.value })),
   };
 }
 
 export function passInfoFromVisit(v: Prisma.VisitGetPayload<{ select: typeof visitSummarySelect }>): ScanPassInfo {
-  return { id: v.passId ?? "", kind: v.kind, visitorName: v.visitorName, company: v.company?.name ?? null, host: v.host?.name ?? null, hostDepartment: v.host?.department ?? null, areas: [], warnings: [], docLast4: v.docLast4, plate: v.plate };
+  return { id: v.passId ?? "", kind: v.kind, visitorName: v.visitorName, company: v.company?.name ?? null, host: v.host?.name ?? null, hostDepartment: v.host?.department ?? null, areas: [], warnings: [], docLast4: v.docLast4, plate: v.plate, answers: listAnswers(readAnswers(v.extra)).map((a) => ({ id: a.id, label: a.label, value: a.value })) };
 }
 
 /** First blacklist row (site or global) matching the pass's document or plate, or null. */
@@ -132,6 +134,7 @@ export async function enterWithPass(input: EnterInput): Promise<ScanResponse> {
         escortEmployeeId: pass.escortEmployeeId,
         scanId,
         conflict,
+        extra: pass.extra ?? undefined,
       },
       select: visitSummarySelect,
     });

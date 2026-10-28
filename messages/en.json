@@ -242,7 +242,13 @@
       "errors": {
         "autoSignOut": "Invalid auto sign-out time (use HH:mm).",
         "emails": "Check the e-mail list (max 20, comma-separated)."
-      }
+      },
+      "formTemplate": "Sign-in form",
+      "defaultForm": "Default form (standard fields)",
+      "sharedTemplate": "all sites",
+      "editForm": "Edit form",
+      "formTemplateHelp": "Defines what is asked of the host, the visitor and at the kiosk.",
+      "manageForms": "Manage forms"
     },
     "companiesPage": {
       "title": "Companies",
@@ -336,7 +342,8 @@
     },
     "evacuation": "Evacuation list",
     "people": "People",
-    "frequent": "Frequent visitors"
+    "frequent": "Frequent visitors",
+    "forms": "Forms"
   },
   "guard": {
     "title": "Security",
@@ -477,7 +484,10 @@
       "pin": "Visitor PIN",
       "pinName": "Name (optional)",
       "pinSubmit": "Enter with PIN",
-      "pinOffline": "PIN entry needs a connection to the server."
+      "pinOffline": "PIN entry needs a connection to the server.",
+      "answers": "Form answers",
+      "yes": "Yes",
+      "no": "No"
     },
     "unannounced": {
       "title": "Unannounced visit",
@@ -501,7 +511,8 @@
         "invalid": "Check the form fields.",
         "host": "Select a host.",
         "blacklisted": "Person or vehicle on the blacklist. Alert Security.",
-        "company_blocked": "The company is blocked."
+        "company_blocked": "The company is blocked.",
+        "missing": "Required form fields are missing."
       },
       "pending": "Waiting at the gate",
       "empty": "No visits waiting.",
@@ -609,8 +620,10 @@
         "window_too_long": "Validity cannot exceed one year.",
         "window_past": "The validity window has already ended.",
         "schedule": "Pick at least one day and a valid time range.",
-        "site": "Choose a site."
-      }
+        "site": "Choose a site.",
+        "missing_field": "Required sign-in form fields are missing."
+      },
+      "customFields": "Additional details"
     },
     "detail": {
       "title": "Pass for {name}",
@@ -749,7 +762,8 @@
       "company": "Company",
       "submit": "Save",
       "ok": "Details saved. Thank you.",
-      "docSaved": "Document registered (ending in {last4})"
+      "docSaved": "Document registered (ending in {last4})",
+      "email": "E-mail"
     },
     "nda": {
       "title": "Visitor policy",
@@ -758,12 +772,14 @@
       "name": "Type your full name as signature",
       "submit": "Accept",
       "ok": "Policy accepted. Thank you.",
-      "accepted": "You accepted the visitor policy on {date}."
+      "accepted": "You accepted the visitor policy on {date}.",
+      "attachment": "Open the full document (PDF)"
     },
     "errors": {
       "invalid": "Check the data and try again.",
       "rateLimited": "Too many attempts. Wait a moment.",
-      "closed": "This pass no longer accepts changes."
+      "closed": "This pass no longer accepts changes.",
+      "missing": "Required answers are missing. Check the form."
     },
     "status": {
       "active": "Valid",
@@ -925,7 +941,9 @@
       "at": "Time",
       "guard": "Guard",
       "text": "Text",
-      "photo": "Photo"
+      "photo": "Photo",
+      "yes": "Yes",
+      "no": "No"
     },
     "totals": {
       "visits": "{count, plural, one {# visit} other {# visits}}",
@@ -1657,6 +1675,141 @@
         "pin": "With PIN"
       },
       "empty": "No invites in that range."
+    }
+  },
+  "forms": {
+    "list": {
+      "title": "Sign-in forms",
+      "intro": "Each visit kind uses a form: what is asked of the host, of the visitor on their link and at the kiosk. Build them here and assign them under Visit policies.",
+      "name": "Form name",
+      "namePlaceholder": "E.g. Vendors level 1",
+      "site": "Site",
+      "allSites": "All sites",
+      "create": "Create form",
+      "empty": "No forms yet. Every visit kind uses the default form.",
+      "elements": "{count, plural, =0 {no elements} one {# element} other {# elements}}",
+      "usedBy": "Used by",
+      "usedByNone": "no visit kind",
+      "edit": "Edit",
+      "view": "View",
+      "duplicate": "Duplicate",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "inactive": "inactive",
+      "rename": "Rename",
+      "save": "Save",
+      "copyName": "{name} (copy)",
+      "ok": {
+        "created": "Form created. Add elements and save.",
+        "duplicated": "Form duplicated.",
+        "renamed": "Name updated.",
+        "activated": "Form activated.",
+        "deactivated": "Form deactivated. Kinds that used it fall back to the default form.",
+        "saved": "Form saved."
+      },
+      "errors": {
+        "forbidden": "You cannot edit that form."
+      }
+    },
+    "editor": {
+      "back": "Back to forms",
+      "allSites": "All sites",
+      "usedBy": "Used by",
+      "usedByNone": "no visit kind",
+      "readOnly": "This form is shared by all sites; only a global administrator can edit it. You can duplicate it for your site.",
+      "name": "Form name",
+      "palette": "Add element",
+      "elements": "{count, plural, =0 {Elements} one {# element} other {# elements}}",
+      "emptyList": "Add elements from the palette. The order here is the order shown.",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "remove": "Remove",
+      "properties": "Properties",
+      "label": "Label",
+      "help": "Help text",
+      "textBody": "Instructions text",
+      "helpHint": "Lines starting with \"- \" become lists; **bold** is supported.",
+      "mode": "Mode",
+      "modes": {
+        "off": "Not asked",
+        "optional": "Optional",
+        "required": "Required"
+      },
+      "questionType": "Answer type",
+      "questionTypes": {
+        "text": "Text",
+        "number": "Number",
+        "select": "Option list",
+        "checkbox": "Checkbox (yes/no)"
+      },
+      "options": "Options",
+      "optionsHint": "One option per line.",
+      "required": "Required",
+      "showOn": "Show on",
+      "surfaces": {
+        "host": "Host invitation",
+        "visitor": "Visitor link",
+        "kiosk": "Kiosk"
+      },
+      "onBadge": "Print on the badge",
+      "mediaCurrent": "Current file: {key}",
+      "mediaNone": "No file. Upload an image (PNG/JPG) or a PDF.",
+      "uploadMedia": "Upload file",
+      "uploading": "Uploading…",
+      "upload": {
+        "forbidden": "You may not upload files to this form.",
+        "invalid": "The file must be PNG, JPG or PDF.",
+        "too_large": "The file exceeds 8 MB.",
+        "not_configured": "File storage is not configured in this environment."
+      },
+      "issues": {
+        "duplicate_id": "Duplicate identifier.",
+        "duplicate_builtin": "That standard field is already on the form.",
+        "select_needs_options": "An option list needs at least one option.",
+        "invalid": "Invalid value."
+      },
+      "save": "Save form",
+      "preview": "Preview",
+      "previewHelp": "What each person will see. Standard fields you do not add are asked as in the default form; add them to change their mode or order.",
+      "ok": {
+        "saved": "Form saved.",
+        "created": "Form created. Add elements and save.",
+        "duplicated": "Form duplicated."
+      }
+    },
+    "types": {
+      "photo": "Photo",
+      "document": "ID or passport",
+      "name": "Visitor name",
+      "phone": "Phone",
+      "email": "E-mail",
+      "company": "Company",
+      "plate": "Plate",
+      "areas": "Areas",
+      "host": "Host",
+      "escort": "Escort",
+      "text": "Text / instructions",
+      "question": "Question",
+      "media": "Document or image",
+      "signature": "Signature"
+    },
+    "render": {
+      "required": "required",
+      "choose": "Choose…",
+      "openDocument": "Open document",
+      "mediaMissing": "File not uploaded yet.",
+      "signature": {
+        "draw": "Draw your signature with your finger or mouse.",
+        "clear": "Clear",
+        "typedName": "Or type your full name as signature",
+        "typedNameHelp": "If you cannot draw, your full name counts as your signature.",
+        "drawn": "Signature captured."
+      }
+    },
+    "answers": {
+      "title": "Form answers",
+      "yes": "Yes",
+      "no": "No"
     }
   }
 }

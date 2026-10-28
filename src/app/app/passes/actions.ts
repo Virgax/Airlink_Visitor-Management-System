@@ -15,6 +15,8 @@ import { generatePin } from "@/lib/people/pin";
 import { readPinFlash, sendPassInviteEmail, setPinFlash } from "@/lib/server/invites";
 import { searchFrequentVisitors } from "@/lib/server/frequent";
 import { rateLimit } from "@/lib/rateLimit";
+import { collectAnswers } from "@/lib/forms/schema";
+import { loadPolicyAndForm } from "@/lib/server/forms";
 import { zonedToUtc } from "@/lib/time/tz";
 import type { FrequentHit } from "@/components/passes/FrequentPicker";
 
@@ -87,6 +89,10 @@ export async function createPassAction(formData: FormData): Promise<void> {
 
   const host = await ensureEmployeeForUser(tenant.user);
   const t = await getTranslations("host.new");
+  // Custom questions of the sign-in form for this kind (host surface).
+  const { form } = await loadPolicyAndForm(site.id, d.kind);
+  const collected = collectAnswers(form.elements, "host", formData);
+  if (collected.invalid.length) fail(site.id, "invalid");
 
   // A frequent visitor picked in the form: copy the hashed document (never re-typed) when no document was given.
   const frequent = d.frequentId ? await db.frequentVisitor.findFirst({ where: { id: d.frequentId, siteId: site.id, active: true }, select: { docHash: true, docLast4: true } }) : null;
@@ -114,6 +120,8 @@ export async function createPassAction(formData: FormData): Promise<void> {
     groupPlaceholder: t("groupPlaceholder"),
     visitorDoc: frequent?.docHash && frequent.docLast4 ? { hash: frequent.docHash, last4: frequent.docLast4 } : null,
     pin,
+    answers: collected.answers,
+    form: form.elements,
   });
   if (!result.ok) fail(site.id, result.error);
   const lead = result.passes[0]!;

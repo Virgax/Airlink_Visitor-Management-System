@@ -2,11 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import type { VisitKind } from "@prisma/client";
+import { Prisma, type VisitKind } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getMembershipOrThrow } from "@/lib/auth/guards";
 import { audit } from "@/lib/audit";
 import { DEFAULT_POLICIES } from "@/lib/policies/evaluate";
+import { templateWhereForSite } from "@/lib/server/forms";
 import { getManagedSite } from "@/lib/server/sites";
 import { normalizeAutoSignOutAt, parseEmailList } from "@/lib/policies/autoClose";
 
@@ -17,6 +18,7 @@ const schema = z.object({
   kind: z.enum(KINDS),
   approverRole: z.enum(["", "security", "approver"]).default(""),
   maxDurationMin: z.union([z.literal(""), z.coerce.number().int().min(5).max(7 * 24 * 60)]).default(""),
+  formTemplateId: z.string().max(64).default(""),
 });
 
 const on = (formData: FormData, key: string) => formData.get(key) === "on";
@@ -26,7 +28,7 @@ export async function savePolicyAction(formData: FormData): Promise<void> {
   const parsed = schema.safeParse(Object.fromEntries(formData));
   const back = `/admin/policies?site=${encodeURIComponent(String(formData.get("siteId") ?? ""))}`;
   if (!parsed.success) redirect(`${back}&error=invalid`);
-  const { siteId, kind, approverRole, maxDurationMin } = parsed.data;
+  const { siteId, kind, approverRole, maxDurationMin, formTemplateId } = parsed.data;
   const site = await getManagedSite(tenant, siteId);
   if (!site) redirect("/admin/policies?error=invalid");
   // "HH:mm" in the site's time zone (the cron job resolves it per day); empty = never auto sign out.
@@ -37,7 +39,11 @@ export async function savePolicyAction(formData: FormData): Promise<void> {
   if (!notifyEmails) redirect(`${back}&error=emails#policy-${kind}`);
   const gateIds = formData.getAll("allowedGateIds").map(String).filter(Boolean);
   const siteGates = gateIds.length ? await db.gate.findMany({ where: { id: { in: gateIds }, siteId: site.id }, select: { id: true } }) : [];
+  // The template id comes from the browser: it must be an active template of this site or a shared one.
+  const template = formTemplateId ? await db.formTemplate.findFirst({ where: { id: formTemplateId, active: true, ...templateWhereForSite(site.id) }, select: { id: true } }) : null;
+  if (formTemplateId && !template) redirect(`${back}&error=invalid`);
   const data = {
+    formTemplateId: template?.id ?? null,
     requiresApproval: on(formData, "requiresApproval"),
     approverRole: approverRole || null,
     requiresDoc: on(formData, "requiresDoc"),
@@ -65,7 +71,7 @@ export async function resetPolicyAction(formData: FormData): Promise<void> {
   if (!KINDS.includes(kind)) redirect(`${back}&error=invalid`);
   const site = await getManagedSite(tenant, siteId);
   if (!site) redirect("/admin/policies?error=invalid");
-  const data = DEFAULT_POLICIES[kind];
+  const data = { ...DEFAULT_POLICIES[kind], formTemplateId: null, form: Prisma.DbNull };
   const policy = await db.visitPolicy.upsert({ where: { siteId_kind: { siteId: site.id, kind } }, create: { siteId: site.id, kind, ...data }, update: data });
   await audit({ action: "policy.changed", siteId: site.id, actorId: tenant.user.id, targetType: "VisitPolicy", targetId: policy.id, meta: { kind, reset: true } });
   redirect(`${back}&ok=reset#policy-${kind}`);

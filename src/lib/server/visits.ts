@@ -5,6 +5,7 @@ import { audit } from "@/lib/audit";
 import { notify } from "@/lib/notifications/index";
 import { entryStatus } from "@/lib/guard/decide";
 import { policyNotifyEmails } from "@/lib/server/policies";
+import { listAnswers, readAnswers } from "@/lib/forms/schema";
 
 export class VisitError extends Error {
   constructor(public readonly code: "not_found" | "bad_state") {
@@ -29,6 +30,7 @@ export const visitSummarySelect = {
   badgeNo: true,
   areaIds: true,
   conflict: true,
+  extra: true,
   company: { select: { id: true, name: true } },
   host: { select: { id: true, name: true, department: true } },
   gate: { select: { id: true, name: true, kind: true } },
@@ -56,6 +58,7 @@ export function visitJson(v: VisitSummary) {
     leftAt: v.leftAt?.toISOString() ?? null,
     badgeNo: v.badgeNo,
     conflict: v.conflict,
+    answers: listAnswers(readAnswers(v.extra)).map((a) => ({ id: a.id, label: a.label, value: a.value })),
   };
 }
 
@@ -230,8 +233,8 @@ export type UnannouncedInput = {
   docHash: string | null;
   docLast4: string | null;
   plate: string | null;
-  /** Extra answers (e.g. the phone typed at the gate QR self sign-in), stored in `Visit.extra`. */
-  extra?: Prisma.InputJsonObject;
+  /** Extra answers (kiosk form questions, or the phone typed at the gate QR self sign-in), stored in `Visit.extra`. */
+  extra?: Prisma.InputJsonObject | null;
 };
 
 /** Creates a pending visit for someone who arrived without a pass and notifies the host (`visit_at_gate`). */
@@ -250,6 +253,7 @@ export async function createUnannouncedVisit(input: UnannouncedInput): Promise<V
       plate: input.plate,
       ...(input.extra ? { extra: input.extra } : {}),
       status: "pending",
+      extra: input.extra ?? undefined,
     },
     select: visitSummarySelect,
   });

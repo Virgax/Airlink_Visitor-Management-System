@@ -13,6 +13,10 @@ import type { EmployeeHit } from "@/lib/guard/types";
 import { searchEmployees } from "@/lib/server/employees-search";
 import { createUnannouncedVisit, securityRecipientIds } from "@/lib/server/visits";
 import { isKindEnabled } from "@/lib/server/policies";
+import { loadPolicyAndForm } from "@/lib/server/forms";
+import { evaluatePolicy } from "@/lib/policies/evaluate";
+import { collectAnswers } from "@/lib/forms/schema";
+import type { Prisma } from "@prisma/client";
 
 /** Host lookup for the kiosk form (called from the HostPicker client component). */
 export async function searchHostsAction(q: string): Promise<EmployeeHit[]> {
@@ -59,6 +63,24 @@ export async function createUnannouncedAction(formData: FormData): Promise<void>
   const last4 = doc ? docLast4(doc) : null;
   const plate = data.plate?.trim() ? normalizePlate(data.plate) : null;
 
+  // Sign-in form of this kind (kiosk surface): custom answers and required built-ins.
+  const { policy, form } = await loadPolicyAndForm(site.id, data.kind);
+  const collected = collectAnswers(form.elements, "kiosk", formData);
+  if (collected.invalid.length) redirect("/guard/unannounced?error=invalid");
+  const evaluation = evaluatePolicy(policy, {
+    kind: data.kind,
+    visitorDocHash: hash,
+    plate,
+    form: form.elements,
+    surface: "kiosk",
+    answers: collected.answers,
+    visitorName: data.visitorName,
+    company: companyName ?? null,
+    hostEmployeeId: host.id,
+  });
+  if (evaluation.missing.length > 0) redirect("/guard/unannounced?error=missing");
+  const extra = Object.keys(collected.answers).length ? ({ answers: collected.answers } as unknown as Prisma.InputJsonObject) : null;
+
   if (hash || plate) {
     const rows = await db.blacklist.findMany({
       where: { OR: [{ siteId: site.id }, { siteId: null }], AND: { OR: [...(hash ? [{ docHash: hash }] : []), ...(plate ? [{ plate }] : [])] } },
@@ -89,6 +111,7 @@ export async function createUnannouncedAction(formData: FormData): Promise<void>
     docHash: hash,
     docLast4: last4,
     plate,
+    extra,
   });
   redirect("/guard/unannounced?ok=1");
 }

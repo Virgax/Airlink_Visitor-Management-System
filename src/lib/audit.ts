@@ -19,6 +19,7 @@ export type AuditAction =
   | "employee.presence"
   | "area.changed"
   | "policy.changed"
+  | "form.changed"
   | "company.changed"
   | "employee.changed"
   | "employee.pin_set"

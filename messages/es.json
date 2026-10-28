@@ -242,7 +242,13 @@
       "errors": {
         "autoSignOut": "Hora de salida automática inválida (usa HH:mm).",
         "emails": "Revisa la lista de correos (máximo 20, separados por coma)."
-      }
+      },
+      "formTemplate": "Formulario de registro",
+      "defaultForm": "Formulario por defecto (campos estándar)",
+      "sharedTemplate": "todos los sitios",
+      "editForm": "Editar formulario",
+      "formTemplateHelp": "Define qué datos se piden al anfitrión, al visitante y en el kiosco.",
+      "manageForms": "Administrar formularios"
     },
     "companiesPage": {
       "title": "Empresas",
@@ -336,7 +342,8 @@
     },
     "evacuation": "Lista de evacuación",
     "people": "Personas",
-    "frequent": "Visitantes frecuentes"
+    "frequent": "Visitantes frecuentes",
+    "forms": "Formularios"
   },
   "guard": {
     "title": "Seguridad",
@@ -477,7 +484,10 @@
       "pin": "PIN del visitante",
       "pinName": "Nombre (opcional)",
       "pinSubmit": "Entrar con PIN",
-      "pinOffline": "El PIN necesita conexión con el servidor."
+      "pinOffline": "El PIN necesita conexión con el servidor.",
+      "answers": "Respuestas del formulario",
+      "yes": "Sí",
+      "no": "No"
     },
     "unannounced": {
       "title": "Visita no anunciada",
@@ -501,7 +511,8 @@
         "invalid": "Revisa los datos del formulario.",
         "host": "Selecciona un anfitrión.",
         "blacklisted": "Persona o vehículo en lista negra. Avisa a Seguridad.",
-        "company_blocked": "La empresa está bloqueada."
+        "company_blocked": "La empresa está bloqueada.",
+        "missing": "Faltan campos obligatorios del formulario."
       },
       "pending": "En espera en la puerta",
       "empty": "No hay visitas esperando.",
@@ -609,8 +620,10 @@
         "window_too_long": "La vigencia no puede superar un año.",
         "window_past": "La vigencia ya terminó.",
         "schedule": "Elige al menos un día y un horario válido.",
-        "site": "Elige un sitio."
-      }
+        "site": "Elige un sitio.",
+        "missing_field": "Faltan campos obligatorios del formulario de registro."
+      },
+      "customFields": "Datos adicionales"
     },
     "detail": {
       "title": "Pase de {name}",
@@ -749,7 +762,8 @@
       "company": "Empresa",
       "submit": "Guardar",
       "ok": "Datos guardados. Gracias.",
-      "docSaved": "Documento registrado (termina en {last4})"
+      "docSaved": "Documento registrado (termina en {last4})",
+      "email": "Correo electrónico"
     },
     "nda": {
       "title": "Política de visitantes",
@@ -758,12 +772,14 @@
       "name": "Escribe tu nombre completo como firma",
       "submit": "Aceptar",
       "ok": "Política aceptada. Gracias.",
-      "accepted": "Aceptaste la política de visitantes el {date}."
+      "accepted": "Aceptaste la política de visitantes el {date}.",
+      "attachment": "Ver documento completo (PDF)"
     },
     "errors": {
       "invalid": "Revisa los datos e inténtalo otra vez.",
       "rateLimited": "Demasiados intentos. Espera un momento.",
-      "closed": "Este pase ya no admite cambios."
+      "closed": "Este pase ya no admite cambios.",
+      "missing": "Faltan respuestas obligatorias. Revisa el formulario."
     },
     "status": {
       "active": "Vigente",
@@ -925,7 +941,9 @@
       "at": "Hora",
       "guard": "Guardia",
       "text": "Texto",
-      "photo": "Foto"
+      "photo": "Foto",
+      "yes": "Sí",
+      "no": "No"
     },
     "totals": {
       "visits": "{count, plural, one {# visita} other {# visitas}}",
@@ -1657,6 +1675,141 @@
         "pin": "Con PIN"
       },
       "empty": "No hay invitaciones en ese rango."
+    }
+  },
+  "forms": {
+    "list": {
+      "title": "Formularios de registro",
+      "intro": "Cada tipo de visita usa un formulario: qué datos se piden al anfitrión, al visitante en su enlace y en el kiosco. Créalos aquí y asígnalos en Políticas de visita.",
+      "name": "Nombre del formulario",
+      "namePlaceholder": "Ej. Proveedores nivel 1",
+      "site": "Sitio",
+      "allSites": "Todos los sitios",
+      "create": "Crear formulario",
+      "empty": "No hay formularios todavía. Cada tipo de visita usa el formulario por defecto.",
+      "elements": "{count, plural, =0 {sin elementos} one {# elemento} other {# elementos}}",
+      "usedBy": "Usado por",
+      "usedByNone": "ningún tipo de visita",
+      "edit": "Editar",
+      "view": "Ver",
+      "duplicate": "Duplicar",
+      "deactivate": "Desactivar",
+      "activate": "Activar",
+      "inactive": "inactivo",
+      "rename": "Cambiar nombre",
+      "save": "Guardar",
+      "copyName": "{name} (copia)",
+      "ok": {
+        "created": "Formulario creado. Agrega elementos y guarda.",
+        "duplicated": "Formulario duplicado.",
+        "renamed": "Nombre actualizado.",
+        "activated": "Formulario activado.",
+        "deactivated": "Formulario desactivado. Los tipos que lo usaban vuelven al formulario por defecto.",
+        "saved": "Formulario guardado."
+      },
+      "errors": {
+        "forbidden": "No puedes editar ese formulario."
+      }
+    },
+    "editor": {
+      "back": "Volver a formularios",
+      "allSites": "Todos los sitios",
+      "usedBy": "Usado por",
+      "usedByNone": "ningún tipo de visita",
+      "readOnly": "Este formulario es compartido por todos los sitios; solo un administrador general puede editarlo. Puedes duplicarlo para tu sitio.",
+      "name": "Nombre del formulario",
+      "palette": "Agregar elemento",
+      "elements": "{count, plural, =0 {Elementos} one {# elemento} other {# elementos}}",
+      "emptyList": "Agrega elementos desde la paleta. El orden aquí es el orden en que se muestran.",
+      "moveUp": "Subir",
+      "moveDown": "Bajar",
+      "remove": "Quitar",
+      "properties": "Propiedades",
+      "label": "Etiqueta",
+      "help": "Texto de ayuda",
+      "textBody": "Texto de las instrucciones",
+      "helpHint": "Puedes usar líneas que empiecen con \"- \" para listas y **negritas**.",
+      "mode": "Modo",
+      "modes": {
+        "off": "No se pide",
+        "optional": "Opcional",
+        "required": "Obligatorio"
+      },
+      "questionType": "Tipo de respuesta",
+      "questionTypes": {
+        "text": "Texto",
+        "number": "Número",
+        "select": "Lista de opciones",
+        "checkbox": "Casilla (sí/no)"
+      },
+      "options": "Opciones",
+      "optionsHint": "Una opción por línea.",
+      "required": "Obligatorio",
+      "showOn": "Mostrar en",
+      "surfaces": {
+        "host": "Invitación del anfitrión",
+        "visitor": "Enlace del visitante",
+        "kiosk": "Kiosco"
+      },
+      "onBadge": "Imprimir en el gafete",
+      "mediaCurrent": "Archivo actual: {key}",
+      "mediaNone": "Sin archivo. Sube una imagen (PNG/JPG) o un PDF.",
+      "uploadMedia": "Subir archivo",
+      "uploading": "Subiendo…",
+      "upload": {
+        "forbidden": "No tienes permiso para subir archivos a este formulario.",
+        "invalid": "El archivo debe ser PNG, JPG o PDF.",
+        "too_large": "El archivo supera 8 MB.",
+        "not_configured": "El almacenamiento de archivos no está configurado en este entorno."
+      },
+      "issues": {
+        "duplicate_id": "Identificador repetido.",
+        "duplicate_builtin": "Ese campo estándar ya está en el formulario.",
+        "select_needs_options": "Una lista de opciones necesita al menos una opción.",
+        "invalid": "Valor no válido."
+      },
+      "save": "Guardar formulario",
+      "preview": "Vista previa",
+      "previewHelp": "Así lo verá cada persona. Los campos estándar que no agregues se piden como en el formulario por defecto; agrégalos para cambiar su modo u orden.",
+      "ok": {
+        "saved": "Formulario guardado.",
+        "created": "Formulario creado. Agrega elementos y guarda.",
+        "duplicated": "Formulario duplicado."
+      }
+    },
+    "types": {
+      "photo": "Foto",
+      "document": "Cédula o pasaporte",
+      "name": "Nombre del visitante",
+      "phone": "Teléfono",
+      "email": "Correo",
+      "company": "Empresa",
+      "plate": "Placa",
+      "areas": "Áreas",
+      "host": "Anfitrión",
+      "escort": "Acompañante",
+      "text": "Texto / instrucciones",
+      "question": "Pregunta",
+      "media": "Documento o imagen",
+      "signature": "Firma"
+    },
+    "render": {
+      "required": "obligatorio",
+      "choose": "Selecciona…",
+      "openDocument": "Abrir documento",
+      "mediaMissing": "Archivo pendiente de subir.",
+      "signature": {
+        "draw": "Dibuja tu firma con el dedo o el ratón.",
+        "clear": "Borrar",
+        "typedName": "O escribe tu nombre completo como firma",
+        "typedNameHelp": "Si no puedes dibujar, tu nombre completo vale como firma.",
+        "drawn": "Firma registrada."
+      }
+    },
+    "answers": {
+      "title": "Respuestas del formulario",
+      "yes": "Sí",
+      "no": "No"
     }
   }
 }

@@ -7,6 +7,11 @@ import { requireKiosk } from "@/lib/auth/kiosk";
 import { kioskBadgeConfig } from "@/lib/server/badges";
 import { listGateVisits, visitJson } from "@/lib/server/visits";
 import { enabledKinds } from "@/lib/server/policies";
+import { FormFields } from "@/components/forms/FormFields";
+import { KindFormSwitch, type KindFormRules } from "@/components/forms/KindFormSwitch";
+import { formLabels } from "@/lib/forms/labels";
+import { builtinRule, BUILTIN_TYPES, elementsFor, type BuiltinType } from "@/lib/forms/schema";
+import { loadFormsForSite } from "@/lib/server/forms";
 import { createUnannouncedAction, searchHostsAction } from "./actions";
 
 export default async function UnannouncedPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
@@ -15,7 +20,18 @@ export default async function UnannouncedPage({ searchParams }: { searchParams: 
   const t = await getTranslations("guard");
   const locale = await getLocale();
   const [initial, KINDS] = await Promise.all([listGateVisits(site.id).then((v) => v.map(visitJson)), enabledKinds(site.id)]);
-  const errorKey = sp.error && ["invalid", "host", "blacklisted", "company_blocked"].includes(sp.error) ? sp.error : null;
+  const errorKey = sp.error && ["invalid", "host", "blacklisted", "company_blocked", "missing"].includes(sp.error) ? sp.error : null;
+  const [forms, labels] = await Promise.all([loadFormsForSite(site.id), formLabels()]);
+  const rules: KindFormRules = Object.fromEntries(
+    KINDS.map((kind) => {
+      const els = forms[kind].form.elements;
+      return [kind, { hidden: BUILTIN_TYPES.filter((b) => builtinRule(els, b, "kiosk") === "off"), required: BUILTIN_TYPES.filter((b) => builtinRule(els, b, "kiosk") === "required") }];
+    }),
+  );
+  const initialRule = rules[KINDS[0] ?? "visit"] ?? { hidden: [], required: [] };
+  const box = (type: BuiltinType) => ({ "data-builtin": type, hidden: initialRule.hidden.includes(type) || undefined });
+  const req = (type: BuiltinType) => initialRule.required.includes(type) || undefined;
+  const hasCustom = KINDS.some((kind) => elementsFor(forms[kind].form.elements, "kiosk").some((e) => e.type !== "signature" && !BUILTIN_TYPES.includes(e.type as BuiltinType)));
 
   return (
     <AppShell user={user} kiosk subtitle={`${site.name} · ${gate.name}`}>
@@ -26,14 +42,14 @@ export default async function UnannouncedPage({ searchParams }: { searchParams: 
           {sp.ok ? <p className="alert-ok" role="status">{t("unannounced.ok")}</p> : null}
           {errorKey ? <p className="alert-error" role="alert">{t(`unannounced.errors.${errorKey}` as "unannounced.errors.invalid")}</p> : null}
           <HostPicker search={searchHostsAction} />
-          <div>
+          <div {...box("name")}>
             <label className="label" htmlFor="visitorName">{t("unannounced.visitor")}</label>
             <input id="visitorName" name="visitorName" required minLength={2} maxLength={120} autoComplete="off" className="input" />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <div>
+            <div {...box("company")}>
               <label className="label" htmlFor="company">{t("unannounced.company")}</label>
-              <input id="company" name="company" maxLength={120} autoComplete="off" className="input" />
+              <input id="company" name="company" maxLength={120} autoComplete="off" className="input" required={req("company")} />
             </div>
             <div>
               <label className="label" htmlFor="kind">{t("unannounced.kind")}</label>
@@ -41,16 +57,29 @@ export default async function UnannouncedPage({ searchParams }: { searchParams: 
                 {KINDS.map((k) => <option key={k} value={k}>{t(`kinds.${k}`)}</option>)}
               </select>
             </div>
-            <div>
+            <div {...box("document")}>
               <label className="label" htmlFor="doc">{t("unannounced.doc")}</label>
-              <input id="doc" name="doc" maxLength={40} autoComplete="off" inputMode="numeric" className="input" aria-describedby="doc-help" />
+              <input id="doc" name="doc" maxLength={40} autoComplete="off" inputMode="numeric" className="input" aria-describedby="doc-help" required={req("document")} />
               <p id="doc-help" className="muted mt-1 text-xs">{t("unannounced.docHelp")}</p>
             </div>
-            <div>
+            <div {...box("plate")}>
               <label className="label" htmlFor="plate">{t("unannounced.plate")}</label>
-              <input id="plate" name="plate" maxLength={16} autoComplete="off" autoCapitalize="characters" className="input uppercase" />
+              <input id="plate" name="plate" maxLength={16} autoComplete="off" autoCapitalize="characters" className="input uppercase" required={req("plate")} />
             </div>
           </div>
+          {hasCustom
+            ? KINDS.map((kind) => {
+                const active = kind === "visit";
+                return (
+                  <div key={kind} data-kind-section={kind} hidden={!active || undefined} data-testid={`kiosk-form-${kind}`}>
+                    <fieldset disabled={!active || undefined} className="space-y-3">
+                      <FormFields elements={forms[kind].form.elements} surface="kiosk" labels={labels} exclude={["signature"]} idPrefix={`${kind}-`} />
+                    </fieldset>
+                  </div>
+                );
+              })
+            : null}
+          <KindFormSwitch selectId="kind" rules={rules} />
           <button type="submit" className="btn-primary w-full">{t("unannounced.submit")}</button>
         </form>
         <section className="card">

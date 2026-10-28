@@ -9,10 +9,14 @@ import { rateLimit } from "@/lib/rateLimit";
 import { clientIp } from "@/lib/auth/session";
 import { Logo } from "@/components/Logo";
 import { RotatingQr } from "@/components/passes/RotatingQr";
-import { loadPolicy, qrPayloadFor } from "@/lib/server/passes";
-import { evaluatePolicy } from "@/lib/policies/evaluate";
+import { qrPayloadFor } from "@/lib/server/passes";
+import { loadPolicyAndForm } from "@/lib/server/forms";
+import { evaluatePolicy, missingDoc } from "@/lib/policies/evaluate";
 import { parseSchedule } from "@/lib/passes/validate";
 import { isOpenForVisitor, TOKEN_RE } from "@/lib/passes/visitor";
+import { FormFields } from "@/components/forms/FormFields";
+import { formLabels } from "@/lib/forms/labels";
+import { builtinMode, elementsFor, hasAnswer, readAnswers, type BuiltinElement } from "@/lib/forms/schema";
 import { acceptNdaAction, preregisterAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -45,19 +49,39 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const tz = pass.site.timezone;
   const now = new Date();
   const open = isOpenForVisitor(pass, now);
-  const policy = await loadPolicy(pass.siteId, pass.kind);
-  const evaluation = evaluatePolicy(policy, { kind: pass.kind, visitorDocHash: pass.visitorDocHash, plate: pass.plate });
-  const needsDoc = evaluation.missing.includes("doc");
+  const { policy, form } = await loadPolicyAndForm(pass.siteId, pass.kind);
+  const answers = readAnswers(pass.extra);
+  const evaluation = evaluatePolicy(policy, {
+    kind: pass.kind,
+    visitorDocHash: pass.visitorDocHash,
+    plate: pass.plate,
+    form: form.elements,
+    surface: "visitor",
+    answers,
+    visitorPhone: pass.visitorPhone,
+    visitorEmail: pass.visitorEmail,
+    company: pass.companyId,
+    ndaAcceptedAt: pass.ndaAcceptedAt,
+  });
+  const needsDoc = missingDoc(evaluation, form.elements);
   const needsNda = evaluation.warnings.includes("nda") && !pass.ndaAcceptedAt;
-  const showPrereg = open && (needsDoc || !pass.visitorDocHash || !pass.visitorPhone);
+  const visitorElements = elementsFor(form.elements, "visitor");
+  const mode = (type: BuiltinElement["type"]) => builtinMode(form.elements, type, "visitor");
+  const signatureElement = visitorElements.find((e) => e.type === "signature") ?? null;
+  const questions = visitorElements.filter((e) => e.type === "question");
+  const unansweredQuestions = questions.some((e) => !hasAnswer(answers[e.id]?.value));
+  const hasVisitorBlocks = visitorElements.some((e) => e.type === "text" || e.type === "media");
+  const showPrereg = open && (needsDoc || (mode("document") !== "off" && !pass.visitorDocHash) || (mode("phone") !== "off" && !pass.visitorPhone) || unansweredQuestions || hasVisitorBlocks);
   const nda = open && needsNda ? await activeNda(pass.siteId) : null;
+  const labels = await formLabels();
+  const mediaHref = (key: string) => `/api/media/${key}?pass=${encodeURIComponent(token)}`;
   const schedule = parseSchedule(pass.schedule);
   const showQr = pass.status === "active" && pass.validUntil > now;
   const qr = showQr ? await qrPayloadFor(pass, now) : null;
   const dataUrl = qr ? await QRCode.toDataURL(qr.payload, { margin: 1, width: 288, errorCorrectionLevel: "M" }) : null;
   const instructions = typeof pass.site.settings === "object" && pass.site.settings && "arrivalInstructions" in pass.site.settings ? String((pass.site.settings as Record<string, unknown>).arrivalInstructions ?? "") : "";
   const okKey = sp.ok === "prereg" ? "prereg" : sp.ok === "nda" ? "nda" : null;
-  const errorKey = sp.error && ["invalid", "rateLimited", "closed"].includes(sp.error) ? sp.error : null;
+  const errorKey = sp.error && ["invalid", "rateLimited", "closed", "missing"].includes(sp.error) ? sp.error : null;
   const statusClass = pass.status === "active" ? "bg-success-bg text-success" : pass.status === "pending_approval" ? "bg-warning-bg text-warning" : "bg-danger-bg text-danger";
 
   return (
@@ -107,26 +131,57 @@ export default async function VisitorPassPage({ params, searchParams }: { params
             <input type="hidden" name="token" value={token} />
             <h2 className="font-medium">{t("prereg.title")}</h2>
             <p className="muted">{t("prereg.intro")}</p>
-            {!pass.visitorDocHash ? (
-              <div>
-                <label className="label" htmlFor="doc">{t("prereg.doc")}</label>
-                <input id="doc" name="doc" required={needsDoc} minLength={5} maxLength={40} className="input" autoComplete="off" inputMode="text" />
-              </div>
-            ) : null}
-            <div>
-              <label className="label" htmlFor="phone">{t("prereg.phone")}</label>
-              <input id="phone" name="phone" type="tel" maxLength={40} className="input" defaultValue={pass.visitorPhone ?? ""} autoComplete="tel" />
-            </div>
-            <div>
-              <label className="label" htmlFor="plate">{t("prereg.plate")}</label>
-              <input id="plate" name="plate" maxLength={20} className="input" defaultValue={pass.plate ?? ""} />
-            </div>
-            {!pass.companyId ? (
-              <div>
-                <label className="label" htmlFor="company">{t("prereg.company")}</label>
-                <input id="company" name="company" maxLength={120} className="input" autoComplete="organization" />
-              </div>
-            ) : null}
+            <FormFields
+              elements={form.elements}
+              surface="visitor"
+              labels={labels}
+              answers={answers}
+              mediaHref={mediaHref}
+              exclude={["signature"]}
+              renderBuiltin={(e) => {
+                const required = e.mode === "required";
+                switch (e.type) {
+                  case "document":
+                    return pass.visitorDocHash ? null : (
+                      <div>
+                        <label className="label" htmlFor="doc">{e.label || t("prereg.doc")}</label>
+                        <input id="doc" name="doc" required={required} minLength={5} maxLength={40} className="input" autoComplete="off" inputMode="text" />
+                        {e.help ? <p className="muted mt-1">{e.help}</p> : null}
+                      </div>
+                    );
+                  case "phone":
+                    return (
+                      <div>
+                        <label className="label" htmlFor="phone">{e.label || t("prereg.phone")}</label>
+                        <input id="phone" name="phone" type="tel" maxLength={40} className="input" defaultValue={pass.visitorPhone ?? ""} autoComplete="tel" required={required && !pass.visitorPhone} />
+                      </div>
+                    );
+                  case "email":
+                    return (
+                      <div>
+                        <label className="label" htmlFor="email">{e.label || t("prereg.email")}</label>
+                        <input id="email" name="email" type="email" maxLength={200} className="input" defaultValue={pass.visitorEmail ?? ""} autoComplete="email" required={required && !pass.visitorEmail} />
+                      </div>
+                    );
+                  case "plate":
+                    return (
+                      <div>
+                        <label className="label" htmlFor="plate">{e.label || t("prereg.plate")}</label>
+                        <input id="plate" name="plate" maxLength={20} className="input" defaultValue={pass.plate ?? ""} required={required && !pass.plate} />
+                      </div>
+                    );
+                  case "company":
+                    return pass.companyId ? null : (
+                      <div>
+                        <label className="label" htmlFor="company">{e.label || t("prereg.company")}</label>
+                        <input id="company" name="company" maxLength={120} className="input" autoComplete="organization" required={required} />
+                      </div>
+                    );
+                  default:
+                    return null;
+                }
+              }}
+            />
             <button type="submit" className="btn-primary w-full">{t("prereg.submit")}</button>
           </form>
         ) : null}
@@ -139,13 +194,18 @@ export default async function VisitorPassPage({ params, searchParams }: { params
             <p className="muted">{t("nda.intro")}</p>
             <h3 className="text-sm font-medium">{nda.title} · v{nda.version}</h3>
             <div className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded bg-surface-2 p-3 text-sm">{nda.body}</div>
+            {nda.attachmentKey ? <a href={mediaHref(nda.attachmentKey)} target="_blank" rel="noreferrer" className="btn-secondary inline-flex text-sm">{t("nda.attachment")}</a> : null}
             <label className="flex items-start gap-2 text-sm">
               <input type="checkbox" name="accept" required className="mt-1" /> {t("nda.accept")}
             </label>
-            <div>
-              <label className="label" htmlFor="name">{t("nda.name")}</label>
-              <input id="name" name="name" required minLength={3} maxLength={120} className="input" autoComplete="name" />
-            </div>
+            {signatureElement ? (
+              <FormFields elements={[signatureElement]} surface="visitor" labels={labels} />
+            ) : (
+              <div>
+                <label className="label" htmlFor="name">{t("nda.name")}</label>
+                <input id="name" name="name" required minLength={3} maxLength={120} className="input" autoComplete="name" />
+              </div>
+            )}
             <button type="submit" className="btn-primary w-full">{t("nda.submit")}</button>
           </form>
         ) : null}
