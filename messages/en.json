@@ -621,7 +621,8 @@
         "window_past": "The validity window has already ended.",
         "schedule": "Pick at least one day and a valid time range.",
         "site": "Choose a site.",
-        "missing_field": "Required sign-in form fields are missing."
+        "missing_field": "Required sign-in form fields are missing.",
+        "pin_group": "A PIN only applies to single passes. For a group, share each member’s link."
       },
       "customFields": "Additional details"
     },

@@ -71,7 +71,7 @@ export async function resetPolicyAction(formData: FormData): Promise<void> {
   if (!KINDS.includes(kind)) redirect(`${back}&error=invalid`);
   const site = await getManagedSite(tenant, siteId);
   if (!site) redirect("/admin/policies?error=invalid");
-  const data = { ...DEFAULT_POLICIES[kind], formTemplateId: null, form: Prisma.DbNull };
+  const data = { ...DEFAULT_POLICIES[kind], formTemplateId: null, form: Prisma.DbNull, enabled: true, autoSignOutAt: null, notifyEmails: [] as string[], autoPrintBadge: false };
   const policy = await db.visitPolicy.upsert({ where: { siteId_kind: { siteId: site.id, kind } }, create: { siteId: site.id, kind, ...data }, update: data });
   await audit({ action: "policy.changed", siteId: site.id, actorId: tenant.user.id, targetType: "VisitPolicy", targetId: policy.id, meta: { kind, reset: true } });
   redirect(`${back}&ok=reset#policy-${kind}`);

@@ -1,5 +1,5 @@
 import type { MembershipRole, VisitKind } from "@prisma/client";
-import { elementsFor, hasAnswer, isBuiltin, isRequired, type Answers, type BuiltinType, type FormElement, type FormSurface } from "@/lib/forms/schema";
+import { elementsFor, hasAnswer, isBuiltin, isRequired, type Answers, type BuiltinType, type FormElement, type FormSurface, builtinCollectableOn } from "@/lib/forms/schema";
 
 export type PolicyInput = {
   kind: VisitKind;
@@ -120,6 +120,7 @@ export function missingFormFields(form: FormElement[], surface: FormSurface, dra
   for (const e of elementsFor(form, surface)) {
     if (!isRequired(e)) continue;
     if (isBuiltin(e)) {
+      if (!builtinCollectableOn(e.type, surface)) continue;
       if (!builtinFilled(e.type, draft)) out.push(e.id);
     } else if (e.type === "question") {
       if (!hasAnswer(answers[e.id]?.value)) out.push(e.id);

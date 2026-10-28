@@ -90,7 +90,9 @@ Full brief: `docs/PLAN.md`.
   static/rotating QR, pre-registration and NDA; kiosk scanner, unannounced visits, inside/evacuation lists, offline
   queue; notification channels (push, Teams, email) + in-app list + quiet hours + cron escalation; shift log and
   reports with CSV. ⏳ production pilot feedback, Entra sign-in test with real tenant, SPN agent on the file server.
-- Phase 2 · badges (Zebra ZP450, `docs/BADGES.md`), VPASS-inspired additions (`docs/REFERENCE_VPASS.md`: auto sign-out,
-  auto-print, extra fields per kind, gate QR self sign-in, manual sign-in from admin, quick date filters, search),
-  recurring/carrier/delivery polish, shifts, PDF, AirlinkCast.
+- Phase 2 ✅ merged into `develop` (slices F–I, see `docs/PHASE2_SLICES.md`): Zebra ZP450 badges (`docs/BADGES.md`,
+  print agent, kiosk photo), HR visual form editor (`/admin/forms`, `FormTemplate`, policy forms per kind/surface),
+  people directory (`/admin/people`: roles incl. `warden`, employee PINs, frequent visitors, presence), visit ops
+  (auto sign-out, auto-print, gate QR self sign-in, manual sign-in, quick date filters, search, policy toggles).
+  ⏳ per-gate print secret, drag-and-drop ordering in the form editor, NDA attachment admin UI, AirlinkCast, PDF.
 - Phase 3 · AI doc/plate reading, access hardware, self-service kiosk.

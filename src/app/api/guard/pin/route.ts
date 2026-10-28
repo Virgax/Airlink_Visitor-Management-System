@@ -9,7 +9,7 @@ import { kioskRoute } from "@/lib/guard/route";
 import { policyFlags } from "@/lib/guard/decide";
 import type { ScanResponse } from "@/lib/guard/types";
 import { validatePassState } from "@/lib/passes/validate";
-import { isPassPin, matchPin, normalizePin, pinCandidates, type PinCandidate } from "@/lib/people/pin";
+import { isPassPin, matchPins, normalizePin, pinCandidates, type PinCandidate } from "@/lib/people/pin";
 import { enterWithPass, findBlacklistHit, findOpenVisit, loadPass, passInfo, reportBlacklistHit } from "@/lib/server/scan";
 import { checkoutVisit, visitJson } from "@/lib/server/visits";
 import { log } from "@/lib/log";
@@ -53,7 +53,18 @@ export async function POST(request: NextRequest): Promise<Response> {
       ...frequent.filter((f) => f.pass).map((f) => ({ passId: f.pass!.id, pinHash: f.pinHash!, siteId: f.pass!.siteId, status: f.pass!.status, validFrom: f.pass!.validFrom, validUntil: f.pass!.validUntil, schedule: f.pass!.schedule ?? undefined, visitorName: f.pass!.visitorName, source: "frequent" as const })),
     ];
     const candidates = pinCandidates(rows, { siteId: site.id, timeZone: site.timezone, now, name: parsed.data.name });
-    const match = await matchPin(pin, candidates, verifyPassword);
+    // Several passes can verify the same PIN (e.g. a frequent visitor's pass and a host pass): prefer the one
+    // without an open visit so a second person never checks the first one out.
+    const matches = await matchPins(pin, candidates, verifyPassword);
+    let match = matches[0] ?? null;
+    if (matches.length > 1) {
+      for (const m of matches) {
+        if (!(await findOpenVisit(m.passId, site.id))) {
+          match = m;
+          break;
+        }
+      }
+    }
     if (!match) {
       await audit({ action: "visit.denied", siteId: site.id, actorId: user.id, meta: { reason: "pin_not_found", gateId: gate.id, candidates: candidates.length } });
       log.info("guard.pin_denied", { reason: "not_found", deviceId: device.id, candidates: candidates.length });

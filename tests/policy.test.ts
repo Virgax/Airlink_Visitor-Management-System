@@ -59,3 +59,20 @@ describe("evaluatePolicy with a sign-in form", () => {
     expect(evaluatePolicy(null, { kind: "carrier" }).missing).toEqual(["doc", "plate"]);
   });
 });
+
+describe("missingFormFields per surface", () => {
+  it("ignores required built-ins a surface cannot collect", async () => {
+    const { missingFormFields } = await import("@/lib/policies/evaluate");
+    const form: FormElement[] = [
+      { id: "e", type: "email", mode: "required", showOn: ["host", "visitor", "kiosk"], onBadge: false },
+      { id: "a", type: "areas", mode: "required", showOn: ["host", "visitor", "kiosk"], onBadge: false },
+      { id: "d", type: "document", mode: "required", showOn: ["host", "visitor", "kiosk"], onBadge: false },
+    ];
+    // Kiosk walk-in has no e-mail or area pickers: only the document is enforced there.
+    expect(missingFormFields(form, "kiosk", { kind: "vendor", form })).toEqual(["d"]);
+    // The visitor link collects e-mail and document but cannot pick areas.
+    expect(missingFormFields(form, "visitor", { kind: "vendor", form })).toEqual(["e", "d"]);
+    // The host form enforces all three.
+    expect(missingFormFields(form, "host", { kind: "vendor", form })).toEqual(["e", "a", "d"]);
+  });
+});

@@ -621,7 +621,8 @@
         "window_past": "La vigencia ya terminó.",
         "schedule": "Elige al menos un día y un horario válido.",
         "site": "Elige un sitio.",
-        "missing_field": "Faltan campos obligatorios del formulario de registro."
+        "missing_field": "Faltan campos obligatorios del formulario de registro.",
+        "pin_group": "El PIN solo aplica a pases individuales. Para un grupo, comparte el enlace de cada integrante."
       },
       "customFields": "Datos adicionales"
     },

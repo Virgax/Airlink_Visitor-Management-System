@@ -91,12 +91,12 @@ async function api(cfg, method, pathWithQuery) {
 }
 
 /** Windows: `copy /b <file> \\localhost\<share>` sends the bytes untouched to a printer shared with RAW datatype. */
-function printViaShare(share, zpl) {
-  return new Promise(async (resolve, reject) => {
-    const dir = await mkdtemp(join(tmpdir(), "visitas-badge-"));
-    const file = join(dir, "badge.zpl");
-    await writeFile(file, zpl, "utf8");
-    const target = share.includes("\\") ? share : `\\\\localhost\\${share}`;
+async function printViaShare(share, zpl) {
+  const dir = await mkdtemp(join(tmpdir(), "visitas-badge-"));
+  const file = join(dir, "badge.zpl");
+  await writeFile(file, zpl, "utf8");
+  const target = share.includes("\\") ? share : `\\\\localhost\\${share}`;
+  return new Promise((resolve, reject) => {
     execFile("cmd.exe", ["/c", "copy", "/b", file, target], { windowsHide: true }, (err, stdout, stderr) => {
       rm(dir, { recursive: true, force: true }).catch(() => undefined);
       if (err) reject(new Error(`copy /b failed: ${stderr || stdout || err.message}`));

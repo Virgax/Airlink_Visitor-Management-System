@@ -91,6 +91,8 @@ test("people screen: add a warden with PIN, inline role toggle, tabs, search and
   await page.getByRole("button", { name: "Agregar persona" }).click();
   await expect(page.locator("[role=status]")).toContainText("Persona agregada");
 
+  // Search for the new person (the directory paginates at 25, so the row may not be on the first page).
+  await page.goto(`/admin/people?q=${encodeURIComponent(String(stamp))}`);
   const row = page.getByTestId("person-row").filter({ hasText: name });
   await expect(row).toHaveCount(1);
   await expect(row.locator("[data-role=warden]")).toHaveAttribute("data-on", "1");

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { ArrowDown, ArrowUp, Eye, Plus, Save, Trash2, Upload } from "lucide-react";
 import { Icon } from "@/components/Icon";
 import { FormFields, type FormLabels } from "@/components/forms/FormFields";
-import { BUILTIN_TYPES, CUSTOM_TYPES, formElementsSchema, isBuiltin, newElementId, SURFACES, withDefaultBuiltins, type BuiltinElement, type ElementType, type FormElement, type FormSurface } from "@/lib/forms/schema";
+import { BUILTIN_TYPES, CUSTOM_TYPES, formElementsSchema, isBuiltin, newElementId, SURFACES, withDefaultBuiltins, type BuiltinElement, type ElementType, type FormElement, type FormSurface, BUILTIN_SURFACES } from "@/lib/forms/schema";
 import type { UploadResult } from "@/app/admin/forms/actions";
 
 type Template = { id: string; name: string; elements: FormElement[] };
@@ -25,7 +25,7 @@ function makeElement(type: ElementType, existing: FormElement[]): FormElement {
     case "question": return { ...base, type, questionType: "text", options: [], required: false, showOn: ["host", "visitor", "kiosk"] };
     case "media": return { ...base, type };
     case "signature": return { ...base, type, required: true, showOn: ["visitor"] };
-    default: return { ...base, type, mode: "optional" };
+    default: return { ...base, type, mode: "optional", showOn: [...BUILTIN_SURFACES[type]] };
   }
 }
 

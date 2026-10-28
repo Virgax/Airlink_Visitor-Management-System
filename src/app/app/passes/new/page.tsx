@@ -17,7 +17,7 @@ import { loadFormsForSite } from "@/lib/server/forms";
 import { createPassAction, searchFrequentAction } from "../actions";
 
 type Search = { siteId?: string; from?: string; error?: string; frequent?: string };
-const ERRORS = ["invalid", "missing_doc", "missing_plate", "gate_not_allowed", "company_blocked", "window_order", "window_too_long", "window_past", "schedule", "site", "missing_field"];
+const ERRORS = ["invalid", "missing_doc", "missing_plate", "gate_not_allowed", "company_blocked", "window_order", "window_too_long", "window_past", "schedule", "site", "missing_field", "pin_group"];
 const WEEK = [1, 2, 3, 4, 5, 6, 0];
 
 export default async function NewPassPage({ searchParams }: { searchParams: Promise<Search> }) {

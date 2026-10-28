@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Prisma, type MembershipRole } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { assertSiteAllowed, getMembershipOrThrow, type Tenant } from "@/lib/auth/guards";
+import { assertSiteAllowed, getMembershipOrThrow, type Tenant, AuthError } from "@/lib/auth/guards";
 import { hashPassword } from "@/lib/auth/password";
 import { audit } from "@/lib/audit";
 import { isEmployeePin, isWeakPin, normalizePin } from "@/lib/people/pin";
@@ -58,11 +58,13 @@ export async function addPersonAction(formData: FormData): Promise<void> {
     await audit({ action: "employee.changed", siteId, actorId: tenant.user.id, targetType: "Employee", targetId: employee.id, meta: { op: "created", via: "people" } });
     if (pinHash) await audit({ action: "employee.pin_set", siteId, actorId: tenant.user.id, targetType: "Employee", targetId: employee.id });
     if (roles.length && email) {
-      const user = await db.user.upsert({
-        where: { email },
-        create: { email, name, employeeId: employee.id, ...(pinHash ? { pinHash } : {}) },
-        update: { employeeId: employee.id, ...(pinHash ? { pinHash } : {}) },
-      });
+      // Never re-link or re-key an existing account from here (that would let a site admin take over any user).
+      const taken = await db.user.findUnique({ where: { email }, select: { id: true } });
+      if (taken) {
+        await db.employee.delete({ where: { id: employee.id } }).catch(() => undefined);
+        redirect(back(formData, { error: "exists" }));
+      }
+      const user = await db.user.create({ data: { email, name, employeeId: employee.id, ...(pinHash ? { pinHash } : {}) } });
       for (const role of roles) {
         const existing = await db.membership.findFirst({ where: { userId: user.id, role, siteId } });
         if (existing) continue;
@@ -87,11 +89,28 @@ async function loadRow(tenant: Tenant, formData: FormData): Promise<Row> {
     const e = await db.employee.findUnique({ where: { id: key.id }, select: { id: true, email: true, name: true, siteId: true, user: { select: { id: true } } } });
     if (!e) redirect(back(formData, { error: "invalid" }));
     if (e.siteId) assertSiteAllowed(tenant, e.siteId);
+    if (e.user) await assertUserManageable(tenant, e.user.id);
     return { employeeId: e.id, userId: e.user?.id ?? null, email: e.email, name: e.name, siteId: e.siteId };
   }
   const u = await db.user.findUnique({ where: { id: key.id }, select: { id: true, email: true, name: true, employeeId: true } });
   if (!u) redirect(back(formData, { error: "invalid" }));
+  await assertUserManageable(tenant, u.id);
   return { employeeId: u.employeeId, userId: u.id, email: u.email, name: u.name, siteId: null };
+}
+
+/**
+ * A site-bound admin may only act on users whose memberships all fall inside their own sites: company-wide
+ * memberships (siteId null) and memberships of other sites are out of reach, so they cannot disable, re-link
+ * or re-PIN a company-wide admin from the Personas screen.
+ */
+async function assertUserManageable(tenant: Tenant, userId: string): Promise<void> {
+  if (tenant.membership.siteId === null) return;
+  const allowed = new Set(tenant.sites.map((s) => s.id));
+  const outside = await db.membership.findFirst({
+    where: { userId, OR: [{ siteId: null }, { siteId: { notIn: [...allowed] } }] },
+    select: { id: true },
+  });
+  if (outside) throw new AuthError("forbidden");
 }
 
 /** Inline role chip: adds the membership for the admin's active site (or every site), or disables/re-enables it. */

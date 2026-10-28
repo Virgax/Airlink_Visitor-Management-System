@@ -176,3 +176,17 @@ describe("editor helpers", () => {
     expect(parseHelp("")).toEqual([]);
   });
 });
+
+describe("built-in surface rules", () => {
+  it("rejects name/host built-ins switched off", () => {
+    const r = formElementsSchema.safeParse([{ id: "b1", type: "name", mode: "off", showOn: ["host"], onBadge: false }]);
+    expect(r.success).toBe(false);
+  });
+
+  it("lists the surfaces that can collect each built-in", async () => {
+    const { BUILTIN_SURFACES, builtinCollectableOn } = await import("@/lib/forms/schema");
+    expect(BUILTIN_SURFACES.email).not.toContain("kiosk");
+    expect(builtinCollectableOn("areas", "visitor")).toBe(false);
+    expect(builtinCollectableOn("document", "kiosk")).toBe(true);
+  });
+});

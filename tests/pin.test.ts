@@ -105,3 +105,17 @@ describe("matchPin", () => {
     expect(await matchPin("111222", [], verifyPassword)).toBeNull();
   });
 });
+
+describe("matchPins", () => {
+  it("returns every candidate that verifies", async () => {
+    const { matchPins } = await import("@/lib/people/pin");
+    const h = await hashPassword("555666");
+    const other = await hashPassword("999999");
+    const candidates = [
+      { passId: "a", pinHash: h },
+      { passId: "b", pinHash: other },
+      { passId: "c", pinHash: h },
+    ];
+    expect((await matchPins("555666", candidates, verifyPassword)).map((c) => c.passId)).toEqual(["a", "c"]);
+  });
+});

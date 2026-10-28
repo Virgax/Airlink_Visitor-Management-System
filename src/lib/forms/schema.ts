@@ -36,7 +36,31 @@ const onBadge = z.boolean().default(false);
 
 const base = { id, label, help, showOn, onBadge };
 
-export const builtinElementSchema = z.object({ ...base, type: z.enum(BUILTIN_TYPES), mode: z.enum(MODES).default("optional") });
+export const builtinElementSchema = z
+  .object({ ...base, type: z.enum(BUILTIN_TYPES), mode: z.enum(MODES).default("optional") })
+  .refine((e) => !((e.type === "name" || e.type === "host") && e.mode === "off"), { message: "builtin_required_surface", path: ["mode"] });
+
+/**
+ * Surfaces that can actually collect each built-in. A required built-in outside this list is ignored on that
+ * surface (the kiosk walk-in form has no e-mail box, the visitor link cannot pick areas), so an HR template can
+ * never make a form impossible to submit.
+ */
+export const BUILTIN_SURFACES: Record<BuiltinType, readonly FormSurface[]> = {
+  photo: ["kiosk"],
+  document: ["host", "visitor", "kiosk"],
+  name: ["host", "kiosk"],
+  phone: ["host", "visitor"],
+  email: ["host", "visitor"],
+  company: ["host", "visitor", "kiosk"],
+  plate: ["host", "visitor", "kiosk"],
+  areas: ["host"],
+  host: ["host", "kiosk"],
+  escort: ["host"],
+};
+
+export function builtinCollectableOn(type: BuiltinType, surface: FormSurface): boolean {
+  return BUILTIN_SURFACES[type].includes(surface);
+}
 export const textElementSchema = z.object({ ...base, type: z.literal("text") });
 export const questionElementSchema = z
   .object({

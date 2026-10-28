@@ -71,3 +71,9 @@ and, when the kiosk has a camera, a quick black-and-white photo taken on site.
 
 ## Open points for Jaime
 - Photo consent text to add to the visitor policy (NDA v1.1).
+
+## Pendiente (follow-up)
+
+- **Secreto de impresión por puerta.** Hoy todos los agentes de impresión comparten `PRINT_AGENT_SECRET`; un agente
+  comprometido en una puerta podría aceptar trabajos de cualquier otra. Pendiente: `Gate.printSecretHash` emitido desde
+  `/admin/gates` (rotable), y que el agente se identifique con `gateId` + HMAC con su propio secreto.

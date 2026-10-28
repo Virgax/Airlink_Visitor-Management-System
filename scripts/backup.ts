@@ -5,13 +5,14 @@
  * Every step logs a line and the whole run has a hard timeout so a stuck run never blocks the next one.
  */
 import { spawn } from "node:child_process";
-import { createReadStream, statSync } from "node:fs";
-import { mkdtemp, rm } from "node:fs/promises";
+import { statSync } from "node:fs";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 
-const RETENTION_DAYS = Number(process.env.BACKUP_RETENTION_DAYS ?? 30);
+const retentionRaw = Number.parseInt(process.env.BACKUP_RETENTION_DAYS || "30", 10);
+const RETENTION_DAYS = Number.isFinite(retentionRaw) && retentionRaw >= 1 ? retentionRaw : 30;
 const RUN_TIMEOUT_MS = Number(process.env.BACKUP_TIMEOUT_MS ?? 20 * 60_000);
 const PREFIX = "backups/";
 
@@ -62,7 +63,9 @@ async function main(): Promise<void> {
     await dumpToFile(databaseUrl, file);
     const size = statSync(file).size;
     log(`uploading ${key} (${size} bytes) to ${bucket} at ${endpoint}`);
-    await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: createReadStream(file), ContentLength: size, ContentType: "application/octet-stream" }));
+    // A Buffer body can be retried by the SDK (a file stream cannot be rewound after a partial send).
+    const body = await readFile(file);
+    await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentLength: size, ContentType: "application/octet-stream" }));
     log(`uploaded ${key}`);
   } finally {
     await rm(dir, { recursive: true, force: true });
@@ -70,7 +73,7 @@ async function main(): Promise<void> {
 
   const cutoff = Date.now() - RETENTION_DAYS * 86_400_000;
   const list = await s3.send(new ListObjectsV2Command({ Bucket: bucket, Prefix: PREFIX }));
-  const old = (list.Contents ?? []).filter((o) => o.Key && o.LastModified && o.LastModified.getTime() < cutoff);
+  const old = (list.Contents ?? []).filter((o) => o.Key && o.Key !== key && o.LastModified && o.LastModified.getTime() < cutoff);
   if (old.length > 0) {
     await s3.send(new DeleteObjectsCommand({ Bucket: bucket, Delete: { Objects: old.map((o) => ({ Key: o.Key! })) } }));
     log(`deleted ${old.length} backups older than ${RETENTION_DAYS} days`);

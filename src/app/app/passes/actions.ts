@@ -96,6 +96,8 @@ export async function createPassAction(formData: FormData): Promise<void> {
 
   // A frequent visitor picked in the form: copy the hashed document (never re-typed) when no document was given.
   const frequent = d.frequentId ? await db.frequentVisitor.findFirst({ where: { id: d.frequentId, siteId: site.id, active: true }, select: { docHash: true, docLast4: true } }) : null;
+  const groupSizeForPin = parseGroupSize(d.groupSize);
+  if (d.generatePin === "on" && groupSizeForPin > 1) redirect(`/app/passes/new?error=pin_group`);
   const pin = d.generatePin === "on" ? generatePin() : null;
 
   const result = await createPass({

@@ -80,3 +80,12 @@ export async function matchPin<T extends { pinHash: string }>(pin: string, candi
   }
   return null;
 }
+
+/** Every candidate whose hash verifies (several passes may share a PIN; the caller picks the right one). */
+export async function matchPins<T extends { pinHash: string }>(pin: string, candidates: T[], verify: (pin: string, hash: string) => Promise<boolean>): Promise<T[]> {
+  const out: T[] = [];
+  for (const c of candidates) {
+    if (await verify(pin, c.pinHash)) out.push(c);
+  }
+  return out;
+}
