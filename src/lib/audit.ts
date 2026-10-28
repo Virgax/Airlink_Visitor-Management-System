@@ -17,6 +17,7 @@ export type AuditAction =
   | "gate.changed"
   | "area.changed"
   | "policy.changed"
+  | "form.changed"
   | "company.changed"
   | "employee.changed"
   | "member.added"

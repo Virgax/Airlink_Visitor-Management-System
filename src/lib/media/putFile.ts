@@ -10,8 +10,12 @@ import { log } from "@/lib/log";
  */
 
 export type ImageType = "image/png" | "image/jpeg";
+export type MediaType = ImageType | "application/pdf";
 
-const EXT: Record<ImageType, string> = { "image/png": "png", "image/jpeg": "jpg" };
+const EXT: Record<MediaType, string> = { "image/png": "png", "image/jpeg": "jpg", "application/pdf": "pdf" };
+
+/** Media kinds (second path segment). `forms` = HR template media, `nda` = drawn NDA signatures. */
+export type MediaKind = "visits" | "shiftlogs" | "forms" | "nda";
 
 /** Content type from the first bytes, or null when the bytes are not a PNG/JPEG. */
 export function sniffImage(bytes: Uint8Array): ImageType | null {
@@ -20,7 +24,17 @@ export function sniffImage(bytes: Uint8Array): ImageType | null {
   return null;
 }
 
-export function extensionFor(type: ImageType): string {
+/** PDF by magic bytes (`%PDF-`). */
+export function sniffPdf(bytes: Uint8Array): boolean {
+  return bytes.length >= 5 && bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46 && bytes[4] === 0x2d;
+}
+
+/** Image or PDF content type from the first bytes, or null. */
+export function sniffMedia(bytes: Uint8Array): MediaType | null {
+  return sniffImage(bytes) ?? (sniffPdf(bytes) ? "application/pdf" : null);
+}
+
+export function extensionFor(type: MediaType): string {
   return EXT[type];
 }
 
@@ -44,14 +58,22 @@ function s3(): S3Client {
 }
 
 /** Key for a media object; `siteId` is the first path segment after `s/` and is what the media route authorizes on. */
-export function mediaKey(siteId: string, kind: "visits" | "shiftlogs", id: string, type: ImageType): string {
+export function mediaKey(siteId: string, kind: MediaKind, id: string, type: MediaType): string {
   return `s/${siteId}/${kind}/${id}.${extensionFor(type)}`;
 }
 
-/** Site id encoded in a media key, or null for a malformed key. */
+const KEY_RE = /^s\/([A-Za-z0-9_-]+)\/(visits|shiftlogs|forms|nda)\/[A-Za-z0-9_-]+\.(png|jpg|pdf)$/;
+
+/** Site id encoded in a media key, or null for a malformed key. `all` is the site of shared form templates. */
 export function siteIdFromKey(key: string): string | null {
-  const m = /^s\/([A-Za-z0-9_-]+)\/(visits|shiftlogs)\/[A-Za-z0-9_-]+\.(png|jpg)$/.exec(key);
+  const m = KEY_RE.exec(key);
   return m?.[1] ?? null;
+}
+
+/** Media kind encoded in a key, or null for a malformed key. */
+export function kindFromKey(key: string): MediaKind | null {
+  const m = KEY_RE.exec(key);
+  return (m?.[2] as MediaKind | undefined) ?? null;
 }
 
 /** Stores bytes under `key`. Throws when the bucket is not configured; callers check `mediaConfigured()` first. */
@@ -69,6 +91,13 @@ export async function putFile(key: string, body: Uint8Array, contentType: ImageT
   const clean = await reencodeImage(body, contentType);
   await s3().send(new PutObjectCommand({ Bucket: e.S3_BUCKET, Key: key, Body: clean, ContentType: contentType, CacheControl: "private, max-age=0" }));
   log.info("media.put", { key, bytes: clean.byteLength });
+}
+
+/** Stores a PDF as-is (sniffed by the caller). Only form media and NDA attachments use this. */
+export async function putPdf(key: string, body: Uint8Array): Promise<void> {
+  const e = env();
+  await s3().send(new PutObjectCommand({ Bucket: e.S3_BUCKET, Key: key, Body: body, ContentType: "application/pdf", CacheControl: "private, max-age=0" }));
+  log.info("media.put", { key, bytes: body.byteLength });
 }
 
 /** Reads an object; null when it does not exist. */
