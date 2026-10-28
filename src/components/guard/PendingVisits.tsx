@@ -4,7 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check, LogIn, X } from "lucide-react";
 import { Icon } from "@/components/Icon";
+import { BadgePanel } from "@/components/guard/BadgePanel";
+import type { KioskBadgeConfig } from "@/lib/badges/config";
 import { fmtDate } from "@/lib/format";
+import type { BadgeInfo } from "@/lib/guard/types";
 import type { VisitJson } from "@/lib/server/visits";
 
 const POLL_MS = 4_000;
@@ -12,11 +15,12 @@ const POLL_MS = 4_000;
 type Action = "approve_in_person" | "deny" | "enter";
 
 /** Unannounced visits waiting at the gate, polled every 4 s, with the guard's override buttons. */
-export function PendingVisits({ initial, locale, timeZone }: { initial: VisitJson[]; locale: string; timeZone: string }) {
+export function PendingVisits({ initial, locale, timeZone, badgeConfig }: { initial: VisitJson[]; locale: string; timeZone: string; badgeConfig: KioskBadgeConfig }) {
   const t = useTranslations("guard");
   const [visits, setVisits] = useState<VisitJson[]>(initial);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState(false);
+  const [badge, setBadge] = useState<BadgeInfo | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -44,15 +48,30 @@ export function PendingVisits({ initial, locale, timeZone }: { initial: VisitJso
     try {
       const res = await fetch("/api/guard/visits", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ visitId, action }) });
       if (!res.ok) setError(true);
+      else {
+        const data = (await res.json().catch(() => null)) as { badge?: BadgeInfo } | null;
+        if (data?.badge) setBadge(data.badge);
+      }
       await refresh();
     } finally {
       setBusy(null);
     }
   };
 
-  if (visits.length === 0) return <p className="muted" data-testid="pending-empty">{t("unannounced.empty")}</p>;
+  const badgePanel = badge ? <BadgePanel key={badge.visitId} visitId={badge.visitId} config={badgeConfig} autoPrint={badge.autoPrint} onDone={() => setBadge(null)} /> : null;
+
+  if (visits.length === 0) {
+    return (
+      <div className="space-y-3">
+        {badgePanel}
+        <p className="muted" data-testid="pending-empty">{t("unannounced.empty")}</p>
+      </div>
+    );
+  }
 
   return (
+    <div className="space-y-3">
+    {badgePanel}
     <ul className="space-y-3" data-testid="pending-list">
       {error ? <li className="alert-error">{t("reasons.network")}</li> : null}
       {visits.map((v) => (
@@ -86,5 +105,6 @@ export function PendingVisits({ initial, locale, timeZone }: { initial: VisitJso
         </li>
       ))}
     </ul>
+    </div>
   );
 }

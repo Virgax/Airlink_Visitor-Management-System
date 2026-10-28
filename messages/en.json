@@ -430,7 +430,8 @@
       "not_found": "We could not find this pass.",
       "rate_limited": "Too many scans. Wait a moment.",
       "invalid_body": "Invalid request.",
-      "network": "No connection to the server."
+      "network": "No connection to the server.",
+      "visit_closed": "This badge already recorded the exit."
     },
     "warnings": {
       "escort": "Escort required",
@@ -1278,6 +1279,62 @@
       "company": "Company",
       "gate": "Gate",
       "since": "Since"
+    }
+  },
+  "badges": {
+    "label": {
+      "host": "Host",
+      "entry": "Entry",
+      "badge": "Badge",
+      "doc": "ID"
+    },
+    "warnings": {
+      "escort": "Escorted",
+      "nda": "NDA",
+      "receptionOnly": "Reception only",
+      "noBadge": "No badge"
+    },
+    "templates": {
+      "landscape_photo": "Landscape with photo",
+      "landscape": "Landscape without photo"
+    },
+    "printerKinds": {
+      "none": "No printer (download ZPL)",
+      "agent": "Print agent (USB on the reception PC)",
+      "browser": "Zebra Browser Print"
+    },
+    "admin": {
+      "template": "Badge template",
+      "printer": "Printer",
+      "printerName": "Shared printer / device",
+      "savePrinter": "Save printer",
+      "printerSaved": "Printer saved.",
+      "autoPrintBadge": "Print badge automatically"
+    },
+    "panel": {
+      "title": "Badge",
+      "reprintTitle": "Reprint badge",
+      "loading": "Preparing the badge…",
+      "loadError": "The badge could not be prepared.",
+      "photoIntro": "Take a quick photo for the badge or continue without one.",
+      "take": "Take photo",
+      "retake": "Retake photo",
+      "addPhoto": "Add photo",
+      "skip": "No photo",
+      "cameraUnavailable": "The camera could not be used. Continue without a photo.",
+      "photoNotStored": "The photo was not stored; the badge prints without it.",
+      "print": "Print badge",
+      "printAgain": "Print again",
+      "printing": "Printing…",
+      "sent": "Badge sent to the printer.",
+      "downloaded": "No printer configured on this gate: the ZPL file was downloaded.",
+      "browserError": "Could not reach Zebra Browser Print on this computer.",
+      "agentError": "Could not queue the print job. Check the gate's printer.",
+      "printError": "Printing failed. Try again.",
+      "autoPrinted": "Printed automatically per policy.",
+      "noPrinter": "This gate has no printer assigned: the ZPL file is downloaded to send it to the Zebra.",
+      "done": "Done",
+      "reprint": "Reprint badge"
     }
   }
 }

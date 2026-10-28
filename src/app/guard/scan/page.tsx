@@ -3,6 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { KioskBar } from "@/components/guard/KioskBar";
 import { Scanner } from "@/components/guard/Scanner";
 import { requireKiosk } from "@/lib/auth/kiosk";
+import { kioskBadgeConfig } from "@/lib/server/badges";
 
 export default async function GuardScanPage() {
   const { user, site, gate } = await requireKiosk();
@@ -12,7 +13,7 @@ export default async function GuardScanPage() {
     <AppShell user={user} kiosk subtitle={`${site.name} · ${gate.name}`}>
       <KioskBar title={t("title")} />
       <p className="muted mb-4">{t("intro")} {t("hint")}</p>
-      <Scanner locale={locale} timeZone={site.timezone} />
+      <Scanner locale={locale} timeZone={site.timezone} badgeConfig={kioskBadgeConfig(site, gate)} />
     </AppShell>
   );
 }

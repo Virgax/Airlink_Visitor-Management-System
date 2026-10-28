@@ -1,5 +1,5 @@
 import "server-only";
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { env } from "@/lib/env";
 import { log } from "@/lib/log";
 
@@ -48,9 +48,14 @@ export function mediaKey(siteId: string, kind: "visits" | "shiftlogs", id: strin
   return `s/${siteId}/${kind}/${id}.${extensionFor(type)}`;
 }
 
-/** Site id encoded in a media key, or null for a malformed key. */
+/** Key of the badge photo taken at the kiosk (1-bit PNG, 160 × 200). */
+export function badgePhotoKey(siteId: string, visitId: string): string {
+  return `s/${siteId}/visits/${visitId}/badge.png`;
+}
+
+/** Site id encoded in a media key, or null for a malformed key (print jobs are never served by /api/media). */
 export function siteIdFromKey(key: string): string | null {
-  const m = /^s\/([A-Za-z0-9_-]+)\/(visits|shiftlogs)\/[A-Za-z0-9_-]+\.(png|jpg)$/.exec(key);
+  const m = /^s\/([A-Za-z0-9_-]+)\/(visits|shiftlogs)\/[A-Za-z0-9_-]+(?:\/badge)?\.(png|jpg)$/.exec(key);
   return m?.[1] ?? null;
 }
 
@@ -83,4 +88,32 @@ export async function getFile(key: string): Promise<{ body: ReadableStream; cont
     if (name === "NoSuchKey" || name === "NotFound") return null;
     throw err;
   }
+}
+
+/** Whole object as bytes; null when it does not exist. */
+export async function getFileBytes(key: string): Promise<Uint8Array | null> {
+  const file = await getFile(key);
+  if (!file) return null;
+  return new Uint8Array(await new Response(file.body).arrayBuffer());
+}
+
+/** Stores a small non-image object as is (print jobs); images go through `putFile`. */
+export async function putObject(key: string, body: Uint8Array | string, contentType: string): Promise<void> {
+  const e = env();
+  await s3().send(new PutObjectCommand({ Bucket: e.S3_BUCKET, Key: key, Body: body, ContentType: contentType, CacheControl: "private, max-age=0" }));
+}
+
+/** Keys under a prefix, oldest first, capped at `max`. */
+export async function listObjects(prefix: string, max = 50): Promise<Array<{ key: string; lastModified: Date | null }>> {
+  const e = env();
+  const res = await s3().send(new ListObjectsV2Command({ Bucket: e.S3_BUCKET, Prefix: prefix, MaxKeys: Math.min(max, 1000) }));
+  return (res.Contents ?? [])
+    .filter((o): o is typeof o & { Key: string } => typeof o.Key === "string")
+    .map((o) => ({ key: o.Key, lastModified: o.LastModified ?? null }))
+    .sort((a, b) => (a.lastModified?.getTime() ?? 0) - (b.lastModified?.getTime() ?? 0));
+}
+
+export async function deleteObject(key: string): Promise<void> {
+  const e = env();
+  await s3().send(new DeleteObjectCommand({ Bucket: e.S3_BUCKET, Key: key }));
 }

@@ -35,15 +35,31 @@ and, when the kiosk has a camera, a quick black-and-white photo taken on site.
 - Badge number `Visit.badgeNo` = `<gate code>-<daily sequence>` (e.g. `A2-0042`), reset per site per day.
 
 ## Code map (slice `feat/badges-zebra`)
-- `src/lib/badges/zpl.ts`: pure `renderBadgeZpl(badge: BadgeData): string` (snapshot-tested, no DB), plus
-  `bitmapToGfa(bits, width, height)`.
-- `src/lib/badges/dither.ts`: client-side grayscale + Floyd–Steinberg to a 1-bit array (unit-tested on small inputs).
-- `src/app/api/guard/badges/[visitId]/zpl/route.ts`: kiosk session, re-checks site, returns `text/plain` ZPL.
-- `tools/print-agent/`: Node script on the reception PC: polls `/api/print/jobs` (HMAC) or receives a local POST from
-  the kiosk page, writes raw ZPL to the printer (USB raw / `\\.\USB001` on Windows or TCP 9100).
-- Kiosk: after a green scan or an in-person approval, "Imprimir gafete" button with a preview rendered from the same
-  `BadgeData` (HTML, same layout) and the optional photo capture step.
-- Reprint from `/guard/inside` (audited `badge.reprinted`).
+- `src/lib/badges/zpl.ts`: pure `renderBadgeZpl(data, template)` for `landscape_photo` | `landscape` (snapshot-tested,
+  no DB), `bitmapToGfa(bits, width, height)`, `zplText` (control chars stripped, lengths capped). Labels arrive
+  translated in `BadgeData.labels` (namespace `badges.label`).
+- `src/lib/badges/dither.ts`: grayscale + Floyd–Steinberg → packed 1-bit (MSB first, 1 = black); runs in the kiosk
+  browser and in `tests/dither.test.ts`. `src/lib/badges/photo.ts` decodes the stored PNG back to bits (sharp).
+- `src/lib/badges/visitQr.ts`: `signVisitQr` / `verifyVisitQr` (`visitId.sig`, HMAC with `PASS_SIGNING_KEY`). The scan
+  route recognises the two-part payload and checks the visitor out (`visit_closed` when already out).
+- `src/lib/badges/badgeNo.ts` + `src/lib/server/badges.ts`: `assignBadgeNo(visitId)` → `<site code><gate initial>-NNNN`
+  (`airlink-2` + `Recepción` → `A2R-0042`), per site per local day, atomic (advisory lock + conditional update).
+  `loadBadge` / `renderVisitBadge` / `auditBadgePrint` (`badge.printed`, `badge.reprinted`).
+- `src/lib/badges/config.ts`: `Site.settings.badgeTemplate`, `Gate.settings.printer = { kind: "agent"|"browser", name }`.
+- API (kiosk session, same site): `GET /api/guard/badges/[visitId]` (preview JSON + QR SVG),
+  `GET /api/guard/badges/[visitId]/zpl` (text/plain; audited unless `?audit=0`; `?reprint=1`),
+  `POST /api/guard/badges/[visitId]/photo` (1-bit PNG → `s/<siteId>/visits/<visitId>/badge.png`, `Visit.badgePhotoKey`).
+- Print queue without a table: `POST /api/print/enqueue` writes the ZPL to the bucket under
+  `s/<siteId>/print/<gateId>/<ms>-<visitId>.zpl`; `tools/print-agent` polls `GET /api/print/jobs?gate=` and acks with
+  `DELETE …&job=` (HMAC `PRINT_AGENT_SECRET`, `x-timestamp` + `x-signature` over `METHOD\n/path?query\nts`).
+  `src/lib/print/queue.ts`.
+- Kiosk: `src/components/guard/BadgePanel.tsx` (photo step → preview `BadgePreview.tsx` → print) shown by `Scanner`
+  after a green scan and by `PendingVisits` after an in-person approval; `VisitPolicy.autoPrintBadge` prints without
+  the tap. Reprint: `/guard/inside` → `/guard/badge/[visitId]`. Without a printer on the gate the `.zpl` is downloaded.
+- Zebra Browser Print (`kind: "browser"`): the kiosk POSTs the ZPL to `http://localhost:9100/write`; the PIN sign-in
+  sets the `visitas_print` cookie so the middleware adds that origin to `connect-src` (`buildCsp({ browserPrint })`)
+  only for that kiosk. Changing the gate's printer takes effect at the next PIN sign-in.
+- Admin: `/admin/sites/[id]` (template per site, printer per gate), `/admin/policies` (auto-print per kind).
 
 ## Confirmed by Jaime (2026-10-27)
 - Reception PCs are **Windows**, each ZP450 connected by **USB directly**. `tools/print-agent` therefore runs as a

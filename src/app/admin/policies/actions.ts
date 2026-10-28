@@ -45,6 +45,7 @@ export async function savePolicyAction(formData: FormData): Promise<void> {
     escortRequired: on(formData, "escortRequired"),
     badge: on(formData, "badge"),
     receptionOnly: on(formData, "receptionOnly"),
+    autoPrintBadge: on(formData, "autoPrintBadge"),
     allowedGateIds: siteGates.map((g) => g.id),
     maxDurationMin: maxDurationMin === "" ? null : maxDurationMin,
     enabled: on(formData, "enabled"),

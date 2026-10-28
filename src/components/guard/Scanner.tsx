@@ -4,8 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { AlertTriangle, Camera, CameraOff, CheckCircle2, CloudOff, LogOut, Wifi, WifiOff, XCircle } from "lucide-react";
 import { Icon } from "@/components/Icon";
+import { BadgePanel } from "@/components/guard/BadgePanel";
+import type { KioskBadgeConfig } from "@/lib/badges/config";
 import { fmtDate } from "@/lib/format";
-import type { ScanPassInfo, ScanReason, ScanResponse } from "@/lib/guard/types";
+import type { BadgeInfo, ScanPassInfo, ScanReason, ScanResponse } from "@/lib/guard/types";
 import { cacheIsFresh, provisionalCheck, type PassCache } from "@/lib/offline/provisional";
 import { countQueuedScans, enqueueScan, flushQueue, loadPassCache, outcomeForStatus, savePassCache, type QueuedScan } from "@/lib/offline/queue";
 
@@ -21,6 +23,7 @@ type ResultView = {
   duplicate?: boolean;
   atDock?: boolean;
   at: string;
+  badge?: BadgeInfo;
 };
 
 /** Minimal typing of the Shape Detection API (not in lib.dom yet). */
@@ -36,7 +39,7 @@ async function postScan(scan: { payload: string; scanId: string; at: string; off
   return fetch("/api/guard/scan", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(scan) });
 }
 
-export function Scanner({ locale, timeZone }: { locale: string; timeZone: string }) {
+export function Scanner({ locale, timeZone, badgeConfig }: { locale: string; timeZone: string; badgeConfig: KioskBadgeConfig }) {
   const t = useTranslations("guard");
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const stopRef = useRef<(() => void) | null>(null);
@@ -176,6 +179,7 @@ export function Scanner({ locale, timeZone }: { locale: string; timeZone: string
           duplicate: data.duplicate,
           atDock: data.visit.status === "at_dock",
           at: data.action === "left" ? (data.visit.leftAt ?? at) : (data.visit.enteredAt ?? at),
+          badge: data.badge,
         });
         void flush();
       } finally {
@@ -339,6 +343,11 @@ export function Scanner({ locale, timeZone }: { locale: string; timeZone: string
             ) : null}
             <p className="muted mt-3">{fmtDate(result.at, locale, { timeZone })}</p>
             <button type="button" onClick={() => setResult(null)} className="btn-secondary mt-3">{t("scan.scanAgain")}</button>
+          </div>
+        ) : null}
+        {result?.badge ? (
+          <div className="mt-4">
+            <BadgePanel key={result.badge.visitId} visitId={result.badge.visitId} config={badgeConfig} autoPrint={result.badge.autoPrint} onDone={() => setResult(null)} />
           </div>
         ) : null}
       </div>

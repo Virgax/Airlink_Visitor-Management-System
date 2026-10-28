@@ -2,7 +2,10 @@ import { db } from "@/lib/db";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { kioskRoute } from "@/lib/guard/route";
-import { checkoutVisit, decideVisit, enterVisit, listGateVisits, listOpenVisits, visitJson } from "@/lib/server/visits";
+import { policyFlags } from "@/lib/guard/decide";
+import type { BadgeInfo } from "@/lib/guard/types";
+import { assignBadgeNo } from "@/lib/server/badges";
+import { checkoutVisit, decideVisit, enterVisit, listGateVisits, listOpenVisits, visitJson, type VisitSummary } from "@/lib/server/visits";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +42,15 @@ export async function POST(request: NextRequest): Promise<Response> {
       : action === "enter" ? await enterOrApprove(visitId, site.id, user.id)
       : await checkoutVisit(visitId, site.id, user.id);
     if (!visit) return Response.json({ ok: false, error: "bad_state" }, { status: 409 });
-    return Response.json({ ok: true, visit: visitJson(visit) });
+    const badge = action === "checkout" || action === "deny" ? null : await badgeStep(visit);
+    return Response.json({ ok: true, visit: visitJson({ ...visit, badgeNo: badge?.badgeNo ?? visit.badgeNo }), ...(badge ? { badge } : {}) });
   });
+}
+
+/** After an in-person approval or a manual entry: number the badge when the policy prints one for this kind. */
+async function badgeStep(visit: VisitSummary): Promise<BadgeInfo | null> {
+  if (visit.status !== "inside" && visit.status !== "at_dock") return null;
+  const policy = policyFlags(visit.kind, await db.visitPolicy.findUnique({ where: { siteId_kind: { siteId: visit.siteId, kind: visit.kind } } }));
+  if (!policy.badge) return null;
+  return { visitId: visit.id, badgeNo: await assignBadgeNo(visit.id), autoPrint: policy.autoPrintBadge };
 }

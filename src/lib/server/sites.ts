@@ -2,6 +2,8 @@ import "server-only";
 import type { Site } from "@prisma/client";
 import { db } from "@/lib/db";
 import { assertSiteAllowed, type Tenant } from "@/lib/auth/guards";
+import { readBadgeTemplate } from "@/lib/badges/config";
+import type { BadgeTemplate } from "@/lib/badges/zpl";
 
 /** Sites an admin may manage: every site (including inactive) for all-sites admins, otherwise their own. */
 export async function listManagedSites(tenant: Tenant): Promise<Site[]> {
@@ -16,14 +18,19 @@ export async function getManagedSite(tenant: Tenant, siteId: string): Promise<Si
   return db.site.findUnique({ where: { id: siteId } });
 }
 
-export type SiteSettings = { retentionDays: number; unannouncedTimeoutMin: number };
+export type SiteSettings = { retentionDays: number; unannouncedTimeoutMin: number; badgeTemplate: BadgeTemplate };
 
-export const DEFAULT_SITE_SETTINGS: SiteSettings = { retentionDays: 90, unannouncedTimeoutMin: 5 };
+export const DEFAULT_SITE_SETTINGS: SiteSettings = { retentionDays: 90, unannouncedTimeoutMin: 5, badgeTemplate: "landscape_photo" };
 
 export function readSiteSettings(site: Pick<Site, "settings">): SiteSettings & Record<string, unknown> {
   const raw = site.settings && typeof site.settings === "object" && !Array.isArray(site.settings) ? (site.settings as Record<string, unknown>) : {};
   const num = (v: unknown, d: number) => (typeof v === "number" && Number.isFinite(v) ? v : d);
-  return { ...raw, retentionDays: num(raw.retentionDays, DEFAULT_SITE_SETTINGS.retentionDays), unannouncedTimeoutMin: num(raw.unannouncedTimeoutMin, DEFAULT_SITE_SETTINGS.unannouncedTimeoutMin) };
+  return {
+    ...raw,
+    retentionDays: num(raw.retentionDays, DEFAULT_SITE_SETTINGS.retentionDays),
+    unannouncedTimeoutMin: num(raw.unannouncedTimeoutMin, DEFAULT_SITE_SETTINGS.unannouncedTimeoutMin),
+    badgeTemplate: readBadgeTemplate(site.settings),
+  };
 }
 
 export function isValidTimeZone(tz: string): boolean {

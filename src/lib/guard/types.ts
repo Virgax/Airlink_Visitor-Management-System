@@ -17,10 +17,13 @@ export type ScanPassInfo = {
   plate: string | null;
 };
 
-export type ScanReason = DenyReason | "invalid_body" | "rate_limited" | "network";
+export type ScanReason = DenyReason | "invalid_body" | "rate_limited" | "network" | "visit_closed";
+
+/** Badge step after a green scan or an in-person approval: which visit to print and whether to print without a tap. */
+export type BadgeInfo = { visitId: string; badgeNo: string | null; autoPrint: boolean };
 
 export type ScanResponse =
   | { ok: false; reason: ScanReason; pass?: ScanPassInfo }
-  | { ok: true; action: "entered" | "left"; duplicate?: boolean; conflict?: boolean; visit: VisitJson; pass: ScanPassInfo };
+  | { ok: true; action: "entered" | "left"; duplicate?: boolean; conflict?: boolean; visit: VisitJson; pass: ScanPassInfo; badge?: BadgeInfo };
 
 export type EmployeeHit = { id: string; name: string; department: string | null };

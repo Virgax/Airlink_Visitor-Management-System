@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { buildCsp } from "@/lib/csp";
-import { SESSION_COOKIE } from "@/lib/auth/cookies";
+import { PRINT_COOKIE, SESSION_COOKIE } from "@/lib/auth/cookies";
 
 // /guard is not listed: the kiosk enrolls with a device cookie and signs in with a PIN on the page itself.
 const PROTECTED_PREFIXES = ["/admin", "/app", "/select-panel", "/account"];
@@ -28,7 +28,8 @@ export function middleware(request: NextRequest) {
   }
 
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
-  const csp = buildCsp(nonce, { dev: process.env.NODE_ENV !== "production" });
+  const browserPrint = pathname === "/guard" || pathname.startsWith("/guard/") ? request.cookies.get(PRINT_COOKIE)?.value === "browser" : false;
+  const csp = buildCsp(nonce, { dev: process.env.NODE_ENV !== "production", browserPrint });
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);

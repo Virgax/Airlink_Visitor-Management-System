@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
-import { LogOut, Truck } from "lucide-react";
+import { LogOut, Printer, Truck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
 import { KioskBar } from "@/components/guard/KioskBar";
@@ -14,6 +15,7 @@ export default async function InsidePage({ searchParams }: { searchParams: Promi
   const sp = await searchParams;
   const { user, site, gate } = await requireKiosk();
   const t = await getTranslations("guard");
+  const tb = await getTranslations("badges.panel");
   const locale = await getLocale();
   const visits = await listOpenVisits(site.id);
 
@@ -42,9 +44,13 @@ export default async function InsidePage({ searchParams }: { searchParams: Promi
                 </p>
                 <p className="mt-1 flex flex-wrap gap-1 text-xs">
                   <span className={`rounded-full px-2 py-0.5 ${v.status === "at_dock" ? "bg-warning-bg text-warning" : "bg-success-bg text-success"}`}>{t(`status.${v.status}`)}</span>
+                  {v.badgeNo ? <span className="rounded-full bg-surface-2 px-2 py-0.5 font-mono">{v.badgeNo}</span> : null}
                   {v.conflict ? <span className="rounded-full bg-danger-bg px-2 py-0.5 text-danger">{t("inside.conflict")}</span> : null}
                 </p>
               </div>
+              <Link href={`/guard/badge/${v.id}`} className="btn-secondary" data-testid="reprint-badge">
+                <Icon icon={Printer} /> {tb("reprint")}
+              </Link>
               <form action={checkoutAction}>
                 <input type="hidden" name="visitId" value={v.id} />
                 <button type="submit" className="btn-primary">
