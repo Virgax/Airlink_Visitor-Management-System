@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
+# tsx and dotenv are runtime dependencies (start:prod, cron:tick, ops:backup), so --omit=dev keeps them.
 RUN npm ci --omit=dev --ignore-scripts && npx prisma generate
 COPY scripts ./scripts
 CMD ["npm", "run", "ops:backup"]
