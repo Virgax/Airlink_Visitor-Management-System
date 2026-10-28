@@ -88,8 +88,9 @@ const DEFAULT_ADMIN_EMAIL = "admin@airlinkdr.com";
 async function seedAdmin() {
   const email = (process.env.SEED_ADMIN_EMAIL ?? DEFAULT_ADMIN_EMAIL).toLowerCase();
   let user = await db.user.findUnique({ where: { email } });
+  const envPassword = process.env.SEED_ADMIN_PASSWORD;
   if (!user) {
-    let password = process.env.SEED_ADMIN_PASSWORD;
+    let password = envPassword;
     let generated = false;
     if (!password) {
       password = randomBytes(12).toString("base64url");
@@ -101,6 +102,11 @@ async function seedAdmin() {
       // Printed exactly once, at creation. Change it in /account right after the first sign-in.
       console.log(`[seed] initial admin password (change it now): ${password}`);
     }
+  } else if (envPassword && process.env.SEED_ADMIN_RESET_PASSWORD === "1") {
+    // Recovery: set SEED_ADMIN_PASSWORD + SEED_ADMIN_RESET_PASSWORD=1 in Railway, redeploy, then remove both.
+    await db.user.update({ where: { id: user.id }, data: { passwordHash: await hashPassword(envPassword), totpSecret: null, status: "active" } });
+    await db.session.deleteMany({ where: { userId: user.id } });
+    console.warn(`[seed] admin password for ${email} was RESET from SEED_ADMIN_PASSWORD; remove SEED_ADMIN_RESET_PASSWORD now`);
   }
   await db.membership.upsert({
     where: { userId_siteId_role: { userId: user.id, siteId: null as unknown as string, role: "admin" } },
