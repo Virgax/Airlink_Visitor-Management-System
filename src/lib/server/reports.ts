@@ -8,6 +8,7 @@ import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { REPORT_PAGE_SIZE, rangeToUtc, type ShiftLogFilters, type VisitFilters } from "@/lib/server/reports-filters";
 import { DEFAULT_TIME_ZONE, zonedStartOfDay, localParts } from "@/lib/time/tz";
+import { formatAnswer, readAnswers } from "@/lib/forms/schema";
 
 /** The slice of `Tenant` the reports need (type-only, so tests can build one by hand). */
 export type ReportTenant = {
@@ -222,10 +223,26 @@ export function buildCsv(header: string[], lines: (string | number | null | unde
 export type VisitCsvLabels = Record<
   "date" | "visitor" | "docLast4" | "plate" | "company" | "host" | "kind" | "site" | "gate" | "status" | "enteredAt" | "leftAt" | "durationMin" | "badgeNo" | "escort",
   string
-> & { kinds: Record<string, string>; statuses: Record<string, string> };
+> & { kinds: Record<string, string>; statuses: Record<string, string>; yes?: string; no?: string };
+
+/**
+ * Custom sign-in answers (`Visit.extra.answers`) present in the exported rows: one column per question id, in order
+ * of first appearance, labelled with the question's label. Rows without that answer get an empty cell.
+ */
+export function answerColumns(rows: Array<{ extra: unknown }>): Array<{ id: string; label: string }> {
+  const cols = new Map<string, string>();
+  for (const r of rows) for (const [id, a] of Object.entries(readAnswers(r.extra))) if (!cols.has(id)) cols.set(id, a.label);
+  return [...cols.entries()].map(([id, label]) => ({ id, label }));
+}
+
+export function answerCells(extra: unknown, cols: Array<{ id: string }>, labels: { yes?: string; no?: string }): string[] {
+  const answers = readAnswers(extra);
+  return cols.map((c) => (answers[c.id] ? formatAnswer(answers[c.id]!.value, { yes: labels.yes ?? "yes", no: labels.no ?? "no" }) : ""));
+}
 
 export function visitsToCsv(rows: VisitRow[], timeZone: string, labels: VisitCsvLabels): string {
-  const header = [labels.date, labels.visitor, labels.docLast4, labels.plate, labels.company, labels.host, labels.kind, labels.site, labels.gate, labels.status, labels.enteredAt, labels.leftAt, labels.durationMin, labels.badgeNo, labels.escort];
+  const extraCols = answerColumns(rows);
+  const header = [labels.date, labels.visitor, labels.docLast4, labels.plate, labels.company, labels.host, labels.kind, labels.site, labels.gate, labels.status, labels.enteredAt, labels.leftAt, labels.durationMin, labels.badgeNo, labels.escort, ...extraCols.map((c) => c.label)];
   const lines = rows.map((r) => [
     csvDate(r.enteredAt ?? r.createdAt, timeZone),
     r.visitorName,
@@ -242,6 +259,7 @@ export function visitsToCsv(rows: VisitRow[], timeZone: string, labels: VisitCsv
     durationMinutes(r.enteredAt, r.leftAt),
     r.badgeNo,
     r.escort?.name,
+    ...answerCells(r.extra, extraCols, labels),
   ]);
   return buildCsv(header, lines);
 }
@@ -249,7 +267,8 @@ export function visitsToCsv(rows: VisitRow[], timeZone: string, labels: VisitCsv
 export type AuditCsvLabels = VisitCsvLabels & Record<"areas" | "ndaVersion" | "ndaAcceptedAt" | "passApprovedBy" | "passApprovedAt" | "visitDecidedBy" | "visitDecidedAt" | "blacklistHits", string>;
 
 export function auditToCsv(rows: AuditRow[], timeZone: string, labels: AuditCsvLabels): string {
-  const header = [labels.date, labels.visitor, labels.docLast4, labels.company, labels.host, labels.kind, labels.site, labels.gate, labels.status, labels.enteredAt, labels.leftAt, labels.areas, labels.escort, labels.ndaVersion, labels.ndaAcceptedAt, labels.passApprovedBy, labels.passApprovedAt, labels.visitDecidedBy, labels.visitDecidedAt, labels.blacklistHits];
+  const extraCols = answerColumns(rows);
+  const header = [labels.date, labels.visitor, labels.docLast4, labels.company, labels.host, labels.kind, labels.site, labels.gate, labels.status, labels.enteredAt, labels.leftAt, labels.areas, labels.escort, labels.ndaVersion, labels.ndaAcceptedAt, labels.passApprovedBy, labels.passApprovedAt, labels.visitDecidedBy, labels.visitDecidedAt, labels.blacklistHits, ...extraCols.map((c) => c.label)];
   const lines = rows.map((r) => [
     csvDate(r.enteredAt ?? r.createdAt, timeZone),
     r.visitorName,
@@ -271,6 +290,7 @@ export function auditToCsv(rows: AuditRow[], timeZone: string, labels: AuditCsvL
     r.decidedBy?.name,
     csvDate(r.decidedAt, timeZone),
     r.blacklistHits,
+    ...answerCells(r.extra, extraCols, labels),
   ]);
   return buildCsv(header, lines);
 }

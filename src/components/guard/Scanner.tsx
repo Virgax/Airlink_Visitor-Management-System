@@ -324,6 +324,18 @@ export function Scanner({ locale, timeZone }: { locale: string; timeZone: string
                   <dt className="muted">{t("scan.kind")}</dt>
                   <dd>{result.pass.kind ? t(`kinds.${result.pass.kind as "visit"}`) : "—"}{result.pass.docLast4 ? ` · ${t("scan.document")} ****${result.pass.docLast4}` : ""}{result.pass.plate ? ` · ${t("scan.plate")} ${result.pass.plate}` : ""}</dd>
                 </div>
+                {result.pass.answers?.length ? (
+                  <div className="sm:col-span-2" data-testid="result-answers">
+                    <dt className="muted">{t("scan.answers")}</dt>
+                    <dd>
+                      <ul className="flex flex-wrap gap-x-4 gap-y-1">
+                        {result.pass.answers.map((a) => (
+                          <li key={a.id}><span className="muted">{a.label}:</span> {typeof a.value === "boolean" ? t(a.value ? "scan.yes" : "scan.no") : String(a.value)}</li>
+                        ))}
+                      </ul>
+                    </dd>
+                  </div>
+                ) : null}
                 {result.pass.warnings?.length ? (
                   <div className="sm:col-span-2">
                     <ul className="mt-1 flex flex-wrap gap-2">

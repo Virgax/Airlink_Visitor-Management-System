@@ -8,10 +8,15 @@ import { ownPassWhere } from "@/lib/server/host-passes";
 import { evaluatePolicy } from "@/lib/policies/evaluate";
 import { VISIT_KINDS } from "@/lib/passes/form";
 import { toLocalInput } from "@/lib/time/tz";
+import { FormFields } from "@/components/forms/FormFields";
+import { KindFormSwitch, type KindFormRules } from "@/components/forms/KindFormSwitch";
+import { builtinRule, BUILTIN_TYPES, elementsFor, readAnswers, type BuiltinType } from "@/lib/forms/schema";
+import { formLabels } from "@/lib/forms/labels";
+import { loadFormsForSite } from "@/lib/server/forms";
 import { createPassAction } from "../actions";
 
 type Search = { siteId?: string; from?: string; error?: string };
-const ERRORS = ["invalid", "missing_doc", "missing_plate", "gate_not_allowed", "company_blocked", "window_order", "window_too_long", "window_past", "schedule", "site"];
+const ERRORS = ["invalid", "missing_doc", "missing_plate", "gate_not_allowed", "company_blocked", "window_order", "window_too_long", "window_past", "schedule", "site", "missing_field"];
 const WEEK = [1, 2, 3, 4, 5, 6, 0];
 
 export default async function NewPassPage({ searchParams }: { searchParams: Promise<Search> }) {
@@ -44,16 +49,29 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
     );
   }
 
-  const [areas, gates, employees, policies, from] = await Promise.all([
+  const [areas, gates, employees, forms, from, labels] = await Promise.all([
     db.area.findMany({ where: { siteId: site.id, active: true }, orderBy: { name: "asc" } }),
     db.gate.findMany({ where: { siteId: site.id, active: true }, orderBy: { name: "asc" } }),
     db.employee.findMany({ where: { active: true, OR: [{ siteId: site.id }, { siteId: null }] }, orderBy: { name: "asc" }, take: 300, select: { id: true, name: true, department: true } }),
-    db.visitPolicy.findMany({ where: { siteId: site.id } }),
+    loadFormsForSite(site.id),
     sp.from ? db.pass.findFirst({ where: { id: sp.from, ...ownPassWhere(tenant) } }) : null,
+    formLabels(),
   ]);
-  const approvalByKind = Object.fromEntries(
-    VISIT_KINDS.map((kind) => [kind, evaluatePolicy(policies.find((p) => p.kind === kind) ?? null, { kind }).approverRole] as const),
+  const approvalByKind = Object.fromEntries(VISIT_KINDS.map((kind) => [kind, evaluatePolicy(forms[kind].policy, { kind }).approverRole] as const));
+  // Built-in field modes per kind (applied server-side for the initial kind, client-side when the kind changes).
+  const rules: KindFormRules = Object.fromEntries(
+    VISIT_KINDS.map((kind) => {
+      const els = forms[kind].form.elements;
+      const hidden = BUILTIN_TYPES.filter((b) => builtinRule(els, b, "host") === "off");
+      const required = BUILTIN_TYPES.filter((b) => builtinRule(els, b, "host") === "required");
+      return [kind, { hidden, required }];
+    }),
   );
+  const initialKind = from?.kind ?? "visit";
+  const initialRule = rules[initialKind]!;
+  const box = (type: BuiltinType) => ({ "data-builtin": type, hidden: initialRule.hidden.includes(type) || undefined });
+  const req = (type: BuiltinType) => initialRule.required.includes(type) || undefined;
+  const storedAnswers = readAnswers(from?.extra);
   const fromCompany = from?.companyId ? await db.company.findUnique({ where: { id: from.companyId }, select: { name: true } }) : null;
   const errorKey = sp.error && ERRORS.includes(sp.error) ? sp.error : null;
   const now = new Date();
@@ -82,31 +100,31 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
             ))}
           </ul>
         </div>
-        <div>
+        <div {...box("name")}>
           <label className="label" htmlFor="visitorName">{t("visitorName")}</label>
           <input id="visitorName" name="visitorName" required minLength={2} maxLength={120} className="input" defaultValue={from?.visitorName ?? ""} />
         </div>
-        <div>
+        <div {...box("company")}>
           <label className="label" htmlFor="company">{t("company")}</label>
-          <input id="company" name="company" maxLength={120} className="input" defaultValue={fromCompany?.name ?? ""} />
+          <input id="company" name="company" maxLength={120} className="input" defaultValue={fromCompany?.name ?? ""} required={req("company")} />
           <p className="muted mt-1">{t("companyHelp")}</p>
         </div>
-        <div>
+        <div {...box("phone")}>
           <label className="label" htmlFor="phone">{t("phone")}</label>
-          <input id="phone" name="phone" type="tel" maxLength={40} className="input" defaultValue={from?.visitorPhone ?? ""} />
+          <input id="phone" name="phone" type="tel" maxLength={40} className="input" defaultValue={from?.visitorPhone ?? ""} required={req("phone")} />
         </div>
-        <div>
+        <div {...box("email")}>
           <label className="label" htmlFor="email">{t("email")}</label>
-          <input id="email" name="email" type="email" maxLength={200} className="input" defaultValue={from?.visitorEmail ?? ""} />
+          <input id="email" name="email" type="email" maxLength={200} className="input" defaultValue={from?.visitorEmail ?? ""} required={req("email")} />
         </div>
-        <div>
+        <div {...box("document")}>
           <label className="label" htmlFor="doc">{t("doc")}</label>
-          <input id="doc" name="doc" maxLength={40} className="input" autoComplete="off" />
+          <input id="doc" name="doc" maxLength={40} className="input" autoComplete="off" required={req("document")} />
           <p className="muted mt-1">{t("docHelp")}</p>
         </div>
-        <div>
+        <div {...box("plate")}>
           <label className="label" htmlFor="plate">{t("plate")}</label>
-          <input id="plate" name="plate" maxLength={20} className="input" defaultValue={from?.plate ?? ""} />
+          <input id="plate" name="plate" maxLength={20} className="input" defaultValue={from?.plate ?? ""} required={req("plate")} />
         </div>
         <div className="sm:col-span-2">
           <label className="label" htmlFor="note">{t("note")}</label>
@@ -114,8 +132,25 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
         </div>
       </div>
 
+      {VISIT_KINDS.some((kind) => elementsFor(forms[kind].form.elements, "host").some((e) => e.type !== "signature" && !BUILTIN_TYPES.includes(e.type as BuiltinType))) ? (
+        <div className="card space-y-4" data-testid="custom-fields">
+          <h2 className="font-medium">{t("customFields")}</h2>
+          {VISIT_KINDS.map((kind) => {
+            const active = kind === initialKind;
+            return (
+              <div key={kind} data-kind-section={kind} hidden={!active || undefined} className="space-y-4">
+                <fieldset disabled={!active || undefined} className="space-y-4">
+                  <FormFields elements={forms[kind].form.elements} surface="host" labels={labels} answers={storedAnswers} exclude={["signature"]} idPrefix={`${kind}-`} />
+                </fieldset>
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
+      <KindFormSwitch selectId="kind" rules={rules} />
+
       <div className="card grid gap-4 sm:grid-cols-2">
-        <fieldset>
+        <fieldset {...box("areas")}>
           <legend className="label">{t("areas")}</legend>
           <ul className="space-y-1">
             {areas.map((a) => (
@@ -130,9 +165,9 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
             ))}
           </ul>
         </fieldset>
-        <div>
+        <div {...box("escort")}>
           <label className="label" htmlFor="escortEmployeeId">{t("escort")}</label>
-          <select id="escortEmployeeId" name="escortEmployeeId" className="input" defaultValue={from?.escortEmployeeId ?? ""}>
+          <select id="escortEmployeeId" name="escortEmployeeId" className="input" defaultValue={from?.escortEmployeeId ?? ""} required={req("escort")}>
             <option value="">{t("escortNone")}</option>
             {employees.map((e) => <option key={e.id} value={e.id}>{e.name}{e.department ? ` · ${e.department}` : ""}</option>)}
           </select>

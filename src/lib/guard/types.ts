@@ -15,7 +15,11 @@ export type ScanPassInfo = {
   warnings: PassWarning[];
   docLast4: string | null;
   plate: string | null;
+  /** Custom answers of the sign-in form (host + visitor surfaces). */
+  answers?: ScanAnswer[];
 };
+
+export type ScanAnswer = { id: string; label: string; value: string | number | boolean };
 
 export type ScanReason = DenyReason | "invalid_body" | "rate_limited" | "network";
 

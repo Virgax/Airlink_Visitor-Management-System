@@ -15,6 +15,7 @@ import { ownPassWhere } from "@/lib/server/host-passes";
 import { loadPolicy } from "@/lib/server/passes";
 import { evaluatePolicy } from "@/lib/policies/evaluate";
 import { parseSchedule } from "@/lib/passes/validate";
+import { formatAnswer, listAnswers, readAnswers } from "@/lib/forms/schema";
 import { renamePassAction, revokePassAction } from "../actions";
 
 type Search = { ok?: string; error?: string };
@@ -53,6 +54,8 @@ export default async function PassDetailPage({ params, searchParams }: { params:
   const canRevoke = pass.status === "active" || pass.status === "pending_approval";
   const okKey = sp.ok && ["created", "createdGroup", "revoked", "renamed"].includes(sp.ok) ? sp.ok : null;
   const date = (d: Date) => fmtDate(d, locale, { timeZone: tz });
+  const tf = await getTranslations("forms.answers");
+  const answers = listAnswers(readAnswers(pass.extra));
 
   return (
     <AppShell user={tenant.user} subtitle={tenant.site?.name ?? ts("allSites")} title={t("title", { name: pass.visitorName })}>
@@ -93,6 +96,20 @@ export default async function PassDetailPage({ params, searchParams }: { params:
             {pass.note ? <><dt className="muted">{t("note")}</dt><dd className="whitespace-pre-wrap">{pass.note}</dd></> : null}
             <dd className="muted col-span-2">{t("uses", { uses: pass.uses, max: pass.maxUses })}</dd>
           </dl>
+
+          {answers.length ? (
+            <div data-testid="pass-answers">
+              <h2 className="mb-1 font-medium">{tf("title")}</h2>
+              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+                {answers.map((a) => (
+                  <div key={a.id} className="contents" data-answer={a.id}>
+                    <dt className="muted">{a.label}</dt>
+                    <dd>{formatAnswer(a.value, { yes: tf("yes"), no: tf("no") })}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          ) : null}
 
           {group.length > 1 ? (
             <div>

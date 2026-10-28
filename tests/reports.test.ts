@@ -167,6 +167,18 @@ describe("visitsToCsv", () => {
   it("produces only the header for no rows", () => {
     expect(visitsToCsv([], TZ, visitLabels).split("\r\n")).toHaveLength(2);
   });
+  it("adds one column per custom answer present in the rows, labelled with the question", () => {
+    const rows = [
+      visit({ extra: { answers: { model: { label: "Modelo", value: "iPhone 15" }, ppe: { label: "Trae EPP", value: true } } } }),
+      visit({ visitorName: "Sin respuestas", extra: null }),
+      visit({ visitorName: "Otra", extra: { answers: { units: { label: "Unidades; cajas", value: 3 }, model: { label: "Modelo", value: "=SUM(1)" } } } }),
+    ];
+    const lines = visitsToCsv(rows, TZ, { ...visitLabels, yes: "Sí", no: "No" }).slice(1).split("\r\n");
+    expect(lines[0]).toBe("Fecha;Visitante;Cédula;Placa;Empresa;Anfitrión;Tipo;Sitio;Puerta;Estado;Entrada;Salida;Duración (min);Gafete;Acompañante;Modelo;Trae EPP;\"Unidades; cajas\"");
+    expect(lines[1]!.endsWith(";iPhone 15;Sí;")).toBe(true);
+    expect(lines[2]!.endsWith(";;;")).toBe(true);
+    expect(lines[3]!.endsWith(";'=SUM(1);;3")).toBe(true);
+  });
 });
 
 describe("auditToCsv", () => {

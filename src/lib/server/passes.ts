@@ -6,7 +6,9 @@ import { audit } from "@/lib/audit";
 import { notify } from "@/lib/notifications/index";
 import { randomToken } from "@/lib/crypto/tokens";
 import { docHash, docLast4, normalizePlate } from "@/lib/crypto/docHash";
-import { evaluatePolicy, type PolicyInput } from "@/lib/policies/evaluate";
+import { evaluatePolicy, missingDoc, type PolicyInput } from "@/lib/policies/evaluate";
+import { readAnswers, type Answers, type FormElement } from "@/lib/forms/schema";
+import { loadPolicyAndForm } from "@/lib/server/forms";
 import type { Schedule } from "@/lib/passes/validate";
 import { groupVisitorNames, RECURRING_MAX_USES } from "@/lib/passes/form";
 import { qrPayloadFor as buildQrPayload, type QrPass, type QrPayloadInfo } from "@/lib/passes/qr";
@@ -90,13 +92,17 @@ export type CreatePassInput = {
   groupSize: number;
   /** Placeholder for numbered group members, in the host's language. */
   groupPlaceholder?: string;
+  /** Custom answers of the host surface (collected with `collectAnswers`), stored in `Pass.extra`. */
+  answers?: Answers;
+  /** Resolved form; loaded from the policy when not given. */
+  form?: FormElement[];
 };
 
-export type CreatePassError = "missing_doc" | "missing_plate" | "gate_not_allowed" | "company_blocked";
+export type CreatePassError = "missing_doc" | "missing_plate" | "gate_not_allowed" | "company_blocked" | "missing_field";
 
 export type CreatePassResult =
   | { ok: true; passes: Pass[]; status: "active" | "pending_approval"; approverRole: MembershipRole | null }
-  | { ok: false; error: CreatePassError };
+  | { ok: false; error: CreatePassError; missing?: string[] };
 
 /**
  * Creates one pass (or N passes sharing a groupId), applying the site's VisitPolicy. Pending passes notify
@@ -110,11 +116,30 @@ export async function createPass(input: CreatePassInput): Promise<CreatePassResu
   const visitorDocLast4 = doc ? docLast4(doc) : null;
   const plate = input.plate?.trim() ? normalizePlate(input.plate) : null;
 
-  const policy = await loadPolicy(input.siteId, input.kind);
-  const evaluation = evaluatePolicy(policy, { kind: input.kind, visitorDocHash, plate, gateIds: input.gateIds });
-  if (evaluation.missing.includes("doc")) return { ok: false, error: "missing_doc" };
-  if (evaluation.missing.includes("plate")) return { ok: false, error: "missing_plate" };
-  if (evaluation.missing.includes("gate")) return { ok: false, error: "gate_not_allowed" };
+  const loaded = await loadPolicyAndForm(input.siteId, input.kind);
+  const form = input.form ?? loaded.form.elements;
+  const evaluation = evaluatePolicy(loaded.policy, {
+    kind: input.kind,
+    visitorDocHash,
+    plate,
+    gateIds: input.gateIds,
+    form,
+    surface: "host",
+    answers: input.answers ?? {},
+    visitorName: input.visitorName,
+    visitorPhone: input.visitorPhone,
+    visitorEmail: input.visitorEmail,
+    company: input.companyName,
+    areaIds: input.areaIds,
+    escortEmployeeId: input.escortEmployeeId,
+    hostEmployeeId: input.hostEmployeeId,
+  });
+  if (missingDoc(evaluation, form)) return { ok: false, error: "missing_doc", missing: evaluation.missing };
+  if (evaluation.missing.includes("plate")) return { ok: false, error: "missing_plate", missing: evaluation.missing };
+  if (evaluation.missing.includes("gate")) return { ok: false, error: "gate_not_allowed", missing: evaluation.missing };
+  if (evaluation.missing.length > 0) return { ok: false, error: "missing_field", missing: evaluation.missing };
+  const answers = readAnswers({ answers: input.answers ?? {} });
+  const extra = Object.keys(answers).length ? ({ answers } as unknown as Prisma.InputJsonObject) : undefined;
 
   let companyId: string | null = null;
   if (input.companyName?.trim()) {
@@ -151,6 +176,7 @@ export async function createPass(input: CreatePassInput): Promise<CreatePassResu
     status,
     note: input.note?.trim() || null,
     groupId,
+    extra,
   }));
 
   const passes = await db.$transaction(async (tx) => {

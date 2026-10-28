@@ -10,6 +10,8 @@ import { ensureEmployeeForUser } from "@/lib/server/employees-link";
 import { ownPassWhere } from "@/lib/server/host-passes";
 import { createPass, revokePass } from "@/lib/server/passes";
 import { buildSchedule, checkWindowRange, isVisitKind, parseGroupSize, uniqueIds } from "@/lib/passes/form";
+import { collectAnswers } from "@/lib/forms/schema";
+import { loadPolicyAndForm } from "@/lib/server/forms";
 import { zonedToUtc } from "@/lib/time/tz";
 
 const optional = (max: number) => z.string().trim().max(max).optional().transform((v) => (v ? v : null));
@@ -78,6 +80,10 @@ export async function createPassAction(formData: FormData): Promise<void> {
 
   const host = await ensureEmployeeForUser(tenant.user);
   const t = await getTranslations("host.new");
+  // Custom questions of the sign-in form for this kind (host surface).
+  const { form } = await loadPolicyAndForm(site.id, d.kind);
+  const collected = collectAnswers(form.elements, "host", formData);
+  if (collected.invalid.length) fail(site.id, "invalid");
 
   const result = await createPass({
     siteId: site.id,
@@ -99,6 +105,8 @@ export async function createPassAction(formData: FormData): Promise<void> {
     schedule,
     groupSize: parseGroupSize(d.groupSize),
     groupPlaceholder: t("groupPlaceholder"),
+    answers: collected.answers,
+    form: form.elements,
   });
   if (!result.ok) fail(site.id, result.error);
   const lead = result.passes[0]!;

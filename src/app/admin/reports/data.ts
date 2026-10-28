@@ -38,6 +38,7 @@ export async function csvLabels(): Promise<{ visits: VisitCsvLabels; audit: Audi
   const visits: VisitCsvLabels = {
     date: c("date"), visitor: c("visitor"), docLast4: c("docLast4"), plate: c("plate"), company: c("company"), host: c("host"), kind: c("kind"), site: c("site"), gate: c("gate"),
     status: c("status"), enteredAt: c("enteredAt"), leftAt: c("leftAt"), durationMin: c("durationMin"), badgeNo: c("badgeNo"), escort: c("escort"), kinds, statuses,
+    yes: c("yes"), no: c("no"),
   };
   const audit: AuditCsvLabels = {
     ...visits, areas: c("areas"), ndaVersion: c("ndaVersion"), ndaAcceptedAt: c("ndaAcceptedAt"), passApprovedBy: c("passApprovedBy"), passApprovedAt: c("passApprovedAt"),
