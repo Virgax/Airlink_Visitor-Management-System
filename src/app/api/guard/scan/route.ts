@@ -11,6 +11,8 @@ import { passIdFromPayload } from "@/lib/guard/payload";
 import { decideScan, entryStatus, matchBlacklist, passWarnings, policyFlags, validationInstant } from "@/lib/guard/decide";
 import type { ScanPassInfo, ScanResponse } from "@/lib/guard/types";
 import { consumePassUse } from "@/lib/server/passes";
+import { assignBadgeNo } from "@/lib/server/badges";
+import { parseVisitQr, verifyVisitQr } from "@/lib/badges/visitQr";
 import { checkoutVisit, notifyEntered, securityRecipientIds, visitJson, visitSummarySelect } from "@/lib/server/visits";
 import { log } from "@/lib/log";
 
@@ -43,6 +45,23 @@ export async function POST(request: NextRequest): Promise<Response> {
       const pass = existing.passId ? await loadPass(existing.passId) : null;
       const info = pass ? await passInfo(pass, site.id) : null;
       return Response.json({ ok: true, action: "entered", duplicate: true, visit: visitJson(existing), pass: info ?? passInfoFromVisit(existing) } satisfies ScanResponse);
+    }
+
+    // A badge QR (`visitId.sig`) checks the visitor out; it never creates a visit.
+    if (parseVisitQr(payload)) {
+      const res = verifyVisitQr(payload, { siteId: site.id, key: await getSecret("PASS_SIGNING_KEY") });
+      if (!res.ok) {
+        log.info("guard.scan_denied", { reason: res.reason, badge: true, deviceId: device.id });
+        return Response.json({ ok: false, reason: res.reason } satisfies ScanResponse);
+      }
+      const badgeVisit = await db.visit.findFirst({ where: { id: res.visitId, siteId: site.id }, select: visitSummarySelect });
+      if (!badgeVisit) return Response.json({ ok: false, reason: "not_found" } satisfies ScanResponse);
+      if (badgeVisit.status !== "inside" && badgeVisit.status !== "at_dock") {
+        return Response.json({ ok: false, reason: "visit_closed", pass: passInfoFromVisit(badgeVisit) } satisfies ScanResponse);
+      }
+      const left = await checkoutVisit(badgeVisit.id, site.id, user.id, now);
+      log.info("guard.scan_badge_left", { visitId: left.id, deviceId: device.id });
+      return Response.json({ ok: true, action: "left", visit: visitJson(left), pass: passInfoFromVisit(left) } satisfies ScanResponse);
     }
 
     const passId = passIdFromPayload(payload);
@@ -153,8 +172,20 @@ export async function POST(request: NextRequest): Promise<Response> {
     await audit({ action: "visit.entered", siteId: site.id, actorId: user.id, targetType: "Visit", targetId: visit.id, meta: { passId: pass.id, gateId: gate.id, status, conflict, offline, scanId } });
     await notifyEntered(visit);
     log.info("guard.scan_entered", { visitId: visit.id, passId: pass.id, status, conflict });
-    return Response.json({ ok: true, action: "entered", conflict, visit: visitJson(visit), pass: info } satisfies ScanResponse);
+    // Badge step: number the visit now so the kiosk can print; a queued (offline) scan has no kiosk waiting.
+    const badge = policy?.badge && !offline ? await badgeStep(visit.id, policy.autoPrintBadge) : undefined;
+    return Response.json({ ok: true, action: "entered", conflict, visit: visitJson({ ...visit, badgeNo: badge?.badgeNo ?? visit.badgeNo }), pass: info, ...(badge ? { badge } : {}) } satisfies ScanResponse);
   });
+}
+
+/** Numbers the badge for the kiosk's badge step; a numbering problem must not turn a recorded entry into a red screen. */
+async function badgeStep(visitId: string, autoPrint: boolean): Promise<{ visitId: string; badgeNo: string | null; autoPrint: boolean }> {
+  try {
+    return { visitId, badgeNo: await assignBadgeNo(visitId), autoPrint };
+  } catch (err) {
+    log.error("badge.assign_failed", { visitId, err: String(err) });
+    return { visitId, badgeNo: null, autoPrint };
+  }
 }
 
 async function loadPass(passId: string) {

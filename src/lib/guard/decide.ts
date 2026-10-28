@@ -9,7 +9,7 @@ import type { PassWarning } from "@/lib/guard/types";
 
 export type { PassWarning };
 
-export type PolicyFlags = { requiresNda: boolean; escortRequired: boolean; badge: boolean; receptionOnly: boolean; allowedGateIds: string[] };
+export type PolicyFlags = { requiresNda: boolean; escortRequired: boolean; badge: boolean; receptionOnly: boolean; allowedGateIds: string[]; autoPrintBadge: boolean };
 
 /** The policy row for a kind, or the seed defaults when the site has none. */
 export function policyFlags(kind: VisitKind, policy: Partial<PolicyFlags> | null | undefined): PolicyFlags {
@@ -20,6 +20,7 @@ export function policyFlags(kind: VisitKind, policy: Partial<PolicyFlags> | null
     badge: policy?.badge ?? d.badge,
     receptionOnly: policy?.receptionOnly ?? d.receptionOnly,
     allowedGateIds: policy?.allowedGateIds ?? d.allowedGateIds,
+    autoPrintBadge: policy?.autoPrintBadge ?? false,
   };
 }
 

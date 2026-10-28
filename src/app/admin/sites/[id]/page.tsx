@@ -4,7 +4,9 @@ import { getTranslations } from "next-intl/server";
 import { requireMembership } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
 import { getManagedSite, readSiteSettings, timeZoneOptions } from "@/lib/server/sites";
-import { createAreaAction, createGateAction, toggleAreaAction, toggleGateAction, updateAreaAction, updateSiteAction } from "../actions";
+import { PRINTER_KINDS, readPrinter } from "@/lib/badges/config";
+import { BADGE_TEMPLATES } from "@/lib/badges/zpl";
+import { createAreaAction, createGateAction, toggleAreaAction, toggleGateAction, updateAreaAction, updateGatePrinterAction, updateSiteAction } from "../actions";
 
 const GATE_KINDS = ["pedestrian", "vehicle", "dock"] as const;
 
@@ -15,6 +17,7 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
   const t = await getTranslations("admin.sitesPage");
   const tc = await getTranslations("admin.common");
   const tg = await getTranslations("admin.gateKinds");
+  const tb = await getTranslations("badges");
   const site = await getManagedSite(tenant, id);
   if (!site) notFound();
   const settings = readSiteSettings(site);
@@ -23,7 +26,7 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
     db.area.findMany({ where: { siteId: site.id }, orderBy: [{ active: "desc" }, { name: "asc" }] }),
   ]);
   const isGlobal = tenant.membership.siteId === null;
-  const okText = sp.ok === "created" ? t("created") : sp.ok === "gate" ? t("gateAdded") : sp.ok === "area" ? t("areaAdded") : sp.ok ? tc("saved") : null;
+  const okText = sp.ok === "created" ? t("created") : sp.ok === "gate" ? t("gateAdded") : sp.ok === "area" ? t("areaAdded") : sp.ok === "printer" ? tb("admin.printerSaved") : sp.ok ? tc("saved") : null;
   const errorText = sp.error === "areaExists" ? t("errors.areaExists") : sp.error === "timezone" ? t("errors.timezone") : sp.error ? tc("invalid") : null;
 
   return (
@@ -61,6 +64,12 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
             <label className="label" htmlFor="unannouncedTimeoutMin">{t("unannouncedTimeoutMin")}</label>
             <input id="unannouncedTimeoutMin" name="unannouncedTimeoutMin" type="number" min={1} max={240} required defaultValue={settings.unannouncedTimeoutMin} className="input" />
           </div>
+          <div>
+            <label className="label" htmlFor="badgeTemplate">{tb("admin.template")}</label>
+            <select id="badgeTemplate" name="badgeTemplate" className="input" defaultValue={settings.badgeTemplate}>
+              {BADGE_TEMPLATES.map((tpl) => <option key={tpl} value={tpl}>{tb(`templates.${tpl}`)}</option>)}
+            </select>
+          </div>
           {isGlobal ? (
             <div className="flex items-end">
               <label className="flex items-center gap-2 py-2">
@@ -96,18 +105,36 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
           <p className="muted">{t("noGates")}</p>
         ) : (
           <ul className="divide-y divide-border" data-testid="gates">
-            {gates.map((g) => (
+            {gates.map((g) => {
+              const printer = readPrinter(g.settings);
+              return (
               <li key={g.id} className="flex flex-wrap items-center gap-3 py-2">
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">{g.name}</p>
                   <p className="muted">{tg(g.kind)} · {g.active ? tc("active") : tc("inactive")}</p>
                 </div>
+                <form action={updateGatePrinterAction} className="flex flex-wrap items-end gap-2" aria-label={`${tb("admin.printer")} · ${g.name}`}>
+                  <input type="hidden" name="gateId" value={g.id} />
+                  <div>
+                    <label className="label" htmlFor={`printerKind-${g.id}`}>{tb("admin.printer")}</label>
+                    <select id={`printerKind-${g.id}`} name="printerKind" className="input text-sm" defaultValue={printer?.kind ?? "none"}>
+                      <option value="none">{tb("printerKinds.none")}</option>
+                      {PRINTER_KINDS.map((k) => <option key={k} value={k}>{tb(`printerKinds.${k}`)}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label" htmlFor={`printerName-${g.id}`}>{tb("admin.printerName")}</label>
+                    <input id={`printerName-${g.id}`} name="printerName" maxLength={80} defaultValue={printer?.name ?? ""} placeholder="ZP450" className="input text-sm" />
+                  </div>
+                  <button type="submit" className="btn-secondary text-sm">{tb("admin.savePrinter")}</button>
+                </form>
                 <form action={toggleGateAction}>
                   <input type="hidden" name="gateId" value={g.id} />
                   <button type="submit" className="btn-secondary text-sm">{g.active ? t("deactivate") : t("activate")}</button>
                 </form>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </section>

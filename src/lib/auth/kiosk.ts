@@ -42,7 +42,7 @@ export async function enrollDevice(code: string): Promise<GuardDevice | null> {
 }
 
 export type KioskSite = { id: string; name: string; timezone: string; settings: Prisma.JsonValue };
-export type KioskGate = { id: string; name: string; kind: GateKind };
+export type KioskGate = { id: string; name: string; kind: GateKind; settings: Prisma.JsonValue };
 export type EnrolledDevice = GuardDevice & { site: KioskSite; gate: KioskGate };
 
 /** The enrolled device for this browser, or null. */
@@ -54,7 +54,7 @@ export async function getDevice(): Promise<EnrolledDevice | null> {
     where: { deviceTokenHash: sha256(token) },
     include: {
       site: { select: { id: true, name: true, timezone: true, settings: true } },
-      gate: { select: { id: true, name: true, kind: true } },
+      gate: { select: { id: true, name: true, kind: true, settings: true } },
     },
   });
   if (!device || !device.active || !device.site || !device.gate) return null;

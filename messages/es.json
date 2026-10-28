@@ -417,7 +417,8 @@
       "not_found": "No encontramos este pase.",
       "rate_limited": "Demasiados escaneos. Espera un momento.",
       "invalid_body": "Solicitud inválida.",
-      "network": "Sin conexión con el servidor."
+      "network": "Sin conexión con el servidor.",
+      "visit_closed": "Este gafete ya registró la salida."
     },
     "warnings": {
       "escort": "Debe ir acompañado",
@@ -1087,6 +1088,62 @@
         "title": "Lista de evacuación",
         "body": "{count, plural, =0 {Nadie adentro} one {# persona adentro} other {# personas adentro}} en {siteName}."
       }
+    }
+  },
+  "badges": {
+    "label": {
+      "host": "Anfitrión",
+      "entry": "Entrada",
+      "badge": "Gafete",
+      "doc": "Doc."
+    },
+    "warnings": {
+      "escort": "Acompañado",
+      "nda": "NDA",
+      "receptionOnly": "Solo recepción",
+      "noBadge": "Sin gafete"
+    },
+    "templates": {
+      "landscape_photo": "Horizontal con foto",
+      "landscape": "Horizontal sin foto"
+    },
+    "printerKinds": {
+      "none": "Sin impresora (descargar ZPL)",
+      "agent": "Agente de impresión (USB en la PC de recepción)",
+      "browser": "Zebra Browser Print"
+    },
+    "admin": {
+      "template": "Plantilla del gafete",
+      "printer": "Impresora",
+      "printerName": "Impresora compartida / dispositivo",
+      "savePrinter": "Guardar impresora",
+      "printerSaved": "Impresora guardada.",
+      "autoPrintBadge": "Imprimir gafete automáticamente"
+    },
+    "panel": {
+      "title": "Gafete",
+      "reprintTitle": "Reimprimir gafete",
+      "loading": "Preparando el gafete…",
+      "loadError": "No se pudo preparar el gafete.",
+      "photoIntro": "Toma una foto rápida para el gafete o continúa sin foto.",
+      "take": "Tomar foto",
+      "retake": "Repetir foto",
+      "addPhoto": "Agregar foto",
+      "skip": "Sin foto",
+      "cameraUnavailable": "No se pudo usar la cámara. Continúa sin foto.",
+      "photoNotStored": "La foto no se guardó; el gafete se imprime sin foto.",
+      "print": "Imprimir gafete",
+      "printAgain": "Imprimir de nuevo",
+      "printing": "Imprimiendo…",
+      "sent": "Gafete enviado a la impresora.",
+      "downloaded": "Sin impresora configurada en esta puerta: se descargó el archivo ZPL.",
+      "browserError": "No se pudo conectar con Zebra Browser Print en este equipo.",
+      "agentError": "No se pudo encolar la impresión. Revisa la impresora de la puerta.",
+      "printError": "No se pudo imprimir. Inténtalo de nuevo.",
+      "autoPrinted": "Impresión automática según la política.",
+      "noPrinter": "Esta puerta no tiene impresora asignada: el archivo ZPL se descarga para enviarlo a la Zebra.",
+      "done": "Listo",
+      "reprint": "Reimprimir gafete"
     }
   }
 }

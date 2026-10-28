@@ -4,6 +4,7 @@ import { KioskBar } from "@/components/guard/KioskBar";
 import { HostPicker } from "@/components/guard/HostPicker";
 import { PendingVisits } from "@/components/guard/PendingVisits";
 import { requireKiosk } from "@/lib/auth/kiosk";
+import { kioskBadgeConfig } from "@/lib/server/badges";
 import { listGateVisits, visitJson } from "@/lib/server/visits";
 import { createUnannouncedAction, searchHostsAction } from "./actions";
 
@@ -56,7 +57,7 @@ export default async function UnannouncedPage({ searchParams }: { searchParams: 
         <section className="card">
           <h2 className="mb-1 text-lg font-semibold">{t("unannounced.pending")}</h2>
           <p className="muted mb-3">{t("unannounced.refresh", { seconds: 4 })}</p>
-          <PendingVisits initial={initial} locale={locale} timeZone={site.timezone} />
+          <PendingVisits initial={initial} locale={locale} timeZone={site.timezone} badgeConfig={kioskBadgeConfig(site, gate)} />
         </section>
       </div>
     </AppShell>

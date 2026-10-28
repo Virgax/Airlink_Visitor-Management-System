@@ -7,6 +7,8 @@ import { db } from "@/lib/db";
 import { getMembershipOrThrow } from "@/lib/auth/guards";
 import { audit } from "@/lib/audit";
 import { getManagedSite, isValidTimeZone, readSiteSettings } from "@/lib/server/sites";
+import { PRINTER_KINDS, readPrinter } from "@/lib/badges/config";
+import { BADGE_TEMPLATES } from "@/lib/badges/zpl";
 
 const nameSchema = z.string().trim().min(2).max(80);
 const slugSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).max(40);
@@ -43,6 +45,7 @@ const updateSchema = z.object({
   timezone: timezoneSchema,
   retentionDays: z.coerce.number().int().min(1).max(3650),
   unannouncedTimeoutMin: z.coerce.number().int().min(1).max(240),
+  badgeTemplate: z.enum(BADGE_TEMPLATES).default("landscape_photo"),
 });
 
 export async function updateSiteAction(formData: FormData): Promise<void> {
@@ -52,14 +55,14 @@ export async function updateSiteAction(formData: FormData): Promise<void> {
     const back = field(formData, "siteId");
     redirect(`/admin/sites/${encodeURIComponent(back)}?error=${parsed.error.issues.some((i) => i.path[0] === "timezone") ? "timezone" : "invalid"}`);
   }
-  const { siteId, name, address, timezone, retentionDays, unannouncedTimeoutMin } = parsed.data;
+  const { siteId, name, address, timezone, retentionDays, unannouncedTimeoutMin, badgeTemplate } = parsed.data;
   const site = await getManagedSite(tenant, siteId);
   if (!site) redirect("/admin/sites?error=invalid");
-  const settings = { ...readSiteSettings(site), retentionDays, unannouncedTimeoutMin };
+  const settings = { ...readSiteSettings(site), retentionDays, unannouncedTimeoutMin, badgeTemplate };
   // Only all-sites admins can deactivate a site (a site-bound admin would lock themselves out).
   const active = tenant.membership.siteId === null ? on(formData, "active") : site.active;
   await db.site.update({ where: { id: site.id }, data: { name, address: address || null, timezone, active, settings } });
-  await audit({ action: "site.settings_changed", siteId: site.id, actorId: tenant.user.id, targetType: "Site", targetId: site.id, meta: { name, timezone, active, retentionDays, unannouncedTimeoutMin } });
+  await audit({ action: "site.settings_changed", siteId: site.id, actorId: tenant.user.id, targetType: "Site", targetId: site.id, meta: { name, timezone, active, retentionDays, unannouncedTimeoutMin, badgeTemplate } });
   redirect(`/admin/sites/${site.id}?ok=saved`);
 }
 
@@ -86,6 +89,30 @@ export async function toggleGateAction(formData: FormData): Promise<void> {
   const updated = await db.gate.update({ where: { id: gate.id }, data: { active: !gate.active } });
   await audit({ action: "gate.changed", siteId: site.id, actorId: tenant.user.id, targetType: "Gate", targetId: gate.id, meta: { op: updated.active ? "activated" : "deactivated" } });
   redirect(`/admin/sites/${site.id}?ok=saved`);
+}
+
+const printerSchema = z.object({
+  gateId: z.string().min(1),
+  printerKind: z.enum(["none", ...PRINTER_KINDS]),
+  printerName: z.string().trim().max(80).optional().or(z.literal("")),
+});
+
+/** Printer of a gate (`Gate.settings.printer`): the print agent's shared printer, Zebra Browser Print, or none. */
+export async function updateGatePrinterAction(formData: FormData): Promise<void> {
+  const tenant = await getMembershipOrThrow("admin");
+  const parsed = printerSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) redirect("/admin/sites?error=invalid");
+  const gate = await db.gate.findUnique({ where: { id: parsed.data.gateId } });
+  if (!gate) redirect("/admin/sites?error=invalid");
+  const site = await getManagedSite(tenant, gate.siteId);
+  if (!site) redirect("/admin/sites?error=invalid");
+  const current = gate.settings && typeof gate.settings === "object" && !Array.isArray(gate.settings) ? (gate.settings as Record<string, unknown>) : {};
+  const printer = parsed.data.printerKind === "none" ? null : { kind: parsed.data.printerKind, name: parsed.data.printerName?.trim() ?? "" };
+  const { printer: _old, ...rest } = current;
+  const settings = (printer ? { ...rest, printer } : rest) as Prisma.InputJsonObject;
+  await db.gate.update({ where: { id: gate.id }, data: { settings } });
+  await audit({ action: "gate.changed", siteId: site.id, actorId: tenant.user.id, targetType: "Gate", targetId: gate.id, meta: { op: "printer", printer: readPrinter({ printer }) } });
+  redirect(`/admin/sites/${site.id}?ok=printer`);
 }
 
 const areaSchema = z.object({ siteId: z.string().min(1), name: nameSchema });

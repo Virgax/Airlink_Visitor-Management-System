@@ -37,6 +37,8 @@ export type AuditAction =
   | "blacklist.hit"
   | "blacklist.added"
   | "blacklist.removed"
+  | "badge.printed"
+  | "badge.reprinted"
   | "shift.incident"
   | "report.exported";
 

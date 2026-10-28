@@ -5,7 +5,11 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { enrollDevice, getDevice, touchDevice } from "@/lib/auth/kiosk";
 import { verifyPassword } from "@/lib/auth/password";
+import { cookies } from "next/headers";
+import { PRINT_COOKIE } from "@/lib/auth/cookies";
 import { createSession, destroySession } from "@/lib/auth/session";
+import { readPrinter } from "@/lib/badges/config";
+import { isProd } from "@/lib/env";
 import { rateLimit } from "@/lib/rateLimit";
 import { audit } from "@/lib/audit";
 
@@ -44,11 +48,20 @@ export async function pinLoginAction(formData: FormData): Promise<void> {
   }
   await createSession(user.id, { guardDeviceId: device.id });
   await touchDevice(device.id);
+  await setPrintCookie(readPrinter(device.gate.settings)?.kind === "browser");
   await audit({ action: "auth.kiosk_login", siteId: device.siteId, actorId: user.id, targetType: "GuardDevice", targetId: device.id });
   redirect("/guard");
 }
 
 export async function lockAction(): Promise<void> {
   await destroySession();
+  await setPrintCookie(false);
   redirect("/guard");
+}
+
+/** Tells the middleware to allow Zebra Browser Print (localhost:9100) in the CSP of /guard pages for this kiosk. */
+async function setPrintCookie(browserPrint: boolean): Promise<void> {
+  const jar = await cookies();
+  if (browserPrint) jar.set(PRINT_COOKIE, "browser", { httpOnly: true, secure: isProd(), sameSite: "lax", path: "/guard", maxAge: 12 * 3600 });
+  else jar.delete({ name: PRINT_COOKIE, path: "/guard" });
 }

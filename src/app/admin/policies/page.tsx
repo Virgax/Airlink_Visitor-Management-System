@@ -17,6 +17,7 @@ export default async function PoliciesPage({ searchParams }: { searchParams: Pro
   const tc = await getTranslations("admin.common");
   const tk = await getTranslations("admin.kinds");
   const tr = await getTranslations("roles");
+  const tb = await getTranslations("badges.admin");
   const sites = (await listManagedSites(tenant)).filter((s) => s.active);
   const site = sites.find((s) => s.id === sp.site) ?? sites.find((s) => s.id === tenant.site?.id) ?? sites[0];
 
@@ -59,7 +60,7 @@ export default async function PoliciesPage({ searchParams }: { searchParams: Pro
       <div className="grid gap-4 lg:grid-cols-2">
         {KINDS.map((kind) => {
           const saved = byKind.get(kind);
-          const p = saved ?? { kind, ...DEFAULT_POLICIES[kind] };
+          const p = saved ?? { kind, ...DEFAULT_POLICIES[kind], autoPrintBadge: false };
           const id = (f: string) => `${kind}-${f}`;
           return (
             <form key={kind} id={`policy-${kind}`} action={savePolicyAction} className="card space-y-3" aria-labelledby={id("title")} data-testid={`policy-${kind}`}>
@@ -76,6 +77,7 @@ export default async function PoliciesPage({ searchParams }: { searchParams: Pro
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="escortRequired" defaultChecked={p.escortRequired} /> {t("escortRequired")}</label>
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="badge" defaultChecked={p.badge} /> {t("badge")}</label>
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="receptionOnly" defaultChecked={p.receptionOnly} /> {t("receptionOnly")}</label>
+                <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="autoPrintBadge" defaultChecked={p.autoPrintBadge} /> {tb("autoPrintBadge")}</label>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
