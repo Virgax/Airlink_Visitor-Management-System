@@ -3,7 +3,10 @@ import { getTranslations } from "next-intl/server";
 import type { VisitKind } from "@prisma/client";
 import { requireMembership } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
+import { Pencil } from "lucide-react";
+import { Icon } from "@/components/Icon";
 import { DEFAULT_POLICIES } from "@/lib/policies/evaluate";
+import { templateWhereForSite } from "@/lib/server/forms";
 import { listManagedSites } from "@/lib/server/sites";
 import { resetPolicyAction, savePolicyAction } from "./actions";
 
@@ -28,9 +31,10 @@ export default async function PoliciesPage({ searchParams }: { searchParams: Pro
       </div>
     );
   }
-  const [policies, gates] = await Promise.all([
+  const [policies, gates, templates] = await Promise.all([
     db.visitPolicy.findMany({ where: { siteId: site.id } }),
     db.gate.findMany({ where: { siteId: site.id, active: true }, orderBy: { name: "asc" } }),
+    db.formTemplate.findMany({ where: { ...templateWhereForSite(site.id), active: true }, select: { id: true, name: true, siteId: true }, orderBy: { name: "asc" } }),
   ]);
   const byKind = new Map(policies.map((p) => [p.kind, p]));
   const okText = sp.ok === "reset" ? t("resetDone") : sp.ok ? t("saved") : null;
@@ -61,6 +65,7 @@ export default async function PoliciesPage({ searchParams }: { searchParams: Pro
           const saved = byKind.get(kind);
           const p = saved ?? { kind, ...DEFAULT_POLICIES[kind] };
           const id = (f: string) => `${kind}-${f}`;
+          const templateId = saved?.formTemplateId && templates.some((x) => x.id === saved.formTemplateId) ? saved.formTemplateId : "";
           return (
             <form key={kind} id={`policy-${kind}`} action={savePolicyAction} className="card space-y-3" aria-labelledby={id("title")} data-testid={`policy-${kind}`}>
               <input type="hidden" name="siteId" value={site.id} />
@@ -89,6 +94,17 @@ export default async function PoliciesPage({ searchParams }: { searchParams: Pro
                   <label className="label" htmlFor={id("maxDurationMin")}>{t("maxDurationMin")}</label>
                   <input id={id("maxDurationMin")} name="maxDurationMin" type="number" min={5} max={10080} placeholder={t("noLimit")} defaultValue={p.maxDurationMin ?? ""} className="input" />
                 </div>
+              </div>
+              <div>
+                <label className="label" htmlFor={id("formTemplateId")}>{t("formTemplate")}</label>
+                <div className="flex gap-2">
+                  <select id={id("formTemplateId")} name="formTemplateId" className="input" defaultValue={templateId}>
+                    <option value="">{t("defaultForm")}</option>
+                    {templates.map((tpl) => <option key={tpl.id} value={tpl.id}>{tpl.name}{tpl.siteId ? "" : ` · ${t("sharedTemplate")}`}</option>)}
+                  </select>
+                  {templateId ? <Link href={`/admin/forms/${templateId}`} className="btn-secondary shrink-0 text-sm" title={t("editForm")}><Icon icon={Pencil} /> <span className="sr-only sm:not-sr-only">{t("editForm")}</span></Link> : null}
+                </div>
+                <p className="muted mt-1">{t("formTemplateHelp")} <Link href="/admin/forms" className="underline">{t("manageForms")}</Link></p>
               </div>
               <fieldset>
                 <legend className="label">{t("allowedGates")}</legend>
