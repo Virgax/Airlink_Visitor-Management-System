@@ -3,8 +3,13 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { requireMembership } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
+import { Printer, QrCode } from "lucide-react";
+import { Icon } from "@/components/Icon";
 import { getManagedSite, readSiteSettings, timeZoneOptions } from "@/lib/server/sites";
-import { createAreaAction, createGateAction, toggleAreaAction, toggleGateAction, updateAreaAction, updateSiteAction } from "../actions";
+import { readGateSettings, selfSignInPath } from "@/lib/server/gates";
+import { VISIT_KINDS } from "@/lib/passes/form";
+import { absoluteUrl } from "@/lib/notifications/channels/types";
+import { createAreaAction, createGateAction, toggleAreaAction, toggleGateAction, toggleSelfSignInAction, updateAreaAction, updateSelfSignInKindsAction, updateSiteAction } from "../actions";
 
 const GATE_KINDS = ["pedestrian", "vehicle", "dock"] as const;
 
@@ -15,6 +20,8 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
   const t = await getTranslations("admin.sitesPage");
   const tc = await getTranslations("admin.common");
   const tg = await getTranslations("admin.gateKinds");
+  const tk = await getTranslations("admin.kinds");
+  const ts = await getTranslations("ops.selfSignIn.admin");
   const site = await getManagedSite(tenant, id);
   if (!site) notFound();
   const settings = readSiteSettings(site);
@@ -23,7 +30,14 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
     db.area.findMany({ where: { siteId: site.id }, orderBy: [{ active: "desc" }, { name: "asc" }] }),
   ]);
   const isGlobal = tenant.membership.siteId === null;
-  const okText = sp.ok === "created" ? t("created") : sp.ok === "gate" ? t("gateAdded") : sp.ok === "area" ? t("areaAdded") : sp.ok ? tc("saved") : null;
+  const okText =
+    sp.ok === "created" ? t("created")
+    : sp.ok === "gate" ? t("gateAdded")
+    : sp.ok === "area" ? t("areaAdded")
+    : sp.ok === "selfSignInOn" ? ts("enabled")
+    : sp.ok === "selfSignInOff" ? ts("disabled")
+    : sp.ok ? tc("saved")
+    : null;
   const errorText = sp.error === "areaExists" ? t("errors.areaExists") : sp.error === "timezone" ? t("errors.timezone") : sp.error ? tc("invalid") : null;
 
   return (
@@ -96,18 +110,54 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
           <p className="muted">{t("noGates")}</p>
         ) : (
           <ul className="divide-y divide-border" data-testid="gates">
-            {gates.map((g) => (
-              <li key={g.id} className="flex flex-wrap items-center gap-3 py-2">
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium">{g.name}</p>
-                  <p className="muted">{tg(g.kind)} · {g.active ? tc("active") : tc("inactive")}</p>
-                </div>
-                <form action={toggleGateAction}>
-                  <input type="hidden" name="gateId" value={g.id} />
-                  <button type="submit" className="btn-secondary text-sm">{g.active ? t("deactivate") : t("activate")}</button>
-                </form>
-              </li>
-            ))}
+            {gates.map((g) => {
+              const selfKinds = readGateSettings(g).selfSignInKinds;
+              return (
+                <li key={g.id} id={`gate-${g.id}`} className="space-y-2 py-3" data-testid="gate" data-gate-name={g.name}>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">{g.name}</p>
+                      <p className="muted">{tg(g.kind)} · {g.active ? tc("active") : tc("inactive")}</p>
+                    </div>
+                    <form action={toggleSelfSignInAction}>
+                      <input type="hidden" name="gateId" value={g.id} />
+                      <button type="submit" className="btn-secondary text-sm" data-testid="toggle-self-sign-in">
+                        <Icon icon={QrCode} /> {g.selfSignInToken ? ts("disable") : ts("enable")}
+                      </button>
+                    </form>
+                    {g.selfSignInToken ? (
+                      <Link href={`/admin/sites/${site.id}/gates/${g.id}/poster`} className="btn-secondary text-sm" data-testid="poster-link">
+                        <Icon icon={Printer} /> {ts("poster")}
+                      </Link>
+                    ) : null}
+                    <form action={toggleGateAction}>
+                      <input type="hidden" name="gateId" value={g.id} />
+                      <button type="submit" className="btn-secondary text-sm">{g.active ? t("deactivate") : t("activate")}</button>
+                    </form>
+                  </div>
+                  {g.selfSignInToken ? (
+                    <form action={updateSelfSignInKindsAction} className="rounded-lg bg-surface-2 p-3" data-testid="self-sign-in-settings">
+                      <input type="hidden" name="gateId" value={g.id} />
+                      <p className="muted mb-2 break-all">
+                        {ts("url")}: <a href={selfSignInPath(g.selfSignInToken)} className="underline" target="_blank" rel="noopener" data-testid="self-sign-in-url">{absoluteUrl(selfSignInPath(g.selfSignInToken))}</a>
+                      </p>
+                      <fieldset>
+                        <legend className="label">{ts("kinds")}</legend>
+                        <div className="flex flex-wrap gap-3">
+                          {VISIT_KINDS.map((k) => (
+                            <label key={k} className="flex items-center gap-2 text-sm">
+                              <input type="checkbox" name="selfSignInKinds" value={k} defaultChecked={selfKinds.includes(k)} /> {tk(k)}
+                            </label>
+                          ))}
+                        </div>
+                        <p className="muted mt-1 text-xs">{ts("kindsHelp")}</p>
+                      </fieldset>
+                      <button type="submit" className="btn-secondary mt-2 text-sm">{tc("save")}</button>
+                    </form>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

@@ -8,6 +8,12 @@ export const VISIT_STATUSES = ["pending", "approved", "denied", "inside", "at_do
 export const SHIFT_LOG_KINDS = ["note", "incident", "round", "handover"] as const satisfies readonly ShiftLogKind[];
 
 export const REPORT_PAGE_SIZE = 50;
+/** Rows-per-page choices offered in the reports (the URL carries `pageSize`). */
+export const PAGE_SIZES = [25, 50, 100] as const;
+export type PageSize = (typeof PAGE_SIZES)[number];
+/** Quick date ranges, resolved in the site's time zone (`range` in the URL beats `from`/`to`). */
+export const QUICK_RANGES = ["today", "yesterday", "week", "month"] as const;
+export type QuickRange = (typeof QUICK_RANGES)[number];
 export const SHIFT_LOG_TEXT_MAX = 2000;
 /** Longest date range a report accepts (inclusive days). */
 export const MAX_RANGE_DAYS = 366;
@@ -36,13 +42,19 @@ const page = z.preprocess((v) => {
   const n = Number(typeof v === "string" ? v : "1");
   return Number.isInteger(n) && n >= 1 ? Math.min(n, 100_000) : 1;
 }, z.number().int().min(1));
+const pageSize = z.preprocess((v) => {
+  const n = Number(typeof v === "string" ? v : "");
+  return (PAGE_SIZES as readonly number[]).includes(n) ? n : undefined;
+}, z.number().int().optional());
 
 const baseSchema = z.object({
   from: ymd(),
   to: ymd(),
+  range: oneOf(QUICK_RANGES),
   siteId: id(),
   gateId: id(),
   page,
+  pageSize,
 });
 
 export const visitFiltersSchema = baseSchema.extend({
@@ -51,6 +63,8 @@ export const visitFiltersSchema = baseSchema.extend({
   host: text(80),
   areaId: id(),
   company: text(80),
+  /** Free text matched against visitor name, company, host name, plate and docLast4. */
+  q: text(80),
 });
 
 export const shiftLogFiltersSchema = baseSchema.extend({
@@ -64,8 +78,33 @@ export type ShiftLogFilters = Omit<z.infer<typeof shiftLogFiltersSchema>, "from"
 
 export type ParseOptions = { timeZone: string; now?: Date };
 
-function normalizeRange<T extends { from?: string; to?: string }>(parsed: T, opts: ParseOptions): Omit<T, "from" | "to"> & { from: string; to: string } {
-  const today = localParts(opts.now ?? new Date(), opts.timeZone).ymd;
+/** Local "YYYY-MM-DD" bounds of a quick range (both inclusive): today, yesterday, Monday–today, 1st–today. */
+export function quickRangeDays(range: QuickRange, now: Date, timeZone: string): { from: string; to: string } {
+  const { ymd: today, weekday } = localParts(now, timeZone);
+  switch (range) {
+    case "today":
+      return { from: today, to: today };
+    case "yesterday": {
+      const y = addDaysYmd(today, -1);
+      return { from: y, to: y };
+    }
+    case "week": {
+      // Weeks start on Monday (weekday 1); Sunday (0) belongs to the week that started 6 days earlier.
+      const back = weekday === 0 ? 6 : weekday - 1;
+      return { from: addDaysYmd(today, -back), to: today };
+    }
+    case "month":
+      return { from: `${today.slice(0, 8)}01`, to: today };
+  }
+}
+
+function normalizeRange<T extends { from?: string; to?: string; range?: QuickRange }>(parsed: T, opts: ParseOptions): Omit<T, "from" | "to"> & { from: string; to: string } {
+  const now = opts.now ?? new Date();
+  const today = localParts(now, opts.timeZone).ymd;
+  if (parsed.range) {
+    const quick = quickRangeDays(parsed.range, now, opts.timeZone);
+    return { ...parsed, from: quick.from, to: quick.to };
+  }
   let from = parsed.from ?? parsed.to ?? today;
   let to = parsed.to ?? parsed.from ?? today;
   if (diffDaysYmd(from, to) < 0) [from, to] = [to, from];

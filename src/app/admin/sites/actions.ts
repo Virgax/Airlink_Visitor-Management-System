@@ -7,6 +7,9 @@ import { db } from "@/lib/db";
 import { getMembershipOrThrow } from "@/lib/auth/guards";
 import { audit } from "@/lib/audit";
 import { getManagedSite, isValidTimeZone, readSiteSettings } from "@/lib/server/sites";
+import { readGateSettings } from "@/lib/server/gates";
+import { randomToken } from "@/lib/crypto/tokens";
+import { isVisitKind } from "@/lib/passes/form";
 
 const nameSchema = z.string().trim().min(2).max(80);
 const slugSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).max(40);
@@ -129,4 +132,35 @@ export async function toggleAreaAction(formData: FormData): Promise<void> {
   const updated = await db.area.update({ where: { id: area.id }, data: { active: !area.active } });
   await audit({ action: "area.changed", siteId: site.id, actorId: tenant.user.id, targetType: "Area", targetId: area.id, meta: { op: updated.active ? "activated" : "deactivated" } });
   redirect(`/admin/sites/${site.id}?ok=saved`);
+}
+
+// ───────────────────────────── Gate QR self sign-in (slice H) ─────────────────────────────
+
+/** Enables (new public token) or disables (token removed, the poster stops working) self sign-in for a gate. */
+export async function toggleSelfSignInAction(formData: FormData): Promise<void> {
+  const tenant = await getMembershipOrThrow("admin");
+  const gateId = field(formData, "gateId");
+  const gate = await db.gate.findUnique({ where: { id: gateId } });
+  if (!gate) redirect("/admin/sites?error=invalid");
+  const site = await getManagedSite(tenant, gate.siteId);
+  if (!site) redirect("/admin/sites?error=invalid");
+  const enable = gate.selfSignInToken === null;
+  await db.gate.update({ where: { id: gate.id }, data: { selfSignInToken: enable ? randomToken(16) : null } });
+  await audit({ action: "gate.self_sign_in", siteId: site.id, actorId: tenant.user.id, targetType: "Gate", targetId: gate.id, meta: { op: enable ? "enabled" : "disabled" } });
+  redirect(`/admin/sites/${site.id}?ok=${enable ? "selfSignInOn" : "selfSignInOff"}#gate-${gate.id}`);
+}
+
+/** Which visit kinds walk-ins may pick on the public form (`Gate.settings.selfSignInKinds`; empty = every enabled kind). */
+export async function updateSelfSignInKindsAction(formData: FormData): Promise<void> {
+  const tenant = await getMembershipOrThrow("admin");
+  const gateId = field(formData, "gateId");
+  const gate = await db.gate.findUnique({ where: { id: gateId } });
+  if (!gate) redirect("/admin/sites?error=invalid");
+  const site = await getManagedSite(tenant, gate.siteId);
+  if (!site) redirect("/admin/sites?error=invalid");
+  const kinds = [...new Set(formData.getAll("selfSignInKinds").map(String).filter(isVisitKind))];
+  const settings = { ...readGateSettings(gate), selfSignInKinds: kinds };
+  await db.gate.update({ where: { id: gate.id }, data: { settings } });
+  await audit({ action: "gate.self_sign_in", siteId: site.id, actorId: tenant.user.id, targetType: "Gate", targetId: gate.id, meta: { op: "kinds", kinds } });
+  redirect(`/admin/sites/${site.id}?ok=saved#gate-${gate.id}`);
 }

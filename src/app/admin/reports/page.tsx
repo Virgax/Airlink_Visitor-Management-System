@@ -1,10 +1,13 @@
+import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
+import { UserPlus } from "lucide-react";
+import { Icon } from "@/components/Icon";
 import { requireReportsTenant } from "@/lib/auth/reports-access";
 import { fmtDate, fmtNumber } from "@/lib/format";
-import { durationMinutes, queryVisits, reportTimeZone } from "@/lib/server/reports";
+import { durationMinutes, queryVisits, reportKpis, reportTimeZone } from "@/lib/server/reports";
 import { filtersToQuery, parseVisitFilters, VISIT_KINDS, VISIT_STATUSES, type SearchParams } from "@/lib/server/reports-filters";
 import { filterOptions, rawSiteId } from "./data";
-import { FilterActions, Pagination, RangeSiteGateFields, ReportNav, StatusBadge } from "./ui";
+import { FilterActions, PageSizeField, Pagination, QuickRanges, RangeSiteGateFields, ReportNav, StatusBadge } from "./ui";
 
 export default async function VisitsReportPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
@@ -13,10 +16,17 @@ export default async function VisitsReportPage({ searchParams }: { searchParams:
   const locale = await getLocale();
   const filters = parseVisitFilters(sp, { timeZone: reportTimeZone({ siteId: rawSiteId(sp) }, tenant) });
   const tz = reportTimeZone(filters, tenant);
-  const [result, options] = await Promise.all([queryVisits(filters, tenant), filterOptions(tenant)]);
+  const [result, options, kpis] = await Promise.all([queryVisits(filters, tenant), filterOptions(tenant), reportKpis(filters, tenant)]);
   const showSite = tenant.sites.length > 1;
   const areas = filters.siteId ? options.areas.filter((a) => a.siteId === filters.siteId) : options.areas;
-  const exportHref = `/admin/reports/export.csv${filtersToQuery({ ...filters, page: undefined })}`;
+  const exportHref = `/admin/reports/export.csv${filtersToQuery({ ...filters, page: undefined, range: undefined, pageSize: undefined })}`;
+  // Links keep the explicit dates: `range` only picks them once (the URL stays shareable later).
+  const linkFilters = { ...filters, range: undefined };
+  const kpiTiles = [
+    ["inside", kpis.insideNow],
+    ["entered", kpis.enteredInRange],
+    ["left", kpis.leftInRange],
+  ] as const;
   const totals = [
     ["inside", (result.byStatus.inside ?? 0) + (result.byStatus.at_dock ?? 0)],
     ["left", result.byStatus.left ?? 0],
@@ -30,9 +40,22 @@ export default async function VisitsReportPage({ searchParams }: { searchParams:
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
         <p className="muted mt-1">{t("intro.visits")}</p>
       </div>
-      <ReportNav active="visits" />
+      <div className="flex flex-wrap items-center gap-2">
+        <ReportNav active="visits" />
+        <Link href="/admin/reports/sign-in" className="btn-primary ml-auto text-sm" data-testid="sign-in-link"><Icon icon={UserPlus} /> {t("signIn")}</Link>
+      </div>
+
+      <dl className="grid grid-cols-3 gap-3" data-testid="visit-kpis">
+        {kpiTiles.map(([k, v]) => (
+          <div key={k} className="card">
+            <dt className="muted">{t(`kpis.${k}`)}</dt>
+            <dd className="mt-1 text-2xl font-semibold tabular-nums" data-testid={`kpi-${k}`}>{fmtNumber(v, locale)}</dd>
+          </div>
+        ))}
+      </dl>
 
       <form method="get" action="/admin/reports" className="card grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <QuickRanges basePath="/admin/reports" filters={linkFilters} active={filters.range} />
         <RangeSiteGateFields filters={filters} sites={tenant.sites} gates={options.gates} showSite={showSite} />
         <div>
           <label className="label" htmlFor="kind">{t("filters.kind")}</label>
@@ -63,6 +86,11 @@ export default async function VisitsReportPage({ searchParams }: { searchParams:
           <label className="label" htmlFor="company">{t("filters.company")}</label>
           <input id="company" name="company" type="search" className="input" defaultValue={filters.company ?? ""} placeholder={t("filters.companyPlaceholder")} maxLength={80} />
         </div>
+        <div className="sm:col-span-2 lg:col-span-3">
+          <label className="label" htmlFor="q">{t("filters.q")}</label>
+          <input id="q" name="q" type="search" className="input" defaultValue={filters.q ?? ""} placeholder={t("filters.qPlaceholder")} maxLength={80} />
+        </div>
+        <PageSizeField value={filters.pageSize} />
         <FilterActions clearHref="/admin/reports" exportHref={exportHref} />
       </form>
 
@@ -125,7 +153,7 @@ export default async function VisitsReportPage({ searchParams }: { searchParams:
         </div>
       )}
 
-      <Pagination basePath="/admin/reports" filters={filters} page={result.page} pages={result.pages} />
+      <Pagination basePath="/admin/reports" filters={linkFilters} page={result.page} pages={result.pages} />
     </div>
   );
 }

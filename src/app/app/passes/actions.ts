@@ -9,6 +9,7 @@ import { audit } from "@/lib/audit";
 import { ensureEmployeeForUser } from "@/lib/server/employees-link";
 import { ownPassWhere } from "@/lib/server/host-passes";
 import { createPass, revokePass } from "@/lib/server/passes";
+import { isKindEnabled } from "@/lib/server/policies";
 import { buildSchedule, checkWindowRange, isVisitKind, parseGroupSize, uniqueIds } from "@/lib/passes/form";
 import { zonedToUtc } from "@/lib/time/tz";
 
@@ -56,6 +57,7 @@ export async function createPassAction(formData: FormData): Promise<void> {
   assertSiteAllowed(tenant, d.siteId);
   const site = await db.site.findFirst({ where: { id: d.siteId, active: true } });
   if (!site) fail(d.siteId, "site");
+  if (!(await isKindEnabled(site.id, d.kind))) fail(site.id, "invalid");
 
   const validFrom = zonedToUtc(d.validFrom, site.timezone);
   const validUntil = zonedToUtc(d.validUntil, site.timezone);

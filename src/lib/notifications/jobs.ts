@@ -2,6 +2,8 @@ import "server-only";
 import { db } from "@/lib/db";
 import { log } from "@/lib/log";
 import { notify } from "@/lib/notifications";
+import { audit } from "@/lib/audit";
+import { autoCloseDue } from "@/lib/policies/autoClose";
 
 const DEFAULT_UNANNOUNCED_TIMEOUT_MIN = 5;
 
@@ -126,5 +128,50 @@ export async function alertOverstays(now = new Date()): Promise<number> {
     }
   }
   if (total) log.info("visits.overstay", { count: total });
+  return total;
+}
+
+/**
+ * Cron: policies with `autoSignOutAt` ("HH:mm", site time zone) close their open visits (`inside` / `at_dock`)
+ * once the site-local day has passed that time. `leftAt` is the cutoff instant itself (not the tick time),
+ * `autoClosed` is set and `visit.left` is audited with `{ auto: true }`. The status transition is atomic
+ * (`updateMany … WHERE status IN (inside, at_dock)`), so repeated ticks never close a visit twice. Returns the count.
+ */
+export async function autoCloseVisits(now = new Date()): Promise<number> {
+  const policies = await db.visitPolicy.findMany({
+    where: { autoSignOutAt: { not: null }, site: { active: true } },
+    select: { siteId: true, kind: true, autoSignOutAt: true, site: { select: { timezone: true } } },
+  });
+  let total = 0;
+  for (const policy of policies) {
+    const at = policy.autoSignOutAt;
+    if (!at) continue;
+    const visits = await db.visit.findMany({
+      where: { siteId: policy.siteId, kind: policy.kind, status: { in: ["inside", "at_dock"] } },
+      select: { id: true, status: true, gateId: true, enteredAt: true, createdAt: true, visitorName: true, hostEmployeeId: true, gate: { select: { name: true } }, company: { select: { name: true } } },
+      take: 500,
+    });
+    for (const visit of visits) {
+      const leftAt = autoCloseDue(visit.enteredAt ?? visit.createdAt, at, policy.site.timezone, now);
+      if (!leftAt) continue;
+      const res = await db.visit.updateMany({
+        where: { id: visit.id, status: { in: ["inside", "at_dock"] } },
+        data: { status: "left", leftAt, autoClosed: true },
+      });
+      if (res.count === 0) continue; // checked out meanwhile
+      total += 1;
+      await audit({ action: "visit.left", siteId: policy.siteId, actorId: null, targetType: "Visit", targetId: visit.id, meta: { auto: true, from: visit.status, gateId: visit.gateId, autoSignOutAt: at } });
+      if (visit.hostEmployeeId) {
+        await notify({
+          type: "visit_left",
+          employeeIds: [visit.hostEmployeeId],
+          siteId: policy.siteId,
+          payload: { visitId: visit.id, visitorName: visit.visitorName, company: visit.company?.name ?? null, gateName: visit.gate.name, auto: true },
+          url: "/app",
+        });
+      }
+    }
+  }
+  if (total) log.info("visits.auto_closed", { count: total });
   return total;
 }

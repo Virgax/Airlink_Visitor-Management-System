@@ -5,16 +5,15 @@ import { HostPicker } from "@/components/guard/HostPicker";
 import { PendingVisits } from "@/components/guard/PendingVisits";
 import { requireKiosk } from "@/lib/auth/kiosk";
 import { listGateVisits, visitJson } from "@/lib/server/visits";
+import { enabledKinds } from "@/lib/server/policies";
 import { createUnannouncedAction, searchHostsAction } from "./actions";
-
-const KINDS = ["visit", "candidate", "contractor", "vendor", "auditor", "carrier", "delivery", "recurring"] as const;
 
 export default async function UnannouncedPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   const sp = await searchParams;
   const { user, site, gate } = await requireKiosk();
   const t = await getTranslations("guard");
   const locale = await getLocale();
-  const initial = (await listGateVisits(site.id)).map(visitJson);
+  const [initial, KINDS] = await Promise.all([listGateVisits(site.id).then((v) => v.map(visitJson)), enabledKinds(site.id)]);
   const errorKey = sp.error && ["invalid", "host", "blacklisted", "company_blocked"].includes(sp.error) ? sp.error : null;
 
   return (
@@ -37,7 +36,7 @@ export default async function UnannouncedPage({ searchParams }: { searchParams: 
             </div>
             <div>
               <label className="label" htmlFor="kind">{t("unannounced.kind")}</label>
-              <select id="kind" name="kind" className="input" defaultValue="visit">
+              <select id="kind" name="kind" className="input" defaultValue={KINDS.includes("visit") ? "visit" : KINDS[0]}>
                 {KINDS.map((k) => <option key={k} value={k}>{t(`kinds.${k}`)}</option>)}
               </select>
             </div>

@@ -8,6 +8,7 @@ import { getMembershipOrThrow } from "@/lib/auth/guards";
 import { audit } from "@/lib/audit";
 import { DEFAULT_POLICIES } from "@/lib/policies/evaluate";
 import { getManagedSite } from "@/lib/server/sites";
+import { normalizeAutoSignOutAt, parseEmailList } from "@/lib/policies/autoClose";
 
 const KINDS = ["visit", "candidate", "contractor", "vendor", "auditor", "carrier", "delivery", "recurring"] as const;
 
@@ -28,6 +29,12 @@ export async function savePolicyAction(formData: FormData): Promise<void> {
   const { siteId, kind, approverRole, maxDurationMin } = parsed.data;
   const site = await getManagedSite(tenant, siteId);
   if (!site) redirect("/admin/policies?error=invalid");
+  // "HH:mm" in the site's time zone (the cron job resolves it per day); empty = never auto sign out.
+  const autoRaw = String(formData.get("autoSignOutAt") ?? "").trim();
+  const autoSignOutAt = autoRaw ? normalizeAutoSignOutAt(autoRaw) : null;
+  if (autoRaw && !autoSignOutAt) redirect(`${back}&error=autoSignOut#policy-${kind}`);
+  const notifyEmails = parseEmailList(String(formData.get("notifyEmails") ?? ""));
+  if (!notifyEmails) redirect(`${back}&error=emails#policy-${kind}`);
   const gateIds = formData.getAll("allowedGateIds").map(String).filter(Boolean);
   const siteGates = gateIds.length ? await db.gate.findMany({ where: { id: { in: gateIds }, siteId: site.id }, select: { id: true } }) : [];
   const data = {
@@ -40,6 +47,9 @@ export async function savePolicyAction(formData: FormData): Promise<void> {
     receptionOnly: on(formData, "receptionOnly"),
     allowedGateIds: siteGates.map((g) => g.id),
     maxDurationMin: maxDurationMin === "" ? null : maxDurationMin,
+    enabled: on(formData, "enabled"),
+    autoSignOutAt,
+    notifyEmails,
   };
   const policy = await db.visitPolicy.upsert({ where: { siteId_kind: { siteId: site.id, kind } }, create: { siteId: site.id, kind, ...data }, update: data });
   await audit({ action: "policy.changed", siteId: site.id, actorId: tenant.user.id, targetType: "VisitPolicy", targetId: policy.id, meta: { kind, ...data } });

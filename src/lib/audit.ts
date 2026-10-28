@@ -15,6 +15,8 @@ export type AuditAction =
   | "site.created"
   | "site.settings_changed"
   | "gate.changed"
+  | "gate.self_sign_in"
+  | "employee.presence"
   | "area.changed"
   | "policy.changed"
   | "company.changed"

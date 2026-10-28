@@ -12,6 +12,7 @@ import { matchBlacklist } from "@/lib/guard/decide";
 import type { EmployeeHit } from "@/lib/guard/types";
 import { searchEmployees } from "@/lib/server/employees-search";
 import { createUnannouncedVisit, securityRecipientIds } from "@/lib/server/visits";
+import { isKindEnabled } from "@/lib/server/policies";
 
 /** Host lookup for the kiosk form (called from the HostPicker client component). */
 export async function searchHostsAction(q: string): Promise<EmployeeHit[]> {
@@ -37,6 +38,7 @@ export async function createUnannouncedAction(formData: FormData): Promise<void>
   const parsed = schema.safeParse(raw);
   if (!parsed.success) redirect("/guard/unannounced?error=invalid");
   const data = parsed.data;
+  if (!(await isKindEnabled(site.id, data.kind))) redirect("/guard/unannounced?error=invalid");
 
   // The host id comes from the browser: re-check it belongs to this site (or has no site).
   const host = await db.employee.findFirst({ where: { id: data.hostEmployeeId, active: true, OR: [{ siteId: site.id }, { siteId: null }] }, select: { id: true } });

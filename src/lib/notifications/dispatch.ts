@@ -20,6 +20,8 @@ export type DispatchInput = {
   siteId: string | null;
   payload: Record<string, unknown>;
   userIds: string[];
+  /** Plain e-mail addresses (policy recipients); rendered in the default locale, no quiet hours. */
+  extraEmails?: string[];
   now?: Date;
 };
 
@@ -82,6 +84,22 @@ async function sendEmail(user: Recipient, message: ChannelMessage): Promise<void
   if (!res.ok) log.warn("notify.channel_failed", { channel: "email", type: message.type, userId: user.id, error: res.error });
 }
 
+/** Policy recipients (`VisitPolicy.notifyEmails`): plain addresses, default locale, no preferences involved. */
+async function sendExtraEmails(input: DispatchInput): Promise<void> {
+  const emails = [...new Set((input.extraEmails ?? []).map((e) => e.trim().toLowerCase()).filter(Boolean))];
+  if (emails.length === 0 || !emailChannel.configured()) return;
+  const rendered = renderNotification(input.type, input.payload, defaultLocale);
+  const message: ChannelMessage = { ...rendered, url: absoluteUrl(rendered.url), type: input.type, locale: defaultLocale, siteId: input.siteId, payload: input.payload };
+  const t = createTranslator({ locale: defaultLocale, messages: MESSAGES[defaultLocale], namespace: "notifications.email" });
+  const labels = { open: t("open"), footer: t("footer") };
+  await Promise.all(
+    emails.map(async (to) => {
+      const res = await emailChannel.send(message, { to, labels });
+      if (!res.ok) log.warn("notify.channel_failed", { channel: "email", type: input.type, to, error: res.error });
+    }),
+  );
+}
+
 async function sendToUser(input: DispatchInput, user: Recipient, siteTimezone: string, now: Date): Promise<void> {
   const prefs: NotificationPrefs = parsePrefs(user.notificationPref?.prefs);
   const locale = user.locale ?? defaultLocale;
@@ -140,6 +158,7 @@ export async function dispatchChannels(input: DispatchInput): Promise<void> {
       : [];
     const results = await Promise.allSettled([
       sendTeams(input, site?.name ?? null, now),
+      sendExtraEmails(input),
       ...users.map((u) => sendToUser(input, u, siteTimezone, now)),
     ]);
     for (const r of results) {
