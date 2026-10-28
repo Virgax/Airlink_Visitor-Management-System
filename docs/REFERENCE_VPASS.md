@@ -72,6 +72,8 @@ instructions; the NDA is acknowledged with a drawn signature.
 | Host element | Host search (done) | done |
 | Preview | **P2**: "Vista previa" on the policy page rendering the visitor form read-only | P2 |
 
+| Named, reusable forms ("Visitor L1", "Visitor L4") shared by several visitor types | **P2**: `FormTemplate` (name, `form` JSON as above, siteId null = all); `VisitPolicy.formTemplateId` optional. A policy either embeds its own `form` or points to a template; the admin page shows "Usado por: …" like VPASS | P2 |
+
 Decision: no free-form page builder. A configuration-driven form (toggles + custom questions) gives the same result
 for Airlink's kinds, stays unit-testable in `evaluatePolicy`, and keeps one consistent form across host, visitor,
 kiosk and self sign-in surfaces.
@@ -79,4 +81,4 @@ kiosk and self sign-in surfaces.
 ## Decisions
 - Keep policies as data (`VisitPolicy`) instead of VPASS-style "forms"; add the few fields above rather than a form builder.
 - Keep our kiosk + host-invitation flow as the primary path; the gate QR self sign-in is an addition for walk-ins, not a replacement.
-- Schema changes needed in Phase 2 (one migration): `VisitPolicy.autoPrintBadge`, `autoSignOutAt`, `enabled`, `notifyEmails`; `Pass.extra`, `Visit.extra`, `Visit.autoClosed`; `Gate.selfSignInToken`, `Gate.settings`; `MembershipRole.warden`; `Employee.pinHash`; `FrequentVisitor`; `Pass.pinCode`; `VisitPolicy.form` (replaces `requiresDoc` + `extraFields`); `NdaVersion.attachmentKey` (or keep PIN on `User` and create the user on first PIN); `EmployeePresence` (self check-in log for the evacuation list).
+- Schema changes needed in Phase 2 (one migration): `VisitPolicy.autoPrintBadge`, `autoSignOutAt`, `enabled`, `notifyEmails`; `Pass.extra`, `Visit.extra`, `Visit.autoClosed`; `Gate.selfSignInToken`, `Gate.settings`; `MembershipRole.warden`; `Employee.pinHash`; `FrequentVisitor`; `Pass.pinCode`; `VisitPolicy.form` (replaces `requiresDoc` + `extraFields`), `VisitPolicy.formTemplateId`, `FormTemplate`; `NdaVersion.attachmentKey` (or keep PIN on `User` and create the user on first PIN); `EmployeePresence` (self check-in log for the evacuation list).
