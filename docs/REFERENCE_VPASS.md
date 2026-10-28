@@ -40,7 +40,16 @@ What the reference product does well and how it maps to Airlink Visitas. Items m
 | Sign Out Only type | not needed (check-out is by QR/badge) | skip |
 | Email notification list per type | **P2**: `VisitPolicy.notifyEmails` (comma list) → `notify` adds an email channel target for `visit_entered` of that kind | P2 |
 
+## Employees (sub-views All / Access / Hosts / Admins / Fire Wardens)
+| VPASS | Ours | Status |
+|---|---|---|
+| One list of employees with role columns Host? / Admin? / Fire Warden? / Active and a per-row toggle | `/admin/employees` (directory) and `/admin/members` (roles) are separate. **P2**: merge into one "Personas" screen: directory row + role chips (Anfitrión = active employee, Admin / Seguridad / Aprobador = memberships, Brigadista = new) with inline toggles; sub-view tabs Todos / Con PIN / Anfitriones / Admins / Brigadistas | P2 |
+| **Pin Code** per employee ("Access") | Security staff have a kiosk PIN. **P2**: optional PIN for any employee, used for (a) kiosk sign-in by security and (b) employee self check-in on the gate QR page when they forgot their badge (audited, employees are not visitors so it only logs presence for the evacuation list) | P2 |
+| **Fire Warden** role | New membership role `warden` (brigadista): receives `evacuation_list` push on demand and when an incident of kind `evacuation` is logged, can open the evacuation list from `/app/evacuacion` on the phone (read-only, offline-cached), and can mark people as "contado" during a drill. Schema: add `warden` to `MembershipRole` | P2 |
+| Search, status filter (Active/Inactive), bulk select + delete, rows per page | **P2** on the merged screen; bulk *deactivate* instead of delete (SPN mirror must not be deleted) | P2 |
+| Add Employee (manual) | exists (manual source) | done |
+
 ## Decisions
 - Keep policies as data (`VisitPolicy`) instead of VPASS-style "forms"; add the few fields above rather than a form builder.
 - Keep our kiosk + host-invitation flow as the primary path; the gate QR self sign-in is an addition for walk-ins, not a replacement.
-- Schema changes needed in Phase 2 (one migration): `VisitPolicy.autoPrintBadge`, `autoSignOutAt`, `enabled`, `notifyEmails`, `extraFields`; `Pass.extra`, `Visit.extra`, `Visit.autoClosed`; `Gate.selfSignInToken`, `Gate.settings`.
+- Schema changes needed in Phase 2 (one migration): `VisitPolicy.autoPrintBadge`, `autoSignOutAt`, `enabled`, `notifyEmails`, `extraFields`; `Pass.extra`, `Visit.extra`, `Visit.autoClosed`; `Gate.selfSignInToken`, `Gate.settings`; `MembershipRole.warden`; `Employee.pinHash` (or keep PIN on `User` and create the user on first PIN); `EmployeePresence` (self check-in log for the evacuation list).
