@@ -74,9 +74,12 @@ instructions; the NDA is acknowledged with a drawn signature.
 
 | Named, reusable forms ("Visitor L1", "Visitor L4") shared by several visitor types | **P2**: `FormTemplate` (name, `form` JSON as above, siteId null = all); `VisitPolicy.formTemplateId` optional. A policy either embeds its own `form` or points to a template; the admin page shows "Usado por: …" like VPASS | P2 |
 
-Decision: no free-form page builder. A configuration-driven form (toggles + custom questions) gives the same result
-for Airlink's kinds, stays unit-testable in `evaluatePolicy`, and keeps one consistent form across host, visitor,
-kiosk and self sign-in surfaces.
+Decision (Jaime, 2026-10-28): **HR must be able to build their own templates**, so Phase 2 ships a visual form
+editor at `/admin/forms`: a list of named `FormTemplate`s, each an ordered list of elements (built-in fields,
+text block, question, media, signature, host) edited with add / move up-down / remove and a properties panel
+(label, help, required, options, show on host/visitor/kiosk, print on badge). No pixel layout: the renderer owns the
+look, so every surface (host invite, visitor link, kiosk, gate self sign-in) stays consistent and the data stays
+unit-testable in `evaluatePolicy`. Drag-and-drop ordering is a nice-to-have on top of the same JSON.
 
 ## Decisions
 - Keep policies as data (`VisitPolicy`) instead of VPASS-style "forms"; add the few fields above rather than a form builder.

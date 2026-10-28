@@ -38,7 +38,8 @@
     "admin": "Administración",
     "security": "Seguridad",
     "approver": "Aprobador",
-    "host": "Anfitrión"
+    "host": "Anfitrión",
+    "warden": "Brigadista"
   },
   "login": {
     "title": "Inicia sesión",

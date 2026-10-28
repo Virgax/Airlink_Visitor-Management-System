@@ -38,7 +38,8 @@
     "admin": "Administration",
     "security": "Security",
     "approver": "Approver",
-    "host": "Host"
+    "host": "Host",
+    "warden": "Fire warden"
   },
   "login": {
     "title": "Sign in",

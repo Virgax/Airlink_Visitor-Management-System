@@ -37,6 +37,9 @@ model Site {
   shiftLogs    ShiftLog[]
   ndaVersions  NdaVersion[]
   auditLogs    AuditLog[]
+  formTemplates    FormTemplate[]
+  frequentVisitors FrequentVisitor[]
+  presences        EmployeePresence[]
 }
 
 enum GateKind {
@@ -51,12 +54,17 @@ model Gate {
   name     String
   kind     GateKind @default(pedestrian)
   active   Boolean  @default(true)
+  /// Public token for the gate QR poster (self sign-in page /s/<token>); null = self sign-in disabled
+  selfSignInToken String?  @unique
+  /// { printer: { kind: "agent"|"browser", name }, selfSignInKinds: VisitKind[] }
+  settings Json     @default("{}")
   createdAt DateTime @default(now())
 
   site         Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
   guardDevices GuardDevice[]
   visits       Visit[]
   shiftLogs    ShiftLog[]
+  presences    EmployeePresence[]
 
   @@index([siteId])
 }
@@ -98,8 +106,12 @@ model Employee {
   source     EmployeeSource @default(manual)
   syncedAt   DateTime       @default(now())
 
+  /// Optional kiosk/self check-in PIN (scrypt)
+  pinHash    String?
+
   site          Site?   @relation(fields: [siteId], references: [id], onDelete: SetNull)
   user          User?
+  presences     EmployeePresence[]
   passesHosted  Pass[]  @relation("PassHost")
   passesEscort  Pass[]  @relation("PassEscort")
   visitsHosted  Visit[] @relation("VisitHost")
@@ -139,6 +151,7 @@ model User {
   visitsRequested   Visit[]            @relation("VisitRequestedBy")
   visitsDecided     Visit[]            @relation("VisitDecidedBy")
   blacklistCreated  Blacklist[]
+  frequentVisitorsCreated FrequentVisitor[]
   shiftLogs         ShiftLog[]
   auditLogs         AuditLog[]
   notifications     Notification[]
@@ -172,6 +185,8 @@ enum MembershipRole {
   security
   approver
   host
+  /// Brigadista: evacuation list on the phone, drill roll call
+  warden
 }
 
 enum MembershipStatus {
@@ -237,6 +252,7 @@ model Company {
   passes    Pass[]
   visits    Visit[]
   blacklist Blacklist[]
+  frequentVisitors FrequentVisitor[]
 
   @@unique([name])
   @@index([kind])
@@ -270,8 +286,17 @@ model VisitPolicy {
   maxDurationMin   Int?
   /// Visitor stays at reception (deliveries)
   receptionOnly    Boolean         @default(false)
+  /// Phase 2: kind can be hidden from hosts, badge auto-prints after the green screen, open visits auto-close at
+  /// "HH:mm" (site time zone), extra e-mail recipients on entry, and the sign-in form (inline or template).
+  enabled          Boolean         @default(true)
+  autoPrintBadge   Boolean         @default(false)
+  autoSignOutAt    String?
+  notifyEmails     String[]        @default([])
+  form             Json?
+  formTemplateId   String?
 
-  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  site         Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  formTemplate FormTemplate? @relation(fields: [formTemplateId], references: [id], onDelete: SetNull)
 
   @@unique([siteId, kind])
 }
@@ -317,9 +342,14 @@ model Pass {
   note             String?
   /// Group visits share a groupId
   groupId          String?
+  /// Answers to the kind's form (custom questions), keyed by element id
+  extra            Json?
+  /// Optional 6-digit code typed at the kiosk when the visitor has no QR at hand (scrypt hash)
+  pinHash          String?
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 
+  frequentVisitor FrequentVisitor?
   site       Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
   host       Employee  @relation("PassHost", fields: [hostEmployeeId], references: [id])
   escort     Employee? @relation("PassEscort", fields: [escortEmployeeId], references: [id], onDelete: SetNull)
@@ -369,6 +399,12 @@ model Visit {
   /// Client-generated id for offline scans; the server dedupes on it
   scanId           String?     @unique
   conflict         Boolean     @default(false)
+  /// Answers captured at the kiosk / self sign-in (custom questions), keyed by element id
+  extra            Json?
+  /// Closed by the policy's autoSignOutAt job, not by a scan
+  autoClosed       Boolean     @default(false)
+  /// Bucket key of the badge photo taken at the kiosk
+  badgePhotoKey    String?
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
@@ -438,6 +474,8 @@ model NdaVersion {
   version    String
   title      String
   body       String
+  /// Optional PDF in the private bucket shown before acceptance
+  attachmentKey String?
   activeFrom DateTime @default(now())
 
   site Site? @relation(fields: [siteId], references: [id], onDelete: Cascade)
@@ -532,4 +570,75 @@ model SystemSecret {
   name      String   @id
   value     String
   createdAt DateTime @default(now())
+}
+
+// ───────────────────────────── Phase 2 ─────────────────────────────
+
+/// Named sign-in form built by HR in /admin/forms. `elements` = ordered list of
+/// { id, type: photo|document|name|phone|email|company|plate|areas|host|escort|text|question|media|signature,
+///   label?, help?, required?, mode?: off|optional|required, options?: string[], questionType?: text|number|select|checkbox,
+///   showOn: ("host"|"visitor"|"kiosk")[], onBadge?: boolean, mediaKey?: string }
+model FormTemplate {
+  id        String   @id @default(cuid())
+  siteId    String?
+  name      String
+  elements  Json     @default("[]")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  site     Site?         @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  policies VisitPolicy[]
+
+  @@index([siteId])
+}
+
+/// Reusable visitor (contractor crew, temp, fixed driver): signs in with a printed QR card or a PIN
+/// that both resolve to a recurring pass.
+enum FrequentSignIn {
+  qr_card
+  pin
+}
+
+model FrequentVisitor {
+  id           String         @id @default(cuid())
+  siteId       String
+  name         String
+  companyId    String?
+  docHash      String?
+  docLast4     String?
+  phone        String?
+  photoKey     String?
+  signIn       FrequentSignIn @default(qr_card)
+  pinHash      String?
+  passId       String?        @unique
+  active       Boolean        @default(true)
+  createdById  String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  pass      Pass?    @relation(fields: [passId], references: [id], onDelete: SetNull)
+  createdBy User     @relation(fields: [createdById], references: [id])
+
+  @@index([siteId, active])
+  @@index([docHash])
+}
+
+/// Employee self check-in / out at a gate (badge forgotten, visitor-style presence for the evacuation list).
+model EmployeePresence {
+  id         String    @id @default(cuid())
+  siteId     String
+  gateId     String
+  employeeId String
+  enteredAt  DateTime  @default(now())
+  leftAt     DateTime?
+
+  site     Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  gate     Gate     @relation(fields: [gateId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([siteId, leftAt])
+  @@index([employeeId, enteredAt])
 }

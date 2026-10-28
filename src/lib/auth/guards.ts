@@ -16,6 +16,7 @@ export const PANEL_PATHS: Record<MembershipRole, string> = {
   security: "/guard",
   approver: "/app/approvals",
   host: "/app",
+  warden: "/app/evacuacion",
 };
 
 /** Web session required. A kiosk (PIN) session is valid only for /guard and is sent back there. */

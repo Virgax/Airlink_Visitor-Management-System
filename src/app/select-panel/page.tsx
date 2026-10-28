@@ -1,11 +1,11 @@
 import { getTranslations } from "next-intl/server";
-import { Building2, ShieldCheck, UserCheck, Users } from "lucide-react";
+import { Building2, ShieldCheck, Siren, UserCheck, Users } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
 import { listPanels, requireUser } from "@/lib/auth/guards";
 import { openPanelAction } from "./actions";
 
-const ICONS = { admin: Building2, security: ShieldCheck, approver: UserCheck, host: Users } as const;
+const ICONS = { admin: Building2, security: ShieldCheck, approver: UserCheck, host: Users, warden: Siren } as const;
 
 export default async function SelectPanelPage() {
   const user = await requireUser("/select-panel");
