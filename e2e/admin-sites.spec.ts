@@ -94,32 +94,33 @@ test("admin manages a site: gate, area, policy, company, blacklist and employee 
   await entry.getByRole("button", { name: "Quitar" }).click();
   await expect(page.locator("[role=status]")).toContainText("Entrada eliminada");
 
-  // Employee directory: create a manual employee and find it with search
-  await page.goto("/admin/employees");
-  await page.getByLabel("Nombre", { exact: true }).fill(`Pedro Anfitrión ${stamp}`);
-  await page.getByLabel("Correo").fill(`pedro-${stamp}@airlinkdr.com`);
-  await page.getByLabel("Departamento").fill("IQC");
-  await page.getByLabel("Extensión").fill("215");
-  await page.getByLabel("Sitio").selectOption({ label: "Airlink 3" });
-  await page.getByRole("button", { name: "Agregar empleado" }).click();
-  await expect(page.locator("[role=status]")).toContainText("Empleado agregado");
+  // People screen (merged directory): create a manual employee and find it with search
+  await page.goto("/admin/people");
+  await page.getByText("Agregar persona", { exact: true }).first().click();
+  await page.locator("#name").fill(`Pedro Anfitrión ${stamp}`);
+  await page.locator("#email").fill(`pedro-${stamp}@airlinkdr.com`);
+  await page.locator("#department").fill("IQC");
+  await page.locator("#extension").fill("215");
+  await page.locator("#siteId").selectOption({ label: "Airlink 3" });
+  await page.getByRole("button", { name: "Agregar persona" }).click();
+  await expect(page.locator("[role=status]")).toContainText("Persona agregada");
 
-  await page.getByLabel("Buscar empleado").fill(`anfitrión ${stamp}`);
+  await page.getByLabel("Buscar persona").fill(`anfitrión ${stamp}`);
   await page.getByRole("button", { name: "Buscar" }).click();
-  const empRow = page.getByRole("row", { name: new RegExp(`Pedro Anfitrión ${stamp}`) });
+  const empRow = page.getByTestId("person-row").filter({ hasText: `Pedro Anfitrión ${stamp}` });
   await expect(empRow).toBeVisible();
   await expect(empRow).toContainText("Airlink 3");
   await expect(empRow).toContainText("Manual");
-  await expect(page.getByText("1 empleado")).toBeVisible();
+  await expect(page.getByText("1 persona", { exact: true })).toBeVisible();
 
-  await page.getByLabel("Buscar empleado").fill("departamento-inexistente");
+  await page.getByLabel("Buscar persona").fill("departamento-inexistente");
   await page.getByRole("button", { name: "Buscar" }).click();
   await expect(page.getByText("Sin resultados")).toBeVisible();
 
   // Search by department and deactivate
-  await page.getByLabel("Buscar empleado").fill(`iqc ${stamp}`);
+  await page.getByLabel("Buscar persona").fill(`iqc ${stamp}`);
   await page.getByRole("button", { name: "Buscar" }).click();
-  await page.getByRole("row", { name: new RegExp(`Pedro Anfitrión ${stamp}`) }).getByRole("button", { name: "Desactivar" }).click();
-  await expect(page.locator("[role=status]")).toContainText("Empleado actualizado");
-  await expect(page.getByRole("row", { name: new RegExp(`Pedro Anfitrión ${stamp}`) })).toContainText("Inactivo");
+  await page.getByTestId("person-row").filter({ hasText: `Pedro Anfitrión ${stamp}` }).getByRole("button", { name: "Desactivar" }).click();
+  await expect(page.locator("[role=status]")).toContainText("Cambios guardados");
+  await expect(page.getByTestId("person-row").filter({ hasText: `Pedro Anfitrión ${stamp}` })).toContainText("Inactivo");
 });

@@ -40,6 +40,7 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   if (!pass) notFound();
   const t = await getTranslations("visitor");
   const tp = await getTranslations("passes");
+  const tp2 = await getTranslations("people");
   const locale = await getLocale();
   const tz = pass.site.timezone;
   const now = new Date();
@@ -97,6 +98,7 @@ export default async function VisitorPassPage({ params, searchParams }: { params
           {schedule ? <><dt className="muted">{t("schedule")}</dt><dd>{schedule.days.map((d) => tp(`weekdays.${d}`)).join(" ")} · {schedule.from}–{schedule.to}</dd></> : null}
         </dl>
         <p className="muted">{t("instructions")}</p>
+        {pass.pinHash ? <p className="muted" data-testid="pass-pin-note">{tp2("pin.visitorNote")}</p> : null}
         {instructions ? <p className="muted whitespace-pre-wrap">{instructions}</p> : null}
         {pass.visitorDocLast4 ? <p className="muted">{t("prereg.docSaved", { last4: pass.visitorDocLast4 })}</p> : null}
 

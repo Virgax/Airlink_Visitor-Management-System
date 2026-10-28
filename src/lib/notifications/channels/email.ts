@@ -3,7 +3,13 @@ import { log } from "@/lib/log";
 import { isFakeMode, recordFake } from "@/lib/notifications/fake";
 import { errorMessage, type Channel, type ChannelMessage, type ChannelResult } from "./types";
 
-export type EmailTarget = { to: string; name?: string | null; labels: { open: string; footer: string } };
+export type EmailTarget = {
+  to: string;
+  name?: string | null;
+  labels: { open: string; footer: string };
+  /** Ready-made HTML body (e.g. the pass invitation with the QR inline); the default template is used otherwise. */
+  html?: string;
+};
 
 type SmtpConfig = { host: string; port: number; user?: string; pass?: string; from: string };
 
@@ -54,7 +60,7 @@ export const emailChannel: Channel<EmailTarget> = {
   configured: () => isFakeMode() || smtp() !== null,
   async send(message, target): Promise<ChannelResult> {
     if (isFakeMode()) {
-      recordFake({ channel: "email", to: target.to, type: message.type, title: message.title, body: message.body, url: message.url });
+      recordFake({ channel: "email", to: target.to, type: message.type, title: message.title, body: message.body, url: message.url, ...(target.html ? { extra: { html: target.html } } : {}) });
       return { ok: true };
     }
     const cfg = smtp();
@@ -65,7 +71,7 @@ export const emailChannel: Channel<EmailTarget> = {
         to: target.name ? { name: target.name, address: target.to } : target.to,
         subject: message.title,
         text: `${message.body}\n\n${message.url}\n\n${target.labels.footer}`,
-        html: emailHtml(message, target),
+        html: target.html ?? emailHtml(message, target),
       });
       return { ok: true };
     } catch (err) {

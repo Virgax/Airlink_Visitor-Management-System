@@ -10,7 +10,12 @@ import { ensureEmployeeForUser } from "@/lib/server/employees-link";
 import { ownPassWhere } from "@/lib/server/host-passes";
 import { createPass, revokePass } from "@/lib/server/passes";
 import { buildSchedule, checkWindowRange, isVisitKind, parseGroupSize, uniqueIds } from "@/lib/passes/form";
+import { generatePin } from "@/lib/people/pin";
+import { readPinFlash, sendPassInviteEmail, setPinFlash } from "@/lib/server/invites";
+import { searchFrequentVisitors } from "@/lib/server/frequent";
+import { rateLimit } from "@/lib/rateLimit";
 import { zonedToUtc } from "@/lib/time/tz";
+import type { FrequentHit } from "@/components/passes/FrequentPicker";
 
 const optional = (max: number) => z.string().trim().max(max).optional().transform((v) => (v ? v : null));
 
@@ -37,6 +42,8 @@ const schema = z.object({
   scheduleFrom: optional(5),
   scheduleTo: optional(5),
   groupSize: z.string().optional(),
+  generatePin: z.string().optional(),
+  frequentId: optional(64),
 });
 
 function fail(siteId: string, error: string): never {
@@ -79,6 +86,10 @@ export async function createPassAction(formData: FormData): Promise<void> {
   const host = await ensureEmployeeForUser(tenant.user);
   const t = await getTranslations("host.new");
 
+  // A frequent visitor picked in the form: copy the hashed document (never re-typed) when no document was given.
+  const frequent = d.frequentId ? await db.frequentVisitor.findFirst({ where: { id: d.frequentId, siteId: site.id, active: true }, select: { docHash: true, docLast4: true } }) : null;
+  const pin = d.generatePin === "on" ? generatePin() : null;
+
   const result = await createPass({
     siteId: site.id,
     hostEmployeeId: host.id,
@@ -99,10 +110,38 @@ export async function createPassAction(formData: FormData): Promise<void> {
     schedule,
     groupSize: parseGroupSize(d.groupSize),
     groupPlaceholder: t("groupPlaceholder"),
+    visitorDoc: frequent?.docHash && frequent.docLast4 ? { hash: frequent.docHash, last4: frequent.docLast4 } : null,
+    pin,
   });
   if (!result.ok) fail(site.id, result.error);
   const lead = result.passes[0]!;
+  if (pin) await setPinFlash(lead.id, pin);
   redirect(`/app/passes/${lead.id}?ok=${result.passes.length > 1 ? "createdGroup" : "created"}`);
+}
+
+/** Frequent-visitor lookup for the invite form (called from the FrequentPicker client component). */
+export async function searchFrequentAction(siteId: string, q: string): Promise<FrequentHit[]> {
+  const tenant = await getMembershipOrThrow("host");
+  if (typeof siteId !== "string" || !siteId) return [];
+  assertSiteAllowed(tenant, siteId);
+  return searchFrequentVisitors(siteId, typeof q === "string" ? q : "");
+}
+
+const emailSchema = z.object({ passId: z.string().min(1).max(64), email: z.string().trim().toLowerCase().email().max(200) });
+
+/** Sends the invitation e-mail (link + QR inline + window + instructions + NDA note) to the visitor. */
+export async function emailPassAction(formData: FormData): Promise<void> {
+  const tenant = await getMembershipOrThrow("host");
+  const parsed = emailSchema.safeParse(Object.fromEntries(formData));
+  const passId = String(formData.get("passId") ?? "");
+  if (!parsed.success) redirect(`/app/passes/${encodeURIComponent(passId)}?error=email_invalid`);
+  const pass = await loadOwnPassId(parsed.data.passId);
+  const limit = await rateLimit(`pass-email:user:${tenant.user.id}`, 20, 600);
+  if (!limit.ok) redirect(`/app/passes/${pass.id}?error=email_rateLimited`);
+  const pin = await readPinFlash(pass.id);
+  const res = await sendPassInviteEmail({ passId: pass.id, to: parsed.data.email, locale: tenant.user.locale ?? "es", pin, actorId: tenant.user.id });
+  if (!res.ok) redirect(`/app/passes/${pass.id}?error=${res.error === "not_open" || res.error === "email_not_configured" ? `email_${res.error}` : "email_failed"}`);
+  redirect(`/app/passes/${pass.id}?ok=emailed`);
 }
 
 async function loadOwnPassId(passId: unknown): Promise<{ id: string; siteId: string }> {

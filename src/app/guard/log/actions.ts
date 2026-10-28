@@ -9,6 +9,7 @@ import { log } from "@/lib/log";
 import { mediaConfigured, mediaKey, putFile, sniffImage } from "@/lib/media/putFile";
 import { rateLimit } from "@/lib/rateLimit";
 import { SHIFT_LOG_KINDS, SHIFT_LOG_TEXT_MAX } from "@/lib/server/reports-filters";
+import { isEvacuationIncident, notifyEvacuationList } from "@/lib/server/evacuation";
 
 const MAX_PHOTO_BYTES = 3 * 1024 * 1024;
 
@@ -57,6 +58,10 @@ export async function addShiftLogAction(formData: FormData): Promise<void> {
 
   if (parsed.data.kind === "incident") {
     await audit({ action: "shift.incident", siteId: session.site.id, actorId: session.user.id, targetType: "ShiftLog", targetId: entry.id, meta: { gateId: session.device.gateId, photo: Boolean(entry.photoKey) } });
+    // An incident logged as "EVACUACIÓN …" pushes the evacuation list to the site's fire wardens.
+    if (isEvacuationIncident(parsed.data.kind, parsed.data.text)) {
+      await notifyEvacuationList(session.site.id, session.user.id, "incident").catch((err) => log.error("evacuation.notify_failed", { err: String(err) }));
+    }
   }
   redirect(photoSkipped ? "/guard/log?ok=nophoto" : "/guard/log?ok=1");
 }

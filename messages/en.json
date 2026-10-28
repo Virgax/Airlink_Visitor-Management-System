@@ -321,7 +321,9 @@
         "exists": "An employee with that email already exists.",
         "synced": "Only manual employees can be edited."
       }
-    }
+    },
+    "people": "People",
+    "frequent": "Frequent visitors"
   },
   "guard": {
     "title": "Security",
@@ -455,7 +457,13 @@
       "atDock": "Carrier at the dock",
       "scanAgain": "Scan another",
       "pending": "Validating…",
-      "hint": "Scanning the same pass again registers the exit."
+      "hint": "Scanning the same pass again registers the exit.",
+      "pinTitle": "Enter with PIN",
+      "pinHelp": "Visitor without a QR: type the 6-digit PIN of their pass or frequent-visitor card. The name is optional and helps to find them.",
+      "pin": "Visitor PIN",
+      "pinName": "Name (optional)",
+      "pinSubmit": "Enter with PIN",
+      "pinOffline": "PIN entry needs a connection to the server."
     },
     "unannounced": {
       "title": "Unannounced visit",
@@ -524,7 +532,8 @@
     "nav": {
       "passes": "My passes",
       "new": "New pass",
-      "approvals": "Approvals"
+      "approvals": "Approvals",
+      "evacuation": "Evacuation"
     },
     "list": {
       "upcoming": "Upcoming",
@@ -634,7 +643,8 @@
         "created": "Pass created. Share the link with the visitor.",
         "createdGroup": "{count} passes created. Share each link with its visitor.",
         "revoked": "Pass cancelled.",
-        "renamed": "Name updated."
+        "renamed": "Name updated.",
+        "emailed": "Invitation sent."
       },
       "errors": {
         "invalid": "Could not save. Check the data."
@@ -819,7 +829,8 @@
     "nav": {
       "visits": "Visits",
       "audit": "Audit",
-      "shifts": "Shift log"
+      "shifts": "Shift log",
+      "invites": "Invites"
     },
     "intro": {
       "visits": "Visits by date, site, gate, kind, host, area and company. Export to CSV for Excel.",
@@ -1087,6 +1098,317 @@
         "title": "Evacuation list",
         "body": "{count, plural, =0 {Nobody inside} one {# person inside} other {# people inside}} at {siteName}."
       }
+    }
+  },
+  "people": {
+    "nav": {
+      "people": "People",
+      "frequent": "Frequent visitors",
+      "evacuation": "Evacuation"
+    },
+    "directory": {
+      "title": "People",
+      "intro": "Employees (hosts) and local users in one list. Toggle roles per row; employees synced from SPN or Microsoft are never deleted, only deactivated.",
+      "searchLabel": "Search person",
+      "searchPlaceholder": "Name, email or department",
+      "search": "Search",
+      "tabs": {
+        "all": "All",
+        "pin": "With PIN",
+        "hosts": "Hosts",
+        "admins": "Admins",
+        "wardens": "Fire wardens",
+        "inactive": "Inactive"
+      },
+      "perPage": "Rows per page",
+      "results": "{count, plural, =0 {No results} one {# person} other {# people}}",
+      "page": "Page {page} of {pages}",
+      "prev": "Previous",
+      "next": "Next",
+      "empty": "No people match.",
+      "columns": {
+        "select": "Select",
+        "name": "Name",
+        "email": "Email",
+        "department": "Department",
+        "site": "Site",
+        "roles": "Roles",
+        "pin": "PIN",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "selectRow": "Select {name}",
+      "selectAll": "Select all",
+      "roles": {
+        "host": "Host",
+        "admin": "Admin",
+        "security": "Security",
+        "approver": "Approver",
+        "warden": "Fire warden"
+      },
+      "roleOn": "{role} active for {scope}. Click to remove.",
+      "roleOff": "{role} inactive. Click to enable for {scope}.",
+      "roleNeedsEmail": "Roles need an email address.",
+      "hostInactive": "Inactive: cannot receive visitors.",
+      "allSites": "all sites",
+      "noSite": "All sites",
+      "source": {
+        "spn": "SPN",
+        "entra": "Microsoft",
+        "manual": "Manual",
+        "user": "Local user"
+      },
+      "userOnly": "Local user without an employee record.",
+      "pinOn": "Has PIN",
+      "pinOff": "No PIN",
+      "pinLabel": "PIN for {name}",
+      "pinPlaceholder": "4 to 8 digits",
+      "pinSet": "Set PIN",
+      "pinReset": "Change PIN",
+      "pinHelp": "The PIN works at the kiosk (security) and for employee presence check-in. Only a hash is stored.",
+      "deactivate": "Deactivate",
+      "activate": "Reactivate",
+      "bulkDeactivate": "Deactivate selected",
+      "bulkHelp": "Tick rows and deactivate them in bulk. Nothing is deleted.",
+      "add": "Add person",
+      "addIntro": "Creates a manual employee and, when roles are ticked, a user with those roles. SPN and Microsoft employees appear on their own after the sync.",
+      "name": "Name",
+      "email": "Email",
+      "department": "Department",
+      "extension": "Extension",
+      "phone": "Phone",
+      "site": "Site",
+      "rolesLabel": "Roles",
+      "rolesHelp": "Admin, Security and Approver open panels; Fire warden receives the evacuation list. Every active employee is a host.",
+      "pinField": "Initial PIN (4 to 8 digits, optional)",
+      "submit": "Add person",
+      "ok": {
+        "added": "Person added.",
+        "saved": "Changes saved.",
+        "pinSet": "PIN saved.",
+        "deactivated": "{count, plural, =0 {Nothing to deactivate.} one {# person deactivated.} other {# people deactivated.}}",
+        "roleOn": "Role enabled.",
+        "roleOff": "Role disabled."
+      },
+      "errors": {
+        "invalid": "Invalid data. Check the form.",
+        "exists": "A person with that email already exists.",
+        "pin": "The PIN must have 4 to 8 digits.",
+        "weakPin": "That PIN is too easy (repeated or sequential digits).",
+        "forbidden": "You do not have permission for that action.",
+        "noEmail": "That person has no email; add one before assigning roles.",
+        "needEmail": "Roles or a PIN require an email address.",
+        "nothing": "No rows selected.",
+        "self": "You cannot remove your own admin role."
+      }
+    },
+    "evacuation": {
+      "title": "Evacuation list",
+      "intro": "Everyone inside right now: visitors (by area and host) and employees checked in with their PIN. Stored on this phone so it opens offline.",
+      "lastUpdate": "Last update: {time}",
+      "offline": "Offline: showing the copy stored on this device.",
+      "refresh": "Refresh",
+      "site": "Site",
+      "count": "{count, plural, =0 {Nobody inside} one {# person inside} other {# people inside}}",
+      "empty": "Nobody is inside.",
+      "visitors": "Visitors",
+      "employees": "Checked-in employees",
+      "noArea": "No area assigned",
+      "visitor": "Visitor",
+      "host": "Host",
+      "since": "since {time}",
+      "rollCall": "Roll call (drill)",
+      "rollCallOn": "End roll call",
+      "rollCallHelp": "Tick each person as you see them at the assembly point. Ticks are kept on this device only.",
+      "counted": "Counted {count} of {total}",
+      "countedLabel": "Count {name}",
+      "reset": "Reset count",
+      "send": "Send list to fire wardens",
+      "sendHelp": "Pushes and e-mails the site's fire wardens with a link to this list.",
+      "sent": "{count, plural, =0 {This site has no fire wardens.} one {List sent to # fire warden.} other {List sent to # fire wardens.}}",
+      "sendError": "The list could not be sent.",
+      "print": "Print"
+    },
+    "frequent": {
+      "title": "Frequent visitors",
+      "intro": "Fixed contractors, temps or regular drivers who sign in with a printed QR card or a PIN. Each one holds an active recurring pass with no per-visit approval.",
+      "readOnly": "Read only: Security can look up and print cards; changes are made by Administration.",
+      "add": "New frequent visitor",
+      "searchLabel": "Search",
+      "searchPlaceholder": "Name or company",
+      "search": "Search",
+      "showInactive": "Show inactive",
+      "empty": "No frequent visitors.",
+      "columns": {
+        "name": "Name",
+        "company": "Company",
+        "doc": "Document",
+        "signIn": "Sign-in",
+        "schedule": "Schedule",
+        "pass": "Pass",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "signIn": {
+        "qr_card": "QR card",
+        "pin": "PIN"
+      },
+      "docEnding": "ending in {last4}",
+      "noDoc": "No document",
+      "noPass": "No pass",
+      "active": "Active",
+      "inactive": "Inactive",
+      "edit": "Edit",
+      "card": "Card",
+      "deactivate": "Deactivate",
+      "activate": "Reactivate",
+      "newTitle": "New frequent visitor",
+      "editTitle": "Edit {name}",
+      "form": {
+        "name": "Name",
+        "company": "Company",
+        "companyHelp": "Type the name; it is created if it does not exist.",
+        "doc": "ID card or passport",
+        "docHelp": "Only a verification code and the last 4 digits are stored.",
+        "docKeep": "Document on file (ending in {last4}). Leave the field empty to keep it.",
+        "phone": "Phone",
+        "photo": "Photo (optional)",
+        "photoHelp": "JPG or PNG, up to 3 MB. Stored privately.",
+        "photoUnavailable": "Photo storage is not configured in this environment.",
+        "signIn": "Sign-in method",
+        "pin": "6-digit PIN",
+        "pinHelp": "Required with the PIN method. Leave empty when editing to keep the current one.",
+        "host": "Responsible host",
+        "site": "Site",
+        "days": "Allowed days",
+        "from": "Entry time",
+        "to": "Exit time",
+        "validFrom": "Valid from",
+        "validUntil": "Valid until",
+        "areas": "Areas",
+        "note": "Note",
+        "submit": "Create frequent visitor",
+        "update": "Save changes",
+        "cancel": "Cancel",
+        "nda": "The visitor accepted the visitor policy / NDA",
+        "ndaHelp": "Required when the recurring-pass policy demands an NDA: recorded as accepted on the visitor's behalf with your user in the audit log."
+      },
+      "ok": {
+        "created": "Frequent visitor created.",
+        "saved": "Changes saved.",
+        "deactivated": "Frequent visitor deactivated and pass revoked.",
+        "activated": "Frequent visitor reactivated with a new pass."
+      },
+      "errors": {
+        "invalid": "Check the highlighted fields.",
+        "pin": "The PIN must have exactly 6 digits.",
+        "missing_doc": "The recurring-pass policy requires an ID card or passport.",
+        "missing_plate": "Plate missing.",
+        "gate_not_allowed": "Gate not allowed.",
+        "schedule": "Pick at least one day and a valid time range.",
+        "window_order": "The end date must be after the start date.",
+        "window_too_long": "Validity cannot exceed one year.",
+        "window_past": "The validity window already ended.",
+        "host": "Pick an active host.",
+        "site": "Pick a site.",
+        "photoType": "The photo must be JPG or PNG.",
+        "photoSize": "The photo exceeds 3 MB.",
+        "company_blocked": "That company is blocked.",
+        "forbidden": "You do not have permission for that action.",
+        "notFound": "Frequent visitor not found.",
+        "nda": "Confirm that the visitor accepted the visitor policy (NDA)."
+      },
+      "cardTitle": "Access card",
+      "cardHelp": "85 × 54 mm card to print on card stock or PVC. The QR is static and valid until the pass expires: a printed card cannot rotate every 30 seconds like the phone QR, so if it is lost, deactivate the visitor (revokes the pass) and issue a new one. The pass keeps a large use quota so the card works every day.",
+      "cardPrint": "Print card",
+      "cardValid": "Valid until {date}",
+      "cardSchedule": "{days} · {from}–{to}",
+      "cardPinOnly": "This visitor signs in with a PIN; the card only carries the name.",
+      "cardNoPass": "No active pass: reactivate the visitor to issue one.",
+      "pickerLabel": "Frequent visitor",
+      "pickerPlaceholder": "Type a name to search",
+      "pickerHelp": "If they are already registered as frequent, pick them and the form fills in with their details.",
+      "pickerNone": "No results",
+      "pickerSearching": "Searching…",
+      "pickerSelected": "Details taken from {name}. The document is copied without retyping it.",
+      "pickerClear": "Clear"
+    },
+    "pin": {
+      "generate": "Generate a 6-digit PIN",
+      "generateHelp": "For visitors without a phone or printout: they type it at the kiosk. Shown only once.",
+      "title": "Visitor PIN",
+      "shownOnce": "Write it down or e-mail it now: it will not be shown again (only a hash is stored).",
+      "has": "This pass has a kiosk PIN.",
+      "visitorNote": "If you cannot show the QR, your host gave you a 6-digit PIN to type at the security kiosk."
+    },
+    "email": {
+      "title": "Send by e-mail",
+      "help": "E-mail with the link, the QR, the validity window, arrival instructions and the visitor-policy note.",
+      "to": "Visitor e-mail",
+      "send": "Send invitation",
+      "includesPin": "The freshly generated PIN will be included.",
+      "sent": "Invitation sent to {email}.",
+      "errors": {
+        "invalid": "Enter a valid e-mail address.",
+        "not_open": "The pass is no longer valid.",
+        "email_not_configured": "E-mail sending is not configured on this server.",
+        "failed": "The e-mail could not be sent. Try again.",
+        "rateLimited": "Too many e-mails. Wait a moment."
+      }
+    },
+    "inviteEmail": {
+      "subject": "Your visitor pass for {site}",
+      "greeting": "Hello, {name}.",
+      "intro": "You have a pass to visit {site}. Your host is {host}.",
+      "window": "Validity",
+      "schedule": "Schedule",
+      "address": "Address",
+      "pin": "Kiosk PIN: {pin}. Type it at security if you cannot show the QR.",
+      "pinAskHost": "This pass also accepts a 6-digit PIN; ask your host for it if you cannot show the QR.",
+      "instructions": "On arrival, show this QR code (or the link below) and your ID card or passport at security.",
+      "nda": "Before entering you must accept the visitor policy from the link.",
+      "pending": "The pass is pending approval; the QR will appear on the link once approved.",
+      "rotating": "This pass uses a QR that changes every 30 seconds: open it from the link when you arrive.",
+      "open": "Open my pass",
+      "footer": "Airlink Visitas · Your data is used only for access control."
+    },
+    "invites": {
+      "title": "Invites",
+      "intro": "Every pass issued: date, visitor, host, kind, PIN, whether they signed in and status. Export to CSV.",
+      "filters": {
+        "q": "Search",
+        "qPlaceholder": "Visitor, e-mail, host or company",
+        "kind": "Kind",
+        "status": "Status",
+        "pin": "PIN",
+        "signedIn": "Signed in",
+        "all": "All",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "columns": {
+        "date": "Date",
+        "visitor": "Visitor",
+        "email": "E-mail",
+        "company": "Company",
+        "host": "Host",
+        "kind": "Kind",
+        "site": "Site",
+        "pin": "PIN",
+        "signedIn": "Signed in",
+        "enteredAt": "Entered",
+        "status": "Status",
+        "validUntil": "Expires",
+        "createdBy": "Created by",
+        "frequent": "Frequent"
+      },
+      "totals": {
+        "invites": "Invites",
+        "signedIn": "Signed in",
+        "pending": "Pending",
+        "pin": "With PIN"
+      },
+      "empty": "No invites in that range."
     }
   }
 }

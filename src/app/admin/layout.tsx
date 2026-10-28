@@ -11,14 +11,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin", label: t("overview") },
     { href: "/admin/sites", label: t("sites") },
     { href: "/admin/policies", label: t("policies") },
-    { href: "/admin/employees", label: t("employees") },
+    { href: "/admin/people", label: t("people") },
+    { href: "/admin/frequent", label: t("frequent") },
     { href: "/admin/companies", label: t("companies") },
     { href: "/admin/blacklist", label: t("blacklist") },
-    { href: "/admin/members", label: t("members") },
     { href: "/admin/devices", label: t("devices") },
     { href: "/admin/reports", label: t("reports") },
   ];
-  const items = tenant.role === "admin" ? adminItems : [{ href: "/admin/reports", label: t("reports") }];
+  const items = tenant.role === "admin" ? adminItems : [{ href: "/admin/reports", label: t("reports") }, { href: "/admin/frequent", label: t("frequent") }];
   return (
     <AppShell user={tenant.user} subtitle={t("title")}>
       <nav aria-label={t("title")} className="mb-6 flex flex-wrap gap-2">

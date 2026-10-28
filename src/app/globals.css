@@ -97,3 +97,25 @@ body {
   html, body { background: #fff; color: #000; }
   .card { box-shadow: none; border-color: #999; }
 }
+
+/* Frequent-visitor access card: 85 × 54 mm (ID-1), printed one per page. */
+.access-card {
+  width: 85mm;
+  height: 54mm;
+  box-sizing: border-box;
+  padding: 4mm;
+  display: grid;
+  grid-template-columns: 1fr 34mm;
+  gap: 3mm;
+  border: 1px solid #999;
+  border-radius: 3mm;
+  background: #fff;
+  color: #000;
+  overflow: hidden;
+}
+.access-card-qr { width: 34mm; height: 34mm; }
+@media print {
+  @page { size: auto; margin: 10mm; }
+  .access-card-page > :not(.access-card-sheet) { display: none !important; }
+  .access-card { break-inside: avoid; }
+}

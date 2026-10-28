@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { AlertTriangle, Camera, CameraOff, CheckCircle2, CloudOff, LogOut, Wifi, WifiOff, XCircle } from "lucide-react";
+import { AlertTriangle, Camera, CameraOff, CheckCircle2, CloudOff, KeyRound, LogOut, Wifi, WifiOff, XCircle } from "lucide-react";
 import { Icon } from "@/components/Icon";
 import { fmtDate } from "@/lib/format";
 import type { ScanPassInfo, ScanReason, ScanResponse } from "@/lib/guard/types";
@@ -36,6 +36,10 @@ async function postScan(scan: { payload: string; scanId: string; at: string; off
   return fetch("/api/guard/scan", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(scan) });
 }
 
+async function postPin(body: { pin: string; name?: string }): Promise<Response> {
+  return fetch("/api/guard/pin", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+}
+
 export function Scanner({ locale, timeZone }: { locale: string; timeZone: string }) {
   const t = useTranslations("guard");
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -49,6 +53,8 @@ export function Scanner({ locale, timeZone }: { locale: string; timeZone: string
   const [camera, setCamera] = useState<"off" | "starting" | "on" | "error">("off");
   const [busy, setBusy] = useState(false);
   const [manual, setManual] = useState("");
+  const [pin, setPin] = useState("");
+  const [pinName, setPinName] = useState("");
   const [result, setResult] = useState<ResultView | null>(null);
 
   const refreshQueued = useCallback(async () => {
@@ -114,6 +120,25 @@ export function Scanner({ locale, timeZone }: { locale: string; timeZone: string
     };
   }, [applyCache, flush, refreshCache, refreshQueued]);
 
+  const showResponse = (data: ScanResponse | null, at: string) => {
+    if (!data) {
+      setResult({ tone: "deny", reason: "network", at });
+      return;
+    }
+    if (!data.ok) {
+      setResult({ tone: "deny", reason: data.reason, pass: data.pass, at });
+      return;
+    }
+    setResult({
+      tone: data.action === "left" ? "left" : "ok",
+      pass: data.pass,
+      conflict: data.conflict,
+      duplicate: data.duplicate,
+      atDock: data.visit.status === "at_dock",
+      at: data.action === "left" ? (data.visit.leftAt ?? at) : (data.visit.enteredAt ?? at),
+    });
+  };
+
   const offlineScan = useCallback(
     async (payload: string, id: string, at: string) => {
       const cache = cacheIsFresh(cacheRef.current) ? cacheRef.current : null;
@@ -161,22 +186,7 @@ export function Scanner({ locale, timeZone }: { locale: string; timeZone: string
           return;
         }
         const data = (await res.json().catch(() => null)) as ScanResponse | null;
-        if (!data) {
-          setResult({ tone: "deny", reason: "network", at });
-          return;
-        }
-        if (!data.ok) {
-          setResult({ tone: "deny", reason: data.reason, pass: data.pass, at });
-          return;
-        }
-        setResult({
-          tone: data.action === "left" ? "left" : "ok",
-          pass: data.pass,
-          conflict: data.conflict,
-          duplicate: data.duplicate,
-          atDock: data.visit.status === "at_dock",
-          at: data.action === "left" ? (data.visit.leftAt ?? at) : (data.visit.enteredAt ?? at),
-        });
+        showResponse(data, at);
         void flush();
       } finally {
         setBusy(false);
@@ -184,6 +194,35 @@ export function Scanner({ locale, timeZone }: { locale: string; timeZone: string
     },
     [busy, flush, offlineScan],
   );
+
+  /** PIN entry (online only): the server finds the pass and runs the same entry path as a scan. */
+  const submitPin = useCallback(async () => {
+    const digits = pin.replace(/\D/g, "");
+    if (digits.length !== 6 || busy) return;
+    const at = new Date().toISOString();
+    setBusy(true);
+    try {
+      let res: Response;
+      try {
+        res = await postPin({ pin: digits, ...(pinName.trim() ? { name: pinName.trim() } : {}) });
+      } catch {
+        setResult({ tone: "deny", reason: "network", at });
+        return;
+      }
+      if (res.status === 401) {
+        window.location.href = "/guard";
+        return;
+      }
+      const data = (await res.json().catch(() => null)) as ScanResponse | null;
+      showResponse(data, at);
+      if (data?.ok) {
+        setPin("");
+        setPinName("");
+      }
+    } finally {
+      setBusy(false);
+    }
+  }, [busy, pin, pinName]);
 
   const stopCamera = useCallback(() => {
     stopRef.current?.();
@@ -285,6 +324,31 @@ export function Scanner({ locale, timeZone }: { locale: string; timeZone: string
             <input id="manual-payload" name="payload" value={manual} onChange={(e) => setManual(e.target.value)} placeholder={t("scan.manualPlaceholder")} autoComplete="off" className="input font-mono" data-testid="manual-payload" />
             <button type="submit" className="btn-secondary" disabled={busy || !manual.trim()}>{t("scan.manualSubmit")}</button>
           </div>
+        </form>
+        <form
+          className="card space-y-2"
+          data-testid="pin-entry"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void submitPin();
+          }}
+        >
+          <h2 className="font-medium"><Icon icon={KeyRound} /> {t("scan.pinTitle")}</h2>
+          <p className="muted">{t("scan.pinHelp")}</p>
+          <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+            <div>
+              <label className="label" htmlFor="pin-entry-pin">{t("scan.pin")}</label>
+              <input id="pin-entry-pin" name="pin" value={pin} onChange={(e) => setPin(e.target.value)} inputMode="numeric" pattern="[0-9 -]{6,8}" maxLength={8} autoComplete="off" className="input font-mono text-lg tracking-widest" data-testid="pin-entry-pin" disabled={!online} />
+            </div>
+            <div>
+              <label className="label" htmlFor="pin-entry-name">{t("scan.pinName")}</label>
+              <input id="pin-entry-name" name="name" value={pinName} onChange={(e) => setPinName(e.target.value)} maxLength={120} autoComplete="off" className="input" disabled={!online} />
+            </div>
+            <div className="self-end">
+              <button type="submit" className="btn-primary w-full" disabled={busy || !online || pin.replace(/\D/g, "").length !== 6}>{t("scan.pinSubmit")}</button>
+            </div>
+          </div>
+          {!online ? <p className="muted">{t("scan.pinOffline")}</p> : null}
         </form>
       </div>
 

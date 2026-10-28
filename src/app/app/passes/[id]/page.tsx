@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { Ban, Copy, Pencil } from "lucide-react";
+import { Ban, Copy, KeyRound, Mail, Pencil } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
 import { HostNav } from "@/components/passes/HostNav";
@@ -15,7 +15,8 @@ import { ownPassWhere } from "@/lib/server/host-passes";
 import { loadPolicy } from "@/lib/server/passes";
 import { evaluatePolicy } from "@/lib/policies/evaluate";
 import { parseSchedule } from "@/lib/passes/validate";
-import { renamePassAction, revokePassAction } from "../actions";
+import { readPinFlash } from "@/lib/server/invites";
+import { emailPassAction, renamePassAction, revokePassAction } from "../actions";
 
 type Search = { ok?: string; error?: string };
 
@@ -51,14 +52,28 @@ export default async function PassDetailPage({ params, searchParams }: { params:
   const url = `${env().APP_URL.replace(/\/$/, "")}/v/${pass.token}`;
   const schedule = parseSchedule(pass.schedule);
   const canRevoke = pass.status === "active" || pass.status === "pending_approval";
-  const okKey = sp.ok && ["created", "createdGroup", "revoked", "renamed"].includes(sp.ok) ? sp.ok : null;
+  const okKey = sp.ok && ["created", "createdGroup", "revoked", "renamed", "emailed"].includes(sp.ok) ? sp.ok : null;
   const date = (d: Date) => fmtDate(d, locale, { timeZone: tz });
+  const tp = await getTranslations("people");
+  const flashPin = pass.pinHash ? await readPinFlash(pass.id) : null;
+  const emailError = sp.error?.startsWith("email_") ? sp.error.slice("email_".length) : null;
+  const emailErrorKey = emailError && ["invalid", "not_open", "email_not_configured", "failed", "rateLimited"].includes(emailError) ? emailError : emailError ? "failed" : null;
+  const canEmail = (pass.status === "active" || pass.status === "pending_approval") && pass.validUntil > new Date();
 
   return (
     <AppShell user={tenant.user} subtitle={tenant.site?.name ?? ts("allSites")} title={t("title", { name: pass.visitorName })}>
       <HostNav userId={tenant.user.id} />
       {okKey ? <p className="alert-ok mb-4" role="status">{t(`ok.${okKey}`, { count: group.length })}</p> : null}
-      {sp.error ? <p className="alert-error mb-4" role="alert">{t("errors.invalid")}</p> : null}
+      {sp.error && !emailErrorKey ? <p className="alert-error mb-4" role="alert">{t("errors.invalid")}</p> : null}
+      {emailErrorKey ? <p className="alert-error mb-4" role="alert">{tp(`email.errors.${emailErrorKey as "failed"}`)}</p> : null}
+      {flashPin ? (
+        <div className="alert-ok mb-4 flex flex-wrap items-center gap-3" role="status" data-testid="pass-pin">
+          <Icon icon={KeyRound} />
+          <span className="font-medium">{tp("pin.title")}:</span>
+          <span className="font-mono text-2xl tracking-widest" data-testid="pass-pin-value">{flashPin}</span>
+          <span className="w-full text-xs sm:w-auto">{tp("pin.shownOnce")}</span>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         <section className="card space-y-4">
@@ -91,6 +106,7 @@ export default async function PassDetailPage({ params, searchParams }: { params:
             <dt className="muted">{t("nda")}</dt>
             <dd>{!requiresNda ? t("ndaNotRequired") : pass.ndaAcceptedAt ? t("ndaAccepted", { date: date(pass.ndaAcceptedAt), version: pass.ndaVersion ?? "" }) : t("ndaPending")}</dd>
             {pass.note ? <><dt className="muted">{t("note")}</dt><dd className="whitespace-pre-wrap">{pass.note}</dd></> : null}
+            {pass.pinHash ? <><dt className="muted">{tp("pin.title")}</dt><dd>{tp("pin.has")}</dd></> : null}
             <dd className="muted col-span-2">{t("uses", { uses: pass.uses, max: pass.maxUses })}</dd>
           </dl>
 
@@ -114,6 +130,20 @@ export default async function PassDetailPage({ params, searchParams }: { params:
             <p className="muted">{t("linkHelp")}</p>
             <ShareLink url={url} title={`${t("title", { name: pass.visitorName })} · ${pass.site.name}`} labels={{ copy: t("copy"), copied: t("copied"), share: t("share"), open: t("open") }} />
           </section>
+          {canEmail ? (
+            <section className="card space-y-3">
+              <h2 className="font-medium"><Icon icon={Mail} /> {tp("email.title")}</h2>
+              <p className="muted">{tp("email.help")}{flashPin ? ` ${tp("email.includesPin")}` : ""}</p>
+              <form action={emailPassAction} className="space-y-2">
+                <input type="hidden" name="passId" value={pass.id} />
+                <label className="label" htmlFor="inviteEmail">{tp("email.to")}</label>
+                <div className="flex gap-2">
+                  <input id="inviteEmail" name="email" type="email" required maxLength={200} className="input" defaultValue={pass.visitorEmail ?? ""} autoComplete="off" />
+                  <button type="submit" className="btn-secondary whitespace-nowrap">{tp("email.send")}</button>
+                </div>
+              </form>
+            </section>
+          ) : null}
           <section className="card space-y-3">
             <form action={renamePassAction} className="space-y-2">
               <input type="hidden" name="passId" value={pass.id} />

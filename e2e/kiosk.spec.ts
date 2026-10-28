@@ -7,15 +7,16 @@ test("admin creates a guard with PIN, enrolls a kiosk, guard signs in with PIN; 
   const stamp = Date.now();
   await loginAsAdmin(page);
 
-  // Guard for Airlink 2
-  await page.goto("/admin/members");
-  await page.getByLabel("Correo").fill(`guardia-${stamp}@airlink.test`);
-  await page.getByLabel("Nombre").fill(`Guardia ${stamp}`);
-  await page.getByLabel("Rol").selectOption("security");
-  await page.getByLabel("Sitio").selectOption({ label: "Airlink 2" });
-  await page.getByLabel(/PIN inicial/).fill("2468");
-  await page.getByRole("button", { name: "Agregar rol" }).click();
-  await expect(page.locator("[role=status]")).toContainText("Rol agregado");
+  // Guard for Airlink 2 (created from the merged "Personas" screen)
+  await page.goto("/admin/people");
+  await page.getByText("Agregar persona", { exact: true }).first().click();
+  await page.locator("#email").fill(`guardia-${stamp}@airlink.test`);
+  await page.locator("#name").fill(`Guardia ${stamp}`);
+  await page.getByLabel("Seguridad", { exact: true }).check();
+  await page.locator("#siteId").selectOption({ label: "Airlink 2" });
+  await page.locator("#pin").fill("2468");
+  await page.getByRole("button", { name: "Agregar persona" }).click();
+  await expect(page.locator("[role=status]")).toContainText("Persona agregada");
 
   // Kiosk device at Airlink 3 (guard above must NOT appear there)
   await page.goto("/admin/devices");
