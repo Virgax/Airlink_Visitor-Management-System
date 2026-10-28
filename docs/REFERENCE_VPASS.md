@@ -55,7 +55,28 @@ What the reference product does well and how it maps to Airlink Visitas. Items m
 | **Registered Visitors**: a reusable person (name, visitor type, sign-in method Badge/PIN, active) that signs in without a form | Covered today by recurring passes (rotating QR). **P2**: `FrequentVisitor` (name, company, docHash/last4, photoKey, sign-in method `qr_card` / `pin`, linked recurring pass, active toggle): hosts pick them from an autocomplete when inviting, security can issue a printed QR card (same ZPL as the badge, durable stock) or a 6-digit PIN typed at the kiosk; both resolve to the same recurring pass | P2 |
 | **Invites**: list of invite records (date, name, description, PIN code, signed in, status) + Export; welcome email with sign-in instructions | Passes already are the invites (`/app` list, `/admin/reports`). **P2**: (a) "Enviar por correo" on the pass detail using the email channel (link + QR inline + instructions + NDA note), (b) optional 6-digit **PIN** on every pass (`Pass.pinCode`, shown on the link) so a visitor without phone/printout can type it at the kiosk, (c) admin-wide invites list with "Signed in" column and export in `/admin/reports/invites` | P2 |
 
+## Forms (sign-in form builder: pages, elements, per-field required/enabled toggles)
+VPASS builds the kiosk/self sign-in form per visitor type from elements: ID Check, Photo Capture, Text, Questions,
+Media, Signature Pad, Host; built-in fields (photo, first/last name, email, mobile, company) have enabled/required
+toggles; custom fields (e.g. "Mobile Phone Model", "IME version") are plain inputs; a "Site Info" page shows
+instructions; the NDA is acknowledged with a drawn signature.
+
+| VPASS element | Ours | Status |
+|---|---|---|
+| Built-in fields with enabled/required toggles | **P2**: `VisitPolicy.form` JSON: `{ photo, document, phone, email, company, plate, areas, escort: "off" \| "optional" \| "required" }` evaluated by `evaluatePolicy` (today `requiresDoc` is the only switch). Shown consistently on the host invite form, the visitor link pre-registration, the kiosk unannounced form and the gate QR self sign-in | P2 |
+| Text element / Questions | **P2**: `VisitPolicy.form.custom[]` = `{ key, label, type: text \| number \| select \| checkbox, options?, required, showOn: host \| visitor \| kiosk }`; answers in `Pass.extra` / `Visit.extra`; printed on the badge when flagged `onBadge` and exported as columns in CSV | P2 |
+| Media (show a document/video) + Site Info page | **P2**: `Site.settings.visitorInstructions` (markdown) + optional `NdaVersion.attachmentKey` (PDF in the bucket) shown on `/v/<token>` and the self sign-in page before acceptance | P2 |
+| Signature Pad for the NDA | Today: typed-name acceptance + audit. **P2**: optional drawn signature (canvas → PNG in the bucket `s/<siteId>/nda/<passId>.png`, hash stored in the audit entry) when `VisitPolicy.form.signature = "required"`; typed name stays as the fallback on small screens | P2 |
+| Photo Capture | Badge photo at the kiosk (`docs/BADGES.md`); **P2** also on self sign-in when `form.photo != off` | P2 |
+| ID Check | Document number → docHash/last4 (done); AI reading of the cédula is Phase 3 | done / later |
+| Host element | Host search (done) | done |
+| Preview | **P2**: "Vista previa" on the policy page rendering the visitor form read-only | P2 |
+
+Decision: no free-form page builder. A configuration-driven form (toggles + custom questions) gives the same result
+for Airlink's kinds, stays unit-testable in `evaluatePolicy`, and keeps one consistent form across host, visitor,
+kiosk and self sign-in surfaces.
+
 ## Decisions
 - Keep policies as data (`VisitPolicy`) instead of VPASS-style "forms"; add the few fields above rather than a form builder.
 - Keep our kiosk + host-invitation flow as the primary path; the gate QR self sign-in is an addition for walk-ins, not a replacement.
-- Schema changes needed in Phase 2 (one migration): `VisitPolicy.autoPrintBadge`, `autoSignOutAt`, `enabled`, `notifyEmails`, `extraFields`; `Pass.extra`, `Visit.extra`, `Visit.autoClosed`; `Gate.selfSignInToken`, `Gate.settings`; `MembershipRole.warden`; `Employee.pinHash`; `FrequentVisitor`; `Pass.pinCode` (or keep PIN on `User` and create the user on first PIN); `EmployeePresence` (self check-in log for the evacuation list).
+- Schema changes needed in Phase 2 (one migration): `VisitPolicy.autoPrintBadge`, `autoSignOutAt`, `enabled`, `notifyEmails`; `Pass.extra`, `Visit.extra`, `Visit.autoClosed`; `Gate.selfSignInToken`, `Gate.settings`; `MembershipRole.warden`; `Employee.pinHash`; `FrequentVisitor`; `Pass.pinCode`; `VisitPolicy.form` (replaces `requiresDoc` + `extraFields`); `NdaVersion.attachmentKey` (or keep PIN on `User` and create the user on first PIN); `EmployeePresence` (self check-in log for the evacuation list).
