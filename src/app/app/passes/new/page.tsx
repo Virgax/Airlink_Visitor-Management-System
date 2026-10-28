@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { requireMembership } from "@/lib/auth/guards";
 import { ownPassWhere } from "@/lib/server/host-passes";
 import { evaluatePolicy } from "@/lib/policies/evaluate";
-import { VISIT_KINDS } from "@/lib/passes/form";
+import { enabledKinds } from "@/lib/server/policies";
 import { toLocalInput } from "@/lib/time/tz";
 import { createPassAction } from "../actions";
 
@@ -44,12 +44,13 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
     );
   }
 
-  const [areas, gates, employees, policies, from] = await Promise.all([
+  const [areas, gates, employees, policies, from, VISIT_KINDS] = await Promise.all([
     db.area.findMany({ where: { siteId: site.id, active: true }, orderBy: { name: "asc" } }),
     db.gate.findMany({ where: { siteId: site.id, active: true }, orderBy: { name: "asc" } }),
     db.employee.findMany({ where: { active: true, OR: [{ siteId: site.id }, { siteId: null }] }, orderBy: { name: "asc" }, take: 300, select: { id: true, name: true, department: true } }),
     db.visitPolicy.findMany({ where: { siteId: site.id } }),
     sp.from ? db.pass.findFirst({ where: { id: sp.from, ...ownPassWhere(tenant) } }) : null,
+    enabledKinds(site.id), // kinds disabled in /admin/policies are hidden here (existing passes keep working)
   ]);
   const approvalByKind = Object.fromEntries(
     VISIT_KINDS.map((kind) => [kind, evaluatePolicy(policies.find((p) => p.kind === kind) ?? null, { kind }).approverRole] as const),
@@ -70,7 +71,7 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
       <div className="card grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label className="label" htmlFor="kind">{t("kind")}</label>
-          <select id="kind" name="kind" className="input" defaultValue={from?.kind ?? "visit"} required>
+          <select id="kind" name="kind" className="input" defaultValue={from && VISIT_KINDS.includes(from.kind) ? from.kind : VISIT_KINDS[0]} required>
             {VISIT_KINDS.map((k) => <option key={k} value={k}>{tk(`kinds.${k}.label`)}</option>)}
           </select>
           <ul className="muted mt-2 grid gap-1 sm:grid-cols-2">

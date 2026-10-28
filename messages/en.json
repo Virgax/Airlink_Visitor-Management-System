@@ -230,7 +230,19 @@
       "saved": "Policy saved.",
       "resetDone": "Policy restored to defaults.",
       "unsaved": "Defaults (not saved)",
-      "empty": "No active sites."
+      "empty": "No active sites.",
+      "enabled": "Kind enabled",
+      "enabledHelp": "When disabled it disappears from the host, kiosk and self sign-in forms. Existing passes keep working.",
+      "disabledTag": "Disabled",
+      "autoSignOutAt": "Auto sign out at",
+      "autoSignOutHelp": "Local time ({tz}). Visits of this kind still inside are closed at that time; empty = never.",
+      "notifyEmails": "E-mail on entry",
+      "notifyEmailsPlaceholder": "security@company.com, hr@company.com",
+      "notifyEmailsHelp": "Comma-separated addresses. They receive the entry notice for this visit kind.",
+      "errors": {
+        "autoSignOut": "Invalid auto sign-out time (use HH:mm).",
+        "emails": "Check the e-mail list (max 20, comma-separated)."
+      }
     },
     "companiesPage": {
       "title": "Companies",
@@ -321,7 +333,8 @@
         "exists": "An employee with that email already exists.",
         "synced": "Only manual employees can be edited."
       }
-    }
+    },
+    "evacuation": "Evacuation list"
   },
   "guard": {
     "title": "Security",
@@ -845,7 +858,9 @@
       "clear": "Clear",
       "export": "Export CSV",
       "exportHelp": "Same filters, up to {max} rows.",
-      "timeZone": "Times in {tz}."
+      "timeZone": "Times in {tz}.",
+      "q": "Search",
+      "qPlaceholder": "Visitor, company, host, plate or last 4 of the ID"
     },
     "columns": {
       "date": "Date",
@@ -912,7 +927,8 @@
     "pagination": {
       "page": "Page {page} of {pages}",
       "prev": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "pageSize": "Rows per page"
     },
     "empty": "No records match these filters.",
     "minutes": "{count} min",
@@ -945,6 +961,19 @@
       "incident": "Incident",
       "round": "Round",
       "handover": "Handover"
+    },
+    "signIn": "Sign in a visitor",
+    "quick": {
+      "label": "Quick ranges",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "week": "This week",
+      "month": "This month"
+    },
+    "kpis": {
+      "inside": "Inside now",
+      "entered": "Entered in range",
+      "left": "Left in range"
     }
   },
   "errors": {
@@ -1087,6 +1116,168 @@
         "title": "Evacuation list",
         "body": "{count, plural, =0 {Nobody inside} one {# person inside} other {# people inside}} at {siteName}."
       }
+    }
+  },
+  "ops": {
+    "selfSignIn": {
+      "title": "Sign in at reception",
+      "modes": "Mode",
+      "visitorTab": "I'm a visitor",
+      "employeeTab": "I'm an employee",
+      "picker": {
+        "searching": "Searching…",
+        "none": "No results",
+        "change": "Change"
+      },
+      "host": {
+        "label": "Who are you visiting?",
+        "placeholder": "Your host's name",
+        "help": "Type at least 2 letters of the name.",
+        "selected": "Host"
+      },
+      "employee": {
+        "label": "Your name",
+        "placeholder": "First and last name",
+        "help": "Type at least 2 letters of your name.",
+        "selected": "Employee",
+        "intro": "Check in or out of the site with your PIN. It feeds the evacuation list.",
+        "pin": "PIN",
+        "pinHelp": "No PIN yet? Ask IT.",
+        "submit": "Check in / out",
+        "ok": {
+          "in": "Checked in. Welcome.",
+          "out": "Checked out. See you."
+        },
+        "errors": {
+          "invalid": "Check the form.",
+          "employee": "Select your name.",
+          "noPin": "You have no PIN set. Contact IT to activate it.",
+          "pin": "Wrong PIN.",
+          "rateLimited": "Too many attempts. Wait a few minutes."
+        }
+      },
+      "visitor": {
+        "intro": "Fill in your details. We notify your host to approve your visit.",
+        "name": "Your name",
+        "company": "Company",
+        "kind": "Reason for the visit",
+        "doc": "ID or passport",
+        "docHelp": "We only keep the last 4 digits.",
+        "phone": "Phone",
+        "submit": "Notify my host",
+        "privacy": "Your data is used only for access control (Law 172-13).",
+        "noKinds": "This gate does not accept visitor registration right now. Please go to reception.",
+        "errors": {
+          "invalid": "Check the form.",
+          "host": "Select your host.",
+          "reception": "We could not complete your registration. Please go to reception.",
+          "rateLimited": "Too many attempts. Wait a few minutes."
+        }
+      },
+      "status": {
+        "title": "Your visit",
+        "yourHost": "your host",
+        "refresh": "This page refreshes itself every {seconds} s.",
+        "another": "Register someone else",
+        "network": "Offline. Retrying…",
+        "pending": {
+          "title": "We told your host…",
+          "body": "Wait at {gate}: {host} must approve your visit."
+        },
+        "approved": {
+          "title": "Visit approved",
+          "body": "{host} approved your visit. Go to reception for your badge."
+        },
+        "denied": {
+          "title": "Visit not approved",
+          "body": "{host} could not receive you today. Ask at reception."
+        },
+        "inside": {
+          "title": "Entry registered",
+          "body": "You are inside. Keep your badge visible."
+        },
+        "at_dock": {
+          "title": "At the dock",
+          "body": "You are registered at the dock."
+        },
+        "left": {
+          "title": "Visit finished",
+          "body": "Your exit was recorded. Thank you for your visit."
+        },
+        "timeout": {
+          "title": "No answer",
+          "body": "{host} did not answer in time. Security was notified: go to reception."
+        }
+      },
+      "admin": {
+        "enable": "Enable self sign-in",
+        "disable": "Disable self sign-in",
+        "poster": "Print poster",
+        "enabled": "Self sign-in enabled. Print the poster with the gate QR.",
+        "disabled": "Self sign-in disabled. The previous poster no longer works.",
+        "url": "Public link",
+        "kinds": "Visit kinds a walk-in may pick",
+        "kindsHelp": "With none checked, every kind enabled in the policies is offered."
+      },
+      "poster": {
+        "back": "Back to site",
+        "print": "Print",
+        "help": "A4 size. Stick it on the gate or the front desk.",
+        "title": "Sign in here",
+        "subtitle": "Scan the code with your phone",
+        "qrAlt": "QR code for self sign-in",
+        "step1": "Open your phone camera and point it at the code.",
+        "step2": "Fill in your details and pick who you are visiting.",
+        "step3": "Wait for the approval on your screen and get your badge at reception.",
+        "employees": "Employees: choose \"I'm an employee\" and check in with your PIN."
+      }
+    },
+    "signIn": {
+      "title": "Sign in a visitor",
+      "intro": "Manual sign-in from reception: the visit is approved and inside at once, under your name.",
+      "back": "Reports",
+      "chooseSite": "Which site?",
+      "site": "Site",
+      "changeSite": "change",
+      "gate": "Gate",
+      "kind": "Visit kind",
+      "host": "Host",
+      "hostPlaceholder": "Name or department",
+      "hostHelp": "Type at least 2 letters.",
+      "hostSelected": "Host selected",
+      "searching": "Searching…",
+      "none": "No results",
+      "change": "Change",
+      "visitor": "Visitor name",
+      "company": "Company",
+      "doc": "ID or passport",
+      "docHelp": "We only keep the last 4 digits.",
+      "plate": "Plate",
+      "submit": "Register entry",
+      "auditNote": "Audited as an in-person approval from the panel.",
+      "noGates": "This site has no active gates.",
+      "ok": "{name} registered and inside.",
+      "errors": {
+        "invalid": "Check the form.",
+        "host": "Select a host.",
+        "company_blocked": "The company is blocked.",
+        "blacklisted": "Person or vehicle on the blacklist. Alert Security."
+      }
+    },
+    "evacuation": {
+      "title": "Evacuation list",
+      "back": "Dashboard",
+      "generatedAt": "Generated: {time}",
+      "total": "{count, plural, =0 {Nobody inside} one {# person in total} other {# people in total}}",
+      "siteTotal": "{count, plural, =0 {Nobody inside} one {# person} other {# people}}",
+      "visitors": "{count, plural, one {# visitor} other {# visitors}}",
+      "employees": "{count, plural, one {# employee} other {# employees}}",
+      "employeesHeading": "Employees (self check-in)",
+      "employee": "Employee",
+      "department": "Department",
+      "company": "Company",
+      "gate": "Gate",
+      "since": "Since"
     }
   }
 }

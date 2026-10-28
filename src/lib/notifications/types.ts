@@ -63,6 +63,11 @@ export type NotifyInput = {
   payload: Prisma.InputJsonObject;
   /** Deep link opened from the notification. */
   url?: string;
+  /**
+   * Extra e-mail recipients that are not users (e.g. `VisitPolicy.notifyEmails`): they get the message by e-mail
+   * in the default language, with no stored notification and no quiet hours.
+   */
+  extraEmails?: string[];
 };
 
 export type NotifyResult = { stored: number };

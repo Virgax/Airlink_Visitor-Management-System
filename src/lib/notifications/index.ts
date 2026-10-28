@@ -35,6 +35,6 @@ export async function notify(input: NotifyInput): Promise<NotifyResult> {
     log.info("notify.stored", { type: input.type, recipients: userIds.size });
   }
   // Teams is a shared channel: the card goes out even when no user is a direct recipient (e.g. blacklist hits).
-  await dispatchChannels({ type: input.type, siteId: input.siteId ?? null, payload, userIds: [...userIds] });
+  await dispatchChannels({ type: input.type, siteId: input.siteId ?? null, payload, userIds: [...userIds], extraEmails: input.extraEmails ?? [] });
   return { stored: userIds.size };
 }

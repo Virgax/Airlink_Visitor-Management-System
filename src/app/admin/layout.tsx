@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const items = tenant.role === "admin" ? adminItems : [{ href: "/admin/reports", label: t("reports") }];
   return (
     <AppShell user={tenant.user} subtitle={t("title")}>
-      <nav aria-label={t("title")} className="mb-6 flex flex-wrap gap-2">
+      <nav aria-label={t("title")} className="mb-6 flex flex-wrap gap-2 print:hidden">
         {items.map((i) => (
           <Link key={i.href} href={i.href} className="btn-secondary text-sm">{i.label}</Link>
         ))}

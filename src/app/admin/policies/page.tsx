@@ -34,6 +34,7 @@ export default async function PoliciesPage({ searchParams }: { searchParams: Pro
   ]);
   const byKind = new Map(policies.map((p) => [p.kind, p]));
   const okText = sp.ok === "reset" ? t("resetDone") : sp.ok ? t("saved") : null;
+  const errorText = sp.error === "autoSignOut" ? t("errors.autoSignOut") : sp.error === "emails" ? t("errors.emails") : sp.error ? tc("invalid") : null;
 
   return (
     <div className="space-y-6">
@@ -42,7 +43,7 @@ export default async function PoliciesPage({ searchParams }: { searchParams: Pro
         <p className="muted mt-1">{t("intro")}</p>
       </div>
       {okText ? <p className="alert-ok" role="status">{okText}</p> : null}
-      {sp.error ? <p className="alert-error" role="alert">{tc("invalid")}</p> : null}
+      {errorText ? <p className="alert-error" role="alert">{errorText}</p> : null}
 
       {sites.length > 1 ? (
         <nav aria-label={t("site")} className="flex flex-wrap gap-2">
@@ -59,7 +60,7 @@ export default async function PoliciesPage({ searchParams }: { searchParams: Pro
       <div className="grid gap-4 lg:grid-cols-2">
         {KINDS.map((kind) => {
           const saved = byKind.get(kind);
-          const p = saved ?? { kind, ...DEFAULT_POLICIES[kind] };
+          const p = saved ?? { kind, ...DEFAULT_POLICIES[kind], enabled: true, autoSignOutAt: null, notifyEmails: [] as string[] };
           const id = (f: string) => `${kind}-${f}`;
           return (
             <form key={kind} id={`policy-${kind}`} action={savePolicyAction} className="card space-y-3" aria-labelledby={id("title")} data-testid={`policy-${kind}`}>
@@ -67,8 +68,10 @@ export default async function PoliciesPage({ searchParams }: { searchParams: Pro
               <input type="hidden" name="kind" value={kind} />
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 id={id("title")} className="text-lg font-semibold">{tk(kind)}</h2>
-                {!saved ? <span className="muted">{t("unsaved")}</span> : null}
+                {!saved ? <span className="muted">{t("unsaved")}</span> : !p.enabled ? <span className="rounded-md bg-warning-bg px-2 py-0.5 text-xs font-medium text-warning">{t("disabledTag")}</span> : null}
               </div>
+              <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" name="enabled" defaultChecked={p.enabled} /> {t("enabled")}</label>
+              <p className="muted -mt-2 text-xs">{t("enabledHelp")}</p>
               <div className="grid gap-2 sm:grid-cols-2">
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="requiresApproval" defaultChecked={p.requiresApproval} /> {t("requiresApproval")}</label>
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="requiresDoc" defaultChecked={p.requiresDoc} /> {t("requiresDoc")}</label>
@@ -88,6 +91,18 @@ export default async function PoliciesPage({ searchParams }: { searchParams: Pro
                 <div>
                   <label className="label" htmlFor={id("maxDurationMin")}>{t("maxDurationMin")}</label>
                   <input id={id("maxDurationMin")} name="maxDurationMin" type="number" min={5} max={10080} placeholder={t("noLimit")} defaultValue={p.maxDurationMin ?? ""} className="input" />
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="label" htmlFor={id("autoSignOutAt")}>{t("autoSignOutAt")}</label>
+                  <input id={id("autoSignOutAt")} name="autoSignOutAt" type="time" defaultValue={p.autoSignOutAt ?? ""} className="input" aria-describedby={id("autoSignOutHelp")} />
+                  <p id={id("autoSignOutHelp")} className="muted mt-1 text-xs">{t("autoSignOutHelp", { tz: site.timezone })}</p>
+                </div>
+                <div>
+                  <label className="label" htmlFor={id("notifyEmails")}>{t("notifyEmails")}</label>
+                  <input id={id("notifyEmails")} name="notifyEmails" type="text" defaultValue={p.notifyEmails.join(", ")} placeholder={t("notifyEmailsPlaceholder")} className="input" aria-describedby={id("notifyEmailsHelp")} maxLength={1000} />
+                  <p id={id("notifyEmailsHelp")} className="muted mt-1 text-xs">{t("notifyEmailsHelp")}</p>
                 </div>
               </div>
               <fieldset>

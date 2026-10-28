@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { notify } from "@/lib/notifications/index";
 import { entryStatus } from "@/lib/guard/decide";
+import { policyNotifyEmails } from "@/lib/server/policies";
 
 export class VisitError extends Error {
   constructor(public readonly code: "not_found" | "bad_state") {
@@ -86,14 +87,18 @@ export async function enterVisit(visitId: string, siteId: string, actorId: strin
   return visit;
 }
 
+/** Notifies the host and, for `visit_entered`, the policy's extra e-mail recipients (`VisitPolicy.notifyEmails`). */
 export async function notifyEntered(visit: VisitSummary): Promise<void> {
-  if (!visit.host) return;
+  const type = visit.status === "at_dock" ? "carrier_at_dock" : "visit_entered";
+  const extraEmails = type === "visit_entered" ? await policyNotifyEmails(visit.siteId, visit.kind) : [];
+  if (!visit.host && extraEmails.length === 0) return;
   await notify({
-    type: visit.status === "at_dock" ? "carrier_at_dock" : "visit_entered",
-    employeeIds: [visit.host.id],
+    type,
+    employeeIds: visit.host ? [visit.host.id] : [],
     siteId: visit.siteId,
-    payload: { visitId: visit.id, visitorName: visit.visitorName, company: visit.company?.name ?? null, gateName: visit.gate.name, kind: visit.kind, plate: visit.plate },
+    payload: { visitId: visit.id, visitorName: visit.visitorName, company: visit.company?.name ?? null, gateName: visit.gate.name, kind: visit.kind, plate: visit.plate, hostName: visit.host?.name ?? "" },
     url: "/app",
+    extraEmails,
   });
 }
 
@@ -125,8 +130,8 @@ export type DecideOptions = {
   reason?: string;
   /** Host note, e.g. "on_my_way" (slice D). */
   note?: string;
-  /** Where the decision came from. */
-  via?: "app" | "teams" | "kiosk";
+  /** Where the decision came from (`admin` = manual sign-in from /admin/reports). */
+  via?: "app" | "teams" | "kiosk" | "admin";
 };
 
 /**
@@ -225,6 +230,8 @@ export type UnannouncedInput = {
   docHash: string | null;
   docLast4: string | null;
   plate: string | null;
+  /** Extra answers (e.g. the phone typed at the gate QR self sign-in), stored in `Visit.extra`. */
+  extra?: Prisma.InputJsonObject;
 };
 
 /** Creates a pending visit for someone who arrived without a pass and notifies the host (`visit_at_gate`). */
@@ -241,6 +248,7 @@ export async function createUnannouncedVisit(input: UnannouncedInput): Promise<V
       docHash: input.docHash,
       docLast4: input.docLast4,
       plate: input.plate,
+      ...(input.extra ? { extra: input.extra } : {}),
       status: "pending",
     },
     select: visitSummarySelect,

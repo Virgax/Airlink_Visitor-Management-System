@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
+import { Siren } from "lucide-react";
+import { Icon } from "@/components/Icon";
 import { db } from "@/lib/db";
 import { requireMembership } from "@/lib/auth/guards";
 import { fmtNumber } from "@/lib/format";
@@ -24,7 +27,10 @@ export default async function AdminHome() {
   const countKeys = ["insideNow", "enteredToday", "pendingApprovals", "incidentsToday"] as const;
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">{t("overview")}</h1>
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="mr-auto text-2xl font-semibold">{t("overview")}</h1>
+        <Link href="/admin/evacuation" className="btn-danger" data-testid="evacuation-link"><Icon icon={Siren} /> {t("evacuation")}</Link>
+      </div>
       <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {stats.map(([label, value]) => (
           <div key={label} className="card">

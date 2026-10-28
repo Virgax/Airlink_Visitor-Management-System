@@ -7,6 +7,7 @@
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { REPORT_PAGE_SIZE, rangeToUtc, type ShiftLogFilters, type VisitFilters } from "@/lib/server/reports-filters";
+import { normalizePlate } from "@/lib/crypto/docHash";
 import { DEFAULT_TIME_ZONE, zonedStartOfDay, localParts } from "@/lib/time/tz";
 
 /** The slice of `Tenant` the reports need (type-only, so tests can build one by hand). */
@@ -67,7 +68,22 @@ export function visitWhere(filters: VisitFilters, tenant: ReportTenant): Prisma.
     ...(filters.host ? { host: { name: { contains: filters.host, mode: "insensitive" } } } : {}),
     ...(filters.areaId ? { areaIds: { has: filters.areaId } } : {}),
     ...(filters.company ? { company: { name: { contains: filters.company, mode: "insensitive" } } } : {}),
+    ...(filters.q ? { AND: [freeTextWhere(filters.q)] } : {}),
   };
+}
+
+/** Free-text search: visitor name, company, host name, plate (normalized) and the last 4 digits of the document. */
+export function freeTextWhere(q: string): Prisma.VisitWhereInput {
+  const term = q.trim();
+  const or: Prisma.VisitWhereInput[] = [
+    { visitorName: { contains: term, mode: "insensitive" } },
+    { company: { name: { contains: term, mode: "insensitive" } } },
+    { host: { name: { contains: term, mode: "insensitive" } } },
+  ];
+  const plate = normalizePlate(term);
+  if (plate.length >= 2) or.push({ plate: { contains: plate } });
+  if (/^\d{4}$/.test(term)) or.push({ docLast4: term });
+  return { OR: or };
 }
 
 const visitOrder: Prisma.VisitOrderByWithRelationInput[] = [{ enteredAt: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }];
@@ -75,7 +91,7 @@ const visitOrder: Prisma.VisitOrderByWithRelationInput[] = [{ enteredAt: { sort:
 /** Paginated visits for the report table (`opts.all` returns up to EXPORT_MAX_ROWS rows for CSV). */
 export async function queryVisits(filters: VisitFilters, tenant: ReportTenant, opts: { all?: boolean } = {}): Promise<VisitsResult> {
   const where = visitWhere(filters, tenant);
-  const pageSize = opts.all ? EXPORT_MAX_ROWS : REPORT_PAGE_SIZE;
+  const pageSize = opts.all ? EXPORT_MAX_ROWS : (filters.pageSize ?? REPORT_PAGE_SIZE);
   const [total, grouped] = await Promise.all([
     db.visit.count({ where }),
     db.visit.groupBy({ by: ["status"], where, _count: { _all: true } }),
@@ -152,7 +168,7 @@ export function shiftLogWhere(filters: ShiftLogFilters, tenant: ReportTenant): P
 
 export async function queryShiftLogs(filters: ShiftLogFilters, tenant: ReportTenant, opts: { all?: boolean } = {}) {
   const where = shiftLogWhere(filters, tenant);
-  const pageSize = opts.all ? EXPORT_MAX_ROWS : REPORT_PAGE_SIZE;
+  const pageSize = opts.all ? EXPORT_MAX_ROWS : (filters.pageSize ?? REPORT_PAGE_SIZE);
   const [total, grouped] = await Promise.all([db.shiftLog.count({ where }), db.shiftLog.groupBy({ by: ["kind"], where, _count: { _all: true } })]);
   const pages = Math.max(1, Math.ceil(total / pageSize));
   const page = opts.all ? 1 : Math.min(filters.page, pages);
@@ -163,6 +179,22 @@ export async function queryShiftLogs(filters: ShiftLogFilters, tenant: ReportTen
 }
 
 // ───────────────────────────── Dashboard ─────────────────────────────
+
+export type ReportKpis = { insideNow: number; enteredInRange: number; leftInRange: number };
+
+/** KPI tiles of the visits report: on site right now (site scope only), entries and exits inside the date range. */
+export async function reportKpis(filters: VisitFilters, tenant: ReportTenant): Promise<ReportKpis> {
+  const scope = scopeSites(filters, tenant);
+  const range = rangeToUtc(filters, reportTimeZone(filters, tenant));
+  const inRange = { gte: range.from, lt: range.to };
+  const gate = filters.gateId ? { gateId: filters.gateId } : {};
+  const [insideNow, enteredInRange, leftInRange] = await Promise.all([
+    db.visit.count({ where: { ...scope, ...gate, status: { in: ["inside", "at_dock"] } } }),
+    db.visit.count({ where: { ...scope, ...gate, enteredAt: inRange } }),
+    db.visit.count({ where: { ...scope, ...gate, leftAt: inRange } }),
+  ]);
+  return { insideNow, enteredInRange, leftInRange };
+}
 
 export type SiteCounts = { insideNow: number; enteredToday: number; pendingApprovals: number; incidentsToday: number };
 

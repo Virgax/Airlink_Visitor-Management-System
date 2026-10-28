@@ -81,11 +81,12 @@ body {
 .input {
   @apply w-full rounded-lg border border-border bg-surface px-3 py-2 text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-ring;
 }
-.btn, .btn-primary, .btn-secondary {
+.btn, .btn-primary, .btn-secondary, .btn-danger {
   @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60;
 }
 .btn-primary { @apply bg-primary text-primary-contrast hover:bg-primary-hover; }
 .btn-secondary { @apply border border-border bg-surface text-text hover:bg-surface-2; }
+.btn-danger { background: var(--brand-red, #d7191c); color: #fff; } .btn-danger:hover { opacity: 0.9; }
 .card { @apply rounded-xl border border-border bg-surface p-4 shadow-sm sm:p-6; }
 .label { @apply mb-1 block text-sm font-medium text-text; }
 .alert-error { @apply rounded-lg border border-danger/30 bg-danger-bg px-3 py-2 text-sm text-danger; }
@@ -94,6 +95,9 @@ body {
 
 @media print {
   .print-hidden { display: none !important; }
+  /* Gate QR poster (/admin/sites/[id]/gates/[gateId]/poster): one A4 sheet, nothing else on it. */
+  .poster { border: none !important; border-radius: 0 !important; padding: 12mm !important; min-height: auto !important; }
+  @page { size: A4; margin: 10mm; }
   html, body { background: #fff; color: #000; }
   .card { box-shadow: none; border-color: #999; }
 }

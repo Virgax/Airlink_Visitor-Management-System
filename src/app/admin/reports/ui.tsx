@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { Icon } from "@/components/Icon";
 import { EXPORT_MAX_ROWS } from "@/lib/server/reports";
-import { filtersToQuery } from "@/lib/server/reports-filters";
+import { filtersToQuery, PAGE_SIZES, QUICK_RANGES, REPORT_PAGE_SIZE, type QuickRange } from "@/lib/server/reports-filters";
 
 export type ReportKey = "visits" | "audit" | "shifts";
 
@@ -64,6 +64,33 @@ export async function RangeSiteGateFields({
         </select>
       </div>
     </>
+  );
+}
+
+/** Hoy / Ayer / Esta semana / Este mes: links that set `from`/`to` in the report's time zone (and keep the rest). */
+export async function QuickRanges({ basePath, filters, active }: { basePath: string; filters: Record<string, string | number | undefined> & { siteId?: string }; active?: QuickRange }) {
+  const t = await getTranslations("reports.quick");
+  return (
+    <nav aria-label={t("label")} className="flex flex-wrap gap-2 sm:col-span-2 lg:col-span-4" data-testid="quick-ranges">
+      {QUICK_RANGES.map((r) => (
+        <Link key={r} href={`${basePath}${filtersToQuery(filters, { range: r, from: undefined, to: undefined, page: undefined })}`} className={active === r ? "btn-primary text-sm" : "btn-secondary text-sm"} aria-current={active === r ? "page" : undefined} data-testid={`quick-${r}`}>
+          {t(r)}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+/** Rows-per-page select (25/50/100); the value travels in the query string with the other filters. */
+export async function PageSizeField({ value }: { value?: number }) {
+  const t = await getTranslations("reports.pagination");
+  return (
+    <div>
+      <label className="label" htmlFor="pageSize">{t("pageSize")}</label>
+      <select id="pageSize" name="pageSize" className="input" defaultValue={String(value ?? REPORT_PAGE_SIZE)}>
+        {PAGE_SIZES.map((n) => <option key={n} value={n}>{n}</option>)}
+      </select>
+    </div>
   );
 }
 

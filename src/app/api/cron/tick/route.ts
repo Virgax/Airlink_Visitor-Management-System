@@ -5,7 +5,7 @@ import { withAdvisoryLock } from "@/lib/jobs/withAdvisoryLock";
 import { expirePasses } from "@/lib/server/passes";
 import { purgeExpiredSessions } from "@/lib/auth/session";
 import { purgeRateLimits } from "@/lib/rateLimit";
-import { alertOverstays, timeoutPendingVisits } from "@/lib/notifications/jobs";
+import { alertOverstays, autoCloseVisits, timeoutPendingVisits } from "@/lib/notifications/jobs";
 import { log } from "@/lib/log";
 
 export const dynamic = "force-dynamic";
@@ -23,8 +23,9 @@ export async function POST(request: NextRequest) {
     const limits = await purgeRateLimits();
     const timedOut = await timeoutPendingVisits();
     const overstays = await alertOverstays();
+    const autoClosed = await autoCloseVisits();
     // Still to come: reminders, media retention purge.
-    return { expired, sessions, limits, timedOut, overstays };
+    return { expired, sessions, limits, timedOut, overstays, autoClosed };
   });
   log.info("cron.tick", result as Record<string, unknown>);
   return Response.json({ ok: true, ...result });

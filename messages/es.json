@@ -230,7 +230,19 @@
       "saved": "Política guardada.",
       "resetDone": "Política restaurada a los valores por defecto.",
       "unsaved": "Valores por defecto (sin guardar)",
-      "empty": "No hay sitios activos."
+      "empty": "No hay sitios activos.",
+      "enabled": "Tipo habilitado",
+      "enabledHelp": "Si lo deshabilitas, desaparece de los formularios de anfitriones, kiosco y auto-registro. Los pases ya creados siguen funcionando.",
+      "disabledTag": "Deshabilitado",
+      "autoSignOutAt": "Salida automática a las",
+      "autoSignOutHelp": "Hora local ({tz}). Las visitas de este tipo que sigan dentro se cierran a esa hora; vacío = nunca.",
+      "notifyEmails": "Avisar por correo al entrar",
+      "notifyEmailsPlaceholder": "seguridad@empresa.com, rrhh@empresa.com",
+      "notifyEmailsHelp": "Correos separados por coma. Reciben el aviso de entrada de este tipo de visita.",
+      "errors": {
+        "autoSignOut": "Hora de salida automática inválida (usa HH:mm).",
+        "emails": "Revisa la lista de correos (máximo 20, separados por coma)."
+      }
     },
     "companiesPage": {
       "title": "Empresas",
@@ -321,7 +333,8 @@
         "exists": "Ya existe un empleado con ese correo.",
         "synced": "Solo se pueden editar empleados manuales."
       }
-    }
+    },
+    "evacuation": "Lista de evacuación"
   },
   "guard": {
     "title": "Seguridad",
@@ -845,7 +858,9 @@
       "clear": "Limpiar",
       "export": "Exportar CSV",
       "exportHelp": "Mismos filtros, hasta {max} filas.",
-      "timeZone": "Horas en {tz}."
+      "timeZone": "Horas en {tz}.",
+      "q": "Buscar",
+      "qPlaceholder": "Visitante, empresa, anfitrión, placa o últimos 4 de la cédula"
     },
     "columns": {
       "date": "Fecha",
@@ -912,7 +927,8 @@
     "pagination": {
       "page": "Página {page} de {pages}",
       "prev": "Anterior",
-      "next": "Siguiente"
+      "next": "Siguiente",
+      "pageSize": "Filas por página"
     },
     "empty": "No hay registros con estos filtros.",
     "minutes": "{count} min",
@@ -945,6 +961,19 @@
       "incident": "Incidente",
       "round": "Ronda",
       "handover": "Relevo"
+    },
+    "signIn": "Registrar visita",
+    "quick": {
+      "label": "Rangos rápidos",
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "week": "Esta semana",
+      "month": "Este mes"
+    },
+    "kpis": {
+      "inside": "Dentro ahora",
+      "entered": "Entraron en el período",
+      "left": "Salieron en el período"
     }
   },
   "errors": {
@@ -1087,6 +1116,168 @@
         "title": "Lista de evacuación",
         "body": "{count, plural, =0 {Nadie adentro} one {# persona adentro} other {# personas adentro}} en {siteName}."
       }
+    }
+  },
+  "ops": {
+    "selfSignIn": {
+      "title": "Regístrate en recepción",
+      "modes": "Modo",
+      "visitorTab": "Soy visitante",
+      "employeeTab": "Soy empleado",
+      "picker": {
+        "searching": "Buscando…",
+        "none": "Sin resultados",
+        "change": "Cambiar"
+      },
+      "host": {
+        "label": "¿A quién visitas?",
+        "placeholder": "Nombre de tu anfitrión",
+        "help": "Escribe al menos 2 letras del nombre.",
+        "selected": "Anfitrión"
+      },
+      "employee": {
+        "label": "Tu nombre",
+        "placeholder": "Nombre y apellido",
+        "help": "Escribe al menos 2 letras de tu nombre.",
+        "selected": "Empleado",
+        "intro": "Marca tu entrada o salida del sitio con tu PIN. Sirve para la lista de evacuación.",
+        "pin": "PIN",
+        "pinHelp": "Si no tienes PIN, pídelo a TI.",
+        "submit": "Marcar entrada / salida",
+        "ok": {
+          "in": "Entrada registrada. Bienvenido.",
+          "out": "Salida registrada. Hasta luego."
+        },
+        "errors": {
+          "invalid": "Revisa los datos.",
+          "employee": "Selecciona tu nombre.",
+          "noPin": "No tienes un PIN configurado. Contacta a TI para activarlo.",
+          "pin": "PIN incorrecto.",
+          "rateLimited": "Demasiados intentos. Espera unos minutos."
+        }
+      },
+      "visitor": {
+        "intro": "Completa tus datos. Avisamos a tu anfitrión para que apruebe tu visita.",
+        "name": "Tu nombre",
+        "company": "Empresa",
+        "kind": "Motivo de la visita",
+        "doc": "Cédula o pasaporte",
+        "docHelp": "Solo guardamos los últimos 4 dígitos.",
+        "phone": "Teléfono",
+        "submit": "Avisar a mi anfitrión",
+        "privacy": "Tus datos se usan únicamente para el control de acceso (Ley 172-13).",
+        "noKinds": "Esta puerta no admite registro de visitantes por ahora. Acércate a recepción.",
+        "errors": {
+          "invalid": "Revisa los datos del formulario.",
+          "host": "Selecciona a tu anfitrión.",
+          "reception": "No pudimos completar tu registro. Por favor acércate a recepción.",
+          "rateLimited": "Demasiados intentos. Espera unos minutos."
+        }
+      },
+      "status": {
+        "title": "Tu visita",
+        "yourHost": "tu anfitrión",
+        "refresh": "Esta página se actualiza sola cada {seconds} s.",
+        "another": "Registrar otra persona",
+        "network": "Sin conexión. Reintentando…",
+        "pending": {
+          "title": "Avisamos a tu anfitrión…",
+          "body": "Espera en {gate}: {host} debe aprobar tu visita."
+        },
+        "approved": {
+          "title": "Visita aprobada",
+          "body": "{host} aprobó tu visita. Pasa por recepción para recibir tu gafete."
+        },
+        "denied": {
+          "title": "Visita no aprobada",
+          "body": "{host} no pudo recibirte hoy. Consulta en recepción."
+        },
+        "inside": {
+          "title": "Entrada registrada",
+          "body": "Ya estás dentro. Porta tu gafete visible."
+        },
+        "at_dock": {
+          "title": "En muelle",
+          "body": "Ya estás registrado en el muelle."
+        },
+        "left": {
+          "title": "Visita finalizada",
+          "body": "Tu salida quedó registrada. Gracias por tu visita."
+        },
+        "timeout": {
+          "title": "Sin respuesta",
+          "body": "{host} no respondió a tiempo. Seguridad fue avisada: acércate a recepción."
+        }
+      },
+      "admin": {
+        "enable": "Activar auto-registro",
+        "disable": "Desactivar auto-registro",
+        "poster": "Imprimir cartel",
+        "enabled": "Auto-registro activado. Imprime el cartel con el QR de la puerta.",
+        "disabled": "Auto-registro desactivado. El cartel anterior deja de funcionar.",
+        "url": "Enlace público",
+        "kinds": "Tipos de visita que puede elegir un visitante",
+        "kindsHelp": "Sin marcar ninguno se ofrecen todos los tipos habilitados en las políticas."
+      },
+      "poster": {
+        "back": "Volver al sitio",
+        "print": "Imprimir",
+        "help": "Tamaño A4. Pégalo en la puerta o en el mostrador.",
+        "title": "Regístrate aquí",
+        "subtitle": "Escanea el código con tu celular",
+        "qrAlt": "Código QR para el auto-registro",
+        "step1": "Abre la cámara de tu celular y apunta al código.",
+        "step2": "Completa tus datos y elige a quién visitas.",
+        "step3": "Espera la aprobación en tu pantalla y recoge tu gafete en recepción.",
+        "employees": "Empleados: elige \"Soy empleado\" y marca tu entrada con tu PIN."
+      }
+    },
+    "signIn": {
+      "title": "Registrar visita",
+      "intro": "Registro manual desde recepción: la visita queda aprobada y dentro de inmediato, a tu nombre.",
+      "back": "Reportes",
+      "chooseSite": "¿En qué sitio?",
+      "site": "Sitio",
+      "changeSite": "cambiar",
+      "gate": "Puerta",
+      "kind": "Tipo de visita",
+      "host": "Anfitrión",
+      "hostPlaceholder": "Nombre o departamento",
+      "hostHelp": "Escribe al menos 2 letras.",
+      "hostSelected": "Anfitrión seleccionado",
+      "searching": "Buscando…",
+      "none": "Sin resultados",
+      "change": "Cambiar",
+      "visitor": "Nombre del visitante",
+      "company": "Empresa",
+      "doc": "Cédula o pasaporte",
+      "docHelp": "Solo guardamos los últimos 4 dígitos.",
+      "plate": "Placa",
+      "submit": "Registrar entrada",
+      "auditNote": "Queda en la auditoría como aprobación en persona desde el panel.",
+      "noGates": "Este sitio no tiene puertas activas.",
+      "ok": "{name} registrado y dentro.",
+      "errors": {
+        "invalid": "Revisa los datos del formulario.",
+        "host": "Selecciona un anfitrión.",
+        "company_blocked": "La empresa está bloqueada.",
+        "blacklisted": "Persona o vehículo en lista negra. Avisa a Seguridad."
+      }
+    },
+    "evacuation": {
+      "title": "Lista de evacuación",
+      "back": "Panel",
+      "generatedAt": "Generada: {time}",
+      "total": "{count, plural, =0 {Nadie dentro} one {# persona en total} other {# personas en total}}",
+      "siteTotal": "{count, plural, =0 {Nadie dentro} one {# persona} other {# personas}}",
+      "visitors": "{count, plural, one {# visitante} other {# visitantes}}",
+      "employees": "{count, plural, one {# empleado} other {# empleados}}",
+      "employeesHeading": "Empleados (auto-registro)",
+      "employee": "Empleado",
+      "department": "Departamento",
+      "company": "Empresa",
+      "gate": "Puerta",
+      "since": "Desde"
     }
   }
 }
