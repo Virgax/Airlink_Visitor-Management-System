@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "NdaVersion" ADD COLUMN     "bodyEn" TEXT,
+ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "titleEn" TEXT;
+

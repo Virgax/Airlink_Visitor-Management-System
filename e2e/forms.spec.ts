@@ -195,6 +195,7 @@ test("a signature element replaces the typed-name NDA acceptance with a drawn si
   await expect(v.getByText("Firma del contratista")).toBeVisible();
   await v.getByLabel("He leído y acepto la política de visitantes").check();
   const canvas = v.getByTestId("signature-canvas");
+  await canvas.scrollIntoViewIfNeeded();
   const box = (await canvas.boundingBox())!;
   await v.mouse.move(box.x + 20, box.y + 80);
   await v.mouse.down();

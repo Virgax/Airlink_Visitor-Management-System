@@ -480,9 +480,13 @@ model NdaVersion {
   version    String
   title      String
   body       String
+  /// English text shown when the visitor's UI language is English (falls back to the Spanish source)
+  titleEn    String?
+  bodyEn     String?
   /// Optional PDF in the private bucket shown before acceptance
   attachmentKey String?
   activeFrom DateTime @default(now())
+  createdAt  DateTime @default(now())
 
   site Site? @relation(fields: [siteId], references: [id], onDelete: Cascade)
 

@@ -207,10 +207,21 @@
       "errors": {
         "exists": "Ya existe un sitio con ese identificador.",
         "areaExists": "Ya existe un área con ese nombre en este sitio.",
-        "timezone": "Zona horaria inválida."
+        "timezone": "Zona horaria inválida.",
+        "gateInUse": "Esa puerta tiene visitas, bitácora o presencias registradas: no se puede eliminar, solo desactivar.",
+        "deleteConfirm": "El nombre escrito no coincide con el del sitio."
       },
       "checkpointAreas": "Áreas que controla este punto",
-      "checkpointAreasHelp": "Al escanear un gafete aquí, el visitante pasa solo si su pase incluye alguna de estas áreas. Sin selección, pasa cualquier visitante que haya entrado por recepción."
+      "checkpointAreasHelp": "Al escanear un gafete aquí, el visitante pasa solo si su pase incluye alguna de estas áreas. Sin selección, pasa cualquier visitante que haya entrado por recepción.",
+      "deleteGate": "Eliminar",
+      "deleteGateConfirm": "¿Eliminar la puerta \"{name}\"? Se quitan también los kioscos enrolados en ella. No se puede deshacer.",
+      "gateDeleted": "Puerta eliminada.",
+      "deleteSite": "Eliminar sitio",
+      "deleteSiteHelp": "Borra el sitio con todo lo registrado en él: {passes, plural, =0 {ningún pase} one {# pase} other {# pases}} y {visits, plural, =0 {ninguna visita} one {# visita} other {# visitas}}, además de puertas, áreas, políticas, formularios, kioscos y roles del sitio. Los empleados y la auditoría se conservan. No se puede deshacer; si el sitio tiene historial, mejor desactívalo.",
+      "deleteSiteConfirm": "Escribe el nombre del sitio ({name}) para confirmar",
+      "deleteSiteDialog": "Vas a eliminar \"{name}\" y todo su historial. ¿Seguro?",
+      "deleteSiteButton": "Eliminar sitio definitivamente",
+      "siteDeleted": "Sitio eliminado."
     },
     "policiesPage": {
       "title": "Políticas de visita",
@@ -348,7 +359,41 @@
     "people": "Personas",
     "frequent": "Visitantes frecuentes",
     "forms": "Formularios",
-    "help": "Ayuda"
+    "help": "Ayuda",
+    "nda": "Política de visitantes",
+    "ndaPage": {
+      "title": "Política de visitantes (NDA)",
+      "intro": "El texto que cada visitante acepta desde su enlace antes de entrar, cuando la política del tipo de visita lo exige. Cada versión es inmutable: lo que alguien aceptó queda registrado tal cual; para corregir, publica una versión nueva.",
+      "versions": "Versiones",
+      "empty": "No hay versiones todavía.",
+      "current": "Vigente",
+      "activeFrom": "Vigente desde",
+      "showText": "Ver texto",
+      "publish": "Publicar nueva versión",
+      "publishHelp": "Escribe el texto en español y, si lo quieres bilingüe, en inglés: el visitante lo ve en el idioma de su enlace. Puedes adjuntar el documento completo en PDF.",
+      "site": "Aplica a",
+      "version": "Versión",
+      "titleEs": "Título (español)",
+      "titleEn": "Título (inglés)",
+      "bodyEs": "Texto (español)",
+      "bodyEn": "Texto (inglés)",
+      "bodyEnHelp": "Si lo dejas vacío, los visitantes en inglés ven el texto en español.",
+      "activeFromField": "Vigente desde (opcional)",
+      "activeFromHelp": "Vacío = ahora mismo. Con fecha futura, la versión anterior sigue vigente hasta entonces.",
+      "attachment": "Documento completo (PDF, opcional)",
+      "attachmentHelp": "Hasta 5 MB. El visitante lo abre desde su enlace antes de aceptar.",
+      "attachmentDisabled": "El almacenamiento de archivos no está configurado en este entorno.",
+      "publishButton": "Publicar versión",
+      "published": "Versión publicada. Los visitantes nuevos ya la ven.",
+      "errors": {
+        "invalid": "Revisa los campos: versión, título y texto son obligatorios.",
+        "forbidden": "Solo un administrador de todos los sitios puede publicar una política global.",
+        "exists": "Ya existe esa versión para ese sitio. Usa otro número.",
+        "media": "No se pudo adjuntar el PDF: el almacenamiento no está configurado.",
+        "tooBig": "El PDF supera 5 MB.",
+        "notPdf": "El archivo no es un PDF."
+      }
+    }
   },
   "guard": {
     "title": "Seguridad",
@@ -2060,6 +2105,14 @@
           "devices": {
             "title": "Kioscos de seguridad",
             "body": "Los equipos de recepción se registran en \"Dispositivos de kiosco\" y se enrolan con un código. La guía \"Activar un kiosco de seguridad\" lo explica paso a paso."
+          },
+          "nda": {
+            "title": "Política de visitantes (NDA) en español e inglés",
+            "body": "En \"Política de visitantes\" publicas el texto que cada visitante acepta desde su enlace cuando el tipo de visita lo exige (contratistas, auditores, recurrentes). Escríbelo en español y, opcionalmente, en inglés: el visitante lo ve en el idioma de su enlace. Puedes adjuntar el documento completo en PDF.\nCada versión es inmutable y queda registrada con la aceptación; para corregir, publica una versión nueva. Una versión por sitio manda sobre la global."
+          },
+          "sitesDelete": {
+            "title": "Eliminar sitios y puertas",
+            "body": "Una puerta sin historial (sin visitas, bitácora ni presencias) se elimina con \"Eliminar\" en su fila; con historial solo se desactiva. Un sitio lo elimina un administrador de todos los sitios desde la tarjeta roja al final de su página, escribiendo el nombre del sitio: se borran sus pases, visitas, puertas, áreas, políticas, formularios y kioscos. Es irreversible; si el sitio tiene historial, desactívalo."
           }
         }
       },

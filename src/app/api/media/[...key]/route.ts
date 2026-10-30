@@ -25,7 +25,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ key: string
   const passToken = req.nextUrl.searchParams.get("pass");
   if (user) {
     if (!(await canReadSite(user, siteId, kind))) return new Response("Forbidden", { status: 403 });
-  } else if (kind === "forms" && passToken && TOKEN_RE.test(passToken)) {
+  } else if ((kind === "forms" || kind === "nda") && passToken && TOKEN_RE.test(passToken)) {
     const pass = await db.pass.findUnique({ where: { token: passToken }, select: { siteId: true } });
     if (!pass || (siteId !== "all" && pass.siteId !== siteId)) return new Response("Forbidden", { status: 403 });
   } else {

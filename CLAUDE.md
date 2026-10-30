@@ -34,6 +34,10 @@ Full brief: `docs/PLAN.md`.
   rotating TOTP QR of recurring passes; validation only in `src/lib/passes/validate.ts` (pure, unit-tested) +
   atomic `uses` increment in `src/lib/server/passes.ts` (`consumePassUse`). Policies (`VisitPolicy`) are data,
   evaluated by `src/lib/policies/evaluate.ts`; `DEFAULT_POLICIES` only seeds them.
+- Visitor policy (NDA): `NdaVersion` rows are immutable, per site or global (`activeNda`/`ndaText` in
+  `src/lib/server/nda.ts`), with optional `titleEn`/`bodyEn` and a PDF attachment; published from `/admin/nda`.
+- Deleting: gates only without history (`deleteGateAction`), sites only by an all-sites admin after typing the name
+  (`deleteSiteAction`, explicit transaction because Visit/ShiftLog/EmployeePresence → Gate are RESTRICT); audited.
 - Forms (`src/lib/forms/schema.ts`): elements carry Spanish `label`/`help` plus optional `labelEn`/`helpEn`
   (`elementText(e, locale)`); question type `list` = one item per line (tools a contractor brings).
 - Identity documents: never store the full number — `docHash` (HMAC `DOC_HASH_KEY`) + `docLast4`

@@ -12,7 +12,8 @@ import { absoluteUrl } from "@/lib/notifications/channels/types";
 import { readCheckpointAreaIds } from "@/lib/guard/checkpoint";
 import { PRINTER_KINDS, readPrinter } from "@/lib/badges/config";
 import { BADGE_TEMPLATES } from "@/lib/badges/zpl";
-import { createAreaAction, createGateAction, toggleAreaAction, toggleGateAction, toggleSelfSignInAction, updateAreaAction, updateGatePrinterAction, updateCheckpointAreasAction, updateSelfSignInKindsAction, updateSiteAction } from "../actions";
+import { ConfirmSubmit } from "@/components/ConfirmSubmit";
+import { createAreaAction, createGateAction, deleteGateAction, deleteSiteAction, toggleAreaAction, toggleGateAction, toggleSelfSignInAction, updateAreaAction, updateGatePrinterAction, updateCheckpointAreasAction, updateSelfSignInKindsAction, updateSiteAction } from "../actions";
 
 const GATE_KINDS = ["pedestrian", "vehicle", "dock", "checkpoint"] as const;
 
@@ -29,10 +30,16 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
   const site = await getManagedSite(tenant, id);
   if (!site) notFound();
   const settings = readSiteSettings(site);
-  const [gates, areas] = await Promise.all([
+  const [gates, areas, gateVisits, gateLogs, gatePresences, passCount, visitCount] = await Promise.all([
     db.gate.findMany({ where: { siteId: site.id }, orderBy: [{ active: "desc" }, { name: "asc" }] }),
     db.area.findMany({ where: { siteId: site.id }, orderBy: [{ active: "desc" }, { name: "asc" }] }),
+    db.visit.groupBy({ by: ["gateId"], where: { siteId: site.id }, _count: { _all: true } }),
+    db.shiftLog.groupBy({ by: ["gateId"], where: { siteId: site.id }, _count: { _all: true } }),
+    db.employeePresence.groupBy({ by: ["gateId"], where: { siteId: site.id }, _count: { _all: true } }),
+    db.pass.count({ where: { siteId: site.id } }),
+    db.visit.count({ where: { siteId: site.id } }),
   ]);
+  const gateInUse = new Set([...gateVisits, ...gateLogs, ...gatePresences].filter((g) => g._count._all > 0).map((g) => g.gateId));
   const isGlobal = tenant.membership.siteId === null;
   const okText =
     sp.ok === "created" ? t("created")
@@ -41,9 +48,16 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
     : sp.ok === "selfSignInOn" ? ts("enabled")
     : sp.ok === "selfSignInOff" ? ts("disabled")
     : sp.ok === "printer" ? tb("admin.printerSaved")
+    : sp.ok === "gateDeleted" ? t("gateDeleted")
     : sp.ok ? tc("saved")
     : null;
-  const errorText = sp.error === "areaExists" ? t("errors.areaExists") : sp.error === "timezone" ? t("errors.timezone") : sp.error ? tc("invalid") : null;
+  const errorText =
+    sp.error === "areaExists" ? t("errors.areaExists")
+    : sp.error === "timezone" ? t("errors.timezone")
+    : sp.error === "gateInUse" ? t("errors.gateInUse")
+    : sp.error === "deleteConfirm" ? t("errors.deleteConfirm")
+    : sp.error ? tc("invalid")
+    : null;
 
   return (
     <div className="space-y-6">
@@ -146,6 +160,12 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
                       <input type="hidden" name="gateId" value={g.id} />
                       <button type="submit" className="btn-secondary text-sm">{g.active ? t("deactivate") : t("activate")}</button>
                     </form>
+                    {gateInUse.has(g.id) ? null : (
+                      <form action={deleteGateAction}>
+                        <input type="hidden" name="gateId" value={g.id} />
+                        <ConfirmSubmit message={t("deleteGateConfirm", { name: g.name })} data-testid="delete-gate">{t("deleteGate")}</ConfirmSubmit>
+                      </form>
+                    )}
                   </div>
                   <form action={updateGatePrinterAction} className="flex flex-wrap items-end gap-2 rounded-lg bg-surface-2 p-3" aria-label={`${tb("admin.printer")} · ${g.name}`}>
                     <input type="hidden" name="gateId" value={g.id} />
@@ -247,6 +267,20 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
           </ul>
         )}
       </section>
+      {isGlobal ? (
+        <section className="card space-y-3 border-danger/40" data-testid="delete-site">
+          <h2 className="text-lg font-semibold text-danger">{t("deleteSite")}</h2>
+          <p className="muted">{t("deleteSiteHelp", { passes: passCount, visits: visitCount })}</p>
+          <form action={deleteSiteAction} className="flex flex-wrap items-end gap-2">
+            <input type="hidden" name="siteId" value={site.id} />
+            <div>
+              <label className="label" htmlFor="confirmName">{t("deleteSiteConfirm", { name: site.name })}</label>
+              <input id="confirmName" name="confirmName" required className="input" autoComplete="off" />
+            </div>
+            <ConfirmSubmit message={t("deleteSiteDialog", { name: site.name })} className="btn-danger" data-testid="delete-site-button">{t("deleteSiteButton")}</ConfirmSubmit>
+          </form>
+        </section>
+      ) : null}
     </div>
   );
 }

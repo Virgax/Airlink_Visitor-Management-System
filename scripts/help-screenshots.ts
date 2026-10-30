@@ -182,6 +182,14 @@ async function main() {
     await admin.goto(`/admin/policies?site=${demo.site.id}`);
     await shot(admin, "admin-policies");
   });
+  await step("admin-nda", async () => {
+    await admin.goto("/admin/nda");
+    await admin.locator("#titleEn").fill("Visitor and confidentiality policy");
+    await admin.locator("#bodyEn").fill("By entering Airlink Distribution DR facilities I agree to: (1) wear the badge visibly and stay escorted where required; (2) take no photos or video without authorization; (3) keep confidential any information, process or device I observe; (4) follow Security's instructions and industrial safety rules; (5) my data being used only for access control.");
+    await shot(admin, "admin-nda", { fullPage: true });
+    await admin.getByRole("button", { name: "Publicar versión" }).click();
+    await admin.waitForLoadState("networkidle");
+  });
   await step("admin-companies", async () => {
     await admin.goto("/admin/companies");
     await shot(admin, "admin-companies");

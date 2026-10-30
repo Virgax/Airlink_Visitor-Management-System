@@ -207,10 +207,21 @@
       "errors": {
         "exists": "A site with that identifier already exists.",
         "areaExists": "An area with that name already exists at this site.",
-        "timezone": "Invalid time zone."
+        "timezone": "Invalid time zone.",
+        "gateInUse": "That gate has visits, shift log entries or presences recorded: it cannot be deleted, only deactivated.",
+        "deleteConfirm": "The typed name does not match the site's name."
       },
       "checkpointAreas": "Areas this checkpoint controls",
-      "checkpointAreasHelp": "When a badge is scanned here, the visitor passes only if their pass includes one of these areas. With none selected, any visitor who entered through reception passes."
+      "checkpointAreasHelp": "When a badge is scanned here, the visitor passes only if their pass includes one of these areas. With none selected, any visitor who entered through reception passes.",
+      "deleteGate": "Delete",
+      "deleteGateConfirm": "Delete gate \"{name}\"? Kiosks enrolled at it are removed too. This cannot be undone.",
+      "gateDeleted": "Gate deleted.",
+      "deleteSite": "Delete site",
+      "deleteSiteHelp": "Deletes the site with everything recorded in it: {passes, plural, =0 {no passes} one {# pass} other {# passes}} and {visits, plural, =0 {no visits} one {# visit} other {# visits}}, plus its gates, areas, policies, forms, kiosks and roles. Employees and the audit log are kept. This cannot be undone; if the site has history, deactivate it instead.",
+      "deleteSiteConfirm": "Type the site name ({name}) to confirm",
+      "deleteSiteDialog": "You are about to delete \"{name}\" and all its history. Are you sure?",
+      "deleteSiteButton": "Delete site permanently",
+      "siteDeleted": "Site deleted."
     },
     "policiesPage": {
       "title": "Visit policies",
@@ -348,7 +359,41 @@
     "people": "People",
     "frequent": "Frequent visitors",
     "forms": "Forms",
-    "help": "Help"
+    "help": "Help",
+    "nda": "Visitor policy",
+    "ndaPage": {
+      "title": "Visitor policy (NDA)",
+      "intro": "The text every visitor accepts from their link before entering, when the visit type's policy requires it. Versions are immutable: what someone accepted stays as it was; to correct it, publish a new version.",
+      "versions": "Versions",
+      "empty": "No versions yet.",
+      "current": "Current",
+      "activeFrom": "Active from",
+      "showText": "Show text",
+      "publish": "Publish a new version",
+      "publishHelp": "Write the text in Spanish and, for a bilingual policy, in English: the visitor sees it in the language of their link. You can attach the full document as a PDF.",
+      "site": "Applies to",
+      "version": "Version",
+      "titleEs": "Title (Spanish)",
+      "titleEn": "Title (English)",
+      "bodyEs": "Text (Spanish)",
+      "bodyEn": "Text (English)",
+      "bodyEnHelp": "When empty, English-speaking visitors see the Spanish text.",
+      "activeFromField": "Active from (optional)",
+      "activeFromHelp": "Empty = right now. With a future date, the previous version stays active until then.",
+      "attachment": "Full document (PDF, optional)",
+      "attachmentHelp": "Up to 5 MB. The visitor opens it from their link before accepting.",
+      "attachmentDisabled": "File storage is not configured in this environment.",
+      "publishButton": "Publish version",
+      "published": "Version published. New visitors see it already.",
+      "errors": {
+        "invalid": "Check the fields: version, title and text are required.",
+        "forbidden": "Only an all-sites administrator can publish a global policy.",
+        "exists": "That version already exists for that site. Use another number.",
+        "media": "The PDF could not be attached: storage is not configured.",
+        "tooBig": "The PDF exceeds 5 MB.",
+        "notPdf": "The file is not a PDF."
+      }
+    }
   },
   "guard": {
     "title": "Security",
@@ -2060,6 +2105,14 @@
           "devices": {
             "title": "Security kiosks",
             "body": "Reception devices are registered under \"Kiosk devices\" and enrolled with a code. The guide \"Activate a security kiosk\" explains it step by step."
+          },
+          "nda": {
+            "title": "Visitor policy (NDA) in Spanish and English",
+            "body": "Under \"Visitor policy\" you publish the text every visitor accepts from their link when the visit type requires it (contractors, auditors, recurring). Write it in Spanish and, optionally, in English: the visitor sees it in the language of their link. You can attach the full document as a PDF.\nEach version is immutable and recorded with the acceptance; to correct it, publish a new version. A site's own version overrides the global one."
+          },
+          "sitesDelete": {
+            "title": "Delete sites and gates",
+            "body": "A gate without history (no visits, shift log or presences) is removed with \"Delete\" on its row; with history it can only be deactivated. A site is deleted by an all-sites administrator from the red card at the bottom of its page, typing the site's name: its passes, visits, gates, areas, policies, forms and kiosks are erased. It is irreversible; if the site has history, deactivate it instead."
           }
         }
       },

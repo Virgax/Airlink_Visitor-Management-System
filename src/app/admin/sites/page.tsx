@@ -23,6 +23,7 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
         <p className="muted mt-1">{t("intro")}</p>
       </div>
+      {sp.ok === "deleted" ? <p className="alert-ok" role="status">{t("siteDeleted")}</p> : null}
       {errorKey ? <p className="alert-error" role="alert">{t(errorKey)}</p> : sp.error ? <p className="alert-error" role="alert">{tc(sp.error === "forbidden" ? "forbidden" : "invalid")}</p> : null}
 
       {isGlobal ? (

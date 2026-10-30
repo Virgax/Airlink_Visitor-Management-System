@@ -95,6 +95,8 @@ export const HELP_GUIDES: readonly HelpGuide[] = [
       { key: "panels", shot: "select-panel" },
       { key: "sites", shot: "admin-site" },
       { key: "policies", shot: "admin-policies" },
+      { key: "nda", shot: "admin-nda" },
+      { key: "sitesDelete" },
       { key: "companies", shot: "admin-companies" },
       { key: "frequent", shot: "admin-frequent" },
       { key: "devices" },

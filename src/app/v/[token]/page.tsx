@@ -18,16 +18,12 @@ import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { FormFields } from "@/components/forms/FormFields";
 import { formLabels } from "@/lib/forms/labels";
 import { builtinMode, elementsFor, elementText, hasAnswer, readAnswers, type BuiltinElement } from "@/lib/forms/schema";
+import { activeNda, ndaText } from "@/lib/server/nda";
 import { acceptNdaAction, preregisterAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 type Search = { ok?: string; error?: string };
 
-/** Active NDA for a site: the site-specific one if any, else the global one; latest activeFrom wins. */
-async function activeNda(siteId: string) {
-  const rows = await db.ndaVersion.findMany({ where: { OR: [{ siteId }, { siteId: null }], activeFrom: { lte: new Date() } }, orderBy: { activeFrom: "desc" } });
-  return rows.find((n) => n.siteId === siteId) ?? rows[0] ?? null;
-}
 
 /** Public pass page. Shows only what the visitor needs; never the host's contact details. */
 export default async function VisitorPassPage({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<Search> }) {
@@ -76,7 +72,8 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const unansweredQuestions = questions.some((e) => !hasAnswer(answers[e.id]?.value));
   const hasVisitorBlocks = visitorElements.some((e) => e.type === "text" || e.type === "media");
   const showPrereg = editable && (registering || needsDoc || (mode("document") !== "off" && !pass.visitorDocHash) || (mode("phone") !== "off" && !pass.visitorPhone) || unansweredQuestions || hasVisitorBlocks);
-  const nda = open && needsNda ? await activeNda(pass.siteId) : null;
+  const nda = open && needsNda ? await activeNda(pass.siteId, now) : null;
+  const ndaCopy = nda ? ndaText(nda, locale) : null;
   const labels = await formLabels();
   const mediaHref = (key: string) => `/api/media/${key}?pass=${encodeURIComponent(token)}`;
   const schedule = parseSchedule(pass.schedule);
@@ -215,8 +212,8 @@ export default async function VisitorPassPage({ params, searchParams }: { params
             <input type="hidden" name="ndaId" value={nda.id} />
             <h2 className="font-medium">{t("nda.title")}</h2>
             <p className="muted">{t("nda.intro")}</p>
-            <h3 className="text-sm font-medium">{nda.title} · v{nda.version}</h3>
-            <div className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded bg-surface-2 p-3 text-sm">{nda.body}</div>
+            <h3 className="text-sm font-medium" data-testid="nda-title">{ndaCopy!.title} · v{nda.version}</h3>
+            <div className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded bg-surface-2 p-3 text-sm" data-testid="nda-body">{ndaCopy!.body}</div>
             {nda.attachmentKey ? <a href={mediaHref(nda.attachmentKey)} target="_blank" rel="noreferrer" className="btn-secondary inline-flex text-sm">{t("nda.attachment")}</a> : null}
             <label className="flex items-start gap-2 text-sm">
               <input type="checkbox" name="accept" required className="mt-1" /> {t("nda.accept")}

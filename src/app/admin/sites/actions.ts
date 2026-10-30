@@ -94,6 +94,50 @@ export async function toggleGateAction(formData: FormData): Promise<void> {
   redirect(`/admin/sites/${site.id}?ok=saved`);
 }
 
+/** Deletes a gate that recorded nothing (no visits, shift log entries or presences); otherwise deactivate it. */
+export async function deleteGateAction(formData: FormData): Promise<void> {
+  const tenant = await getMembershipOrThrow("admin");
+  const gateId = field(formData, "gateId");
+  const gate = await db.gate.findUnique({ where: { id: gateId } });
+  if (!gate) redirect("/admin/sites?error=invalid");
+  const site = await getManagedSite(tenant, gate.siteId);
+  if (!site) redirect("/admin/sites?error=invalid");
+  const [visits, logs, presences] = await Promise.all([
+    db.visit.count({ where: { gateId: gate.id } }),
+    db.shiftLog.count({ where: { gateId: gate.id } }),
+    db.employeePresence.count({ where: { gateId: gate.id } }),
+  ]);
+  if (visits + logs + presences > 0) redirect(`/admin/sites/${site.id}?error=gateInUse#gate-${gate.id}`);
+  await db.gate.delete({ where: { id: gate.id } }); // enrolled devices of the gate go with it (cascade)
+  await audit({ action: "gate.deleted", siteId: site.id, actorId: tenant.user.id, targetType: "Gate", targetId: gate.id, meta: { name: gate.name, kind: gate.kind } });
+  redirect(`/admin/sites/${site.id}?ok=gateDeleted`);
+}
+
+/**
+ * Deletes a site and everything recorded in it (passes, visits, logs, devices, policies, forms, memberships…).
+ * Irreversible, so only a company-wide admin can do it and must type the site's name. Employees and audit entries
+ * keep existing without a site. Prefer deactivating a site that has history.
+ */
+export async function deleteSiteAction(formData: FormData): Promise<void> {
+  const tenant = await getMembershipOrThrow("admin");
+  if (tenant.membership.siteId !== null) redirect("/admin/sites?error=forbidden");
+  const siteId = field(formData, "siteId");
+  const site = await db.site.findUnique({ where: { id: siteId } });
+  if (!site) redirect("/admin/sites?error=invalid");
+  const typed = field(formData, "confirmName").trim();
+  if (typed !== site.name) redirect(`/admin/sites/${site.id}?error=deleteConfirm`);
+  const [passes, visits] = await Promise.all([db.pass.count({ where: { siteId: site.id } }), db.visit.count({ where: { siteId: site.id } })]);
+  await db.$transaction(async (tx) => {
+    // Rows that reference a gate with RESTRICT go first; the rest cascades from the site.
+    await tx.visit.deleteMany({ where: { siteId: site.id } });
+    await tx.shiftLog.deleteMany({ where: { siteId: site.id } });
+    await tx.employeePresence.deleteMany({ where: { siteId: site.id } });
+    await tx.site.delete({ where: { id: site.id } });
+  });
+  await audit({ action: "site.deleted", siteId: null, actorId: tenant.user.id, targetType: "Site", targetId: site.id, meta: { name: site.name, slug: site.slug, passes, visits } });
+  redirect("/admin/sites?ok=deleted");
+}
+
 const printerSchema = z.object({
   gateId: z.string().min(1),
   printerKind: z.enum(["none", ...PRINTER_KINDS]),
