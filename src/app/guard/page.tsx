@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ClipboardList, Lock, QrCode, ScanLine, Siren, UserPlus } from "lucide-react";
+import { CircleHelp, ClipboardList, Lock, QrCode, ScanLine, Siren, UserPlus } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
 import { db } from "@/lib/db";
@@ -83,6 +83,7 @@ export default async function GuardPage({ searchParams }: { searchParams: Promis
     { icon: QrCode, label: t("kiosk.inside"), href: "/guard/inside", badge: inside || null },
     { icon: Siren, label: t("kiosk.evacuation"), href: "/guard/evacuation", badge: null },
     { icon: ClipboardList, label: t("kiosk.log"), href: "/guard/log", badge: null },
+    { icon: CircleHelp, label: t("kiosk.help"), href: "/help/kiosk-daily", badge: null },
   ];
   const tileClass = "card flex min-h-32 flex-col items-center justify-center gap-2 text-center";
   return (
@@ -94,7 +95,7 @@ export default async function GuardPage({ searchParams }: { searchParams: Promis
           <button type="submit" className="btn-secondary"><Icon icon={Lock} /> {t("kiosk.lock")}</button>
         </form>
       </div>
-      <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+      <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         {tiles.map((a) => (
           <li key={a.href}>
             <Link href={a.href} className={`${tileClass} relative hover:bg-surface-2 focus:outline-none focus:ring-2 focus:ring-ring`}>

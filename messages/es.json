@@ -32,7 +32,8 @@
     "app": "Anfitrión",
     "approvals": "Aprobaciones",
     "privacy": "Privacidad",
-    "terms": "Términos"
+    "terms": "Términos",
+    "help": "Ayuda"
   },
   "roles": {
     "admin": "Administración",
@@ -343,7 +344,8 @@
     "evacuation": "Lista de evacuación",
     "people": "Personas",
     "frequent": "Visitantes frecuentes",
-    "forms": "Formularios"
+    "forms": "Formularios",
+    "help": "Ayuda"
   },
   "guard": {
     "title": "Seguridad",
@@ -373,7 +375,8 @@
       "log": "Bitácora",
       "lock": "Bloquear",
       "signedInAs": "Sesión: {name} · {gate}",
-      "logSoon": "Bitácora · próximamente"
+      "logSoon": "Bitácora · próximamente",
+      "help": "Ayuda"
     },
     "log": {
       "title": "Bitácora de turno",
@@ -487,7 +490,8 @@
       "pinOffline": "El PIN necesita conexión con el servidor.",
       "answers": "Respuestas del formulario",
       "yes": "Sí",
-      "no": "No"
+      "no": "No",
+      "visitor": "Visitante"
     },
     "unannounced": {
       "title": "Visita no anunciada",
@@ -1811,6 +1815,307 @@
       "title": "Respuestas del formulario",
       "yes": "Sí",
       "no": "No"
+    }
+  },
+  "help": {
+    "title": "Ayuda",
+    "intro": "Guías paso a paso, con capturas de pantalla, para cada función de Airlink Visitas. Elige la guía según lo que necesitas hacer.",
+    "audiences": {
+      "admin": "Administración",
+      "security": "Seguridad / recepción",
+      "host": "Anfitriones",
+      "approver": "Aprobadores",
+      "warden": "Brigadistas",
+      "hr": "Recursos Humanos"
+    },
+    "forLabel": "Para",
+    "stepsCount": "{count, plural, one {# paso} other {# pasos}}",
+    "open": "Abrir guía",
+    "back": "Todas las guías",
+    "step": "Paso {n}",
+    "screenshotAlt": "Captura de pantalla: {title}",
+    "related": "Guías relacionadas",
+    "prev": "Guía anterior",
+    "next": "Siguiente guía",
+    "notFound": "No encontramos esa guía.",
+    "kioskLink": "¿Cómo se activa un kiosco? Ver la guía paso a paso.",
+    "guides": {
+      "kiosk-setup": {
+        "title": "Activar un kiosco de seguridad",
+        "summary": "Desde crear el PIN del guardia hasta dejar la tablet o PC de recepción en modo kiosco.",
+        "steps": {
+          "guardPin": {
+            "title": "Crea al personal de seguridad con PIN",
+            "body": "En Administración → Personas pulsa \"Agregar persona\". Escribe nombre, correo y sitio, marca el rol Seguridad y pon un PIN de 4 a 8 dígitos (evita 1234 o dígitos repetidos).\nSi la persona ya existe, usa \"Fijar PIN\" o \"Cambiar PIN\" en su fila. Ese PIN es el que usará para entrar al kiosco."
+          },
+          "device": {
+            "title": "Registra el dispositivo",
+            "body": "En Administración → Dispositivos de kiosco escribe un nombre que identifique el equipo (por ejemplo \"Tablet Recepción A2\"), elige el sitio y la puerta donde estará, y pulsa \"Crear dispositivo\".\nCada tablet o PC es un dispositivo distinto y queda ligado a una sola puerta."
+          },
+          "code": {
+            "title": "Copia el código de enrolamiento",
+            "body": "Al crear el dispositivo aparece un código en grande. Vale 15 minutos y una sola vez.\nSi se vence antes de usarlo, pulsa \"Generar código\" en la tarjeta del dispositivo para obtener otro."
+          },
+          "enroll": {
+            "title": "Enrola la tablet o PC de recepción",
+            "body": "En el equipo de recepción abre la dirección de Visitas seguida de /guard. No hace falta iniciar sesión.\nEscribe el código y pulsa \"Enrolar\". El navegador queda vinculado a esa puerta de forma permanente: usa siempre el mismo navegador y no borres sus datos de navegación."
+          },
+          "pin": {
+            "title": "Entra con el PIN del guardia",
+            "body": "La pantalla pasa a \"Entrar con PIN\" y muestra el dispositivo, el sitio y la puerta. Elige el nombre del guardia y escribe su PIN.\nLa sesión dura 12 horas. Tras varios intentos fallidos el kiosco espera un minuto."
+          },
+          "home": {
+            "title": "Modo kiosco listo",
+            "body": "Desde aquí Seguridad escanea códigos QR, registra visitas no anunciadas, ve quién está dentro, imprime la lista de evacuación y lleva la bitácora de turno.\nEl botón \"Bloquear\" cierra la sesión del guardia sin perder el enrolamiento: solo vuelve a pedir el PIN."
+          },
+          "install": {
+            "title": "Instálalo como aplicación (recomendado)",
+            "body": "En Chrome o Edge usa el menú \"Instalar aplicación\" (icono en la barra de direcciones). El kiosco abre a pantalla completa, sin barra de direcciones, y sigue funcionando sin conexión: los escaneos se guardan y se envían al volver la red.\nEn una tablet Android, \"Agregar a pantalla de inicio\" hace lo mismo."
+          },
+          "printer": {
+            "title": "Impresora de gafetes (opcional)",
+            "body": "Para imprimir gafetes en la Zebra ZP450 conectada por USB a la PC de recepción, IT instala el agente de impresión en esa PC y en Administración → Sitios → la puerta elige \"Agente de impresión\" y el nombre de la impresora compartida.\nSin impresora configurada, el kiosco descarga el archivo del gafete para imprimirlo a mano. La guía técnica está en docs/BADGES.md del repositorio."
+          }
+        }
+      },
+      "kiosk-daily": {
+        "title": "Operar el kiosco cada día",
+        "summary": "Escanear pases, registrar no anunciados, imprimir gafetes, salidas, evacuación y bitácora.",
+        "steps": {
+          "scan": {
+            "title": "Escanea el QR del visitante",
+            "body": "Pulsa \"Escanear QR\" y enciende la cámara. El visitante muestra el QR de su enlace, del correo o de su tarjeta de frecuente.\nSi la cámara no funciona, pega el contenido del código en \"Código manual\" y pulsa \"Validar\". El segundo escaneo del mismo pase registra la salida."
+          },
+          "result": {
+            "title": "Lee el resultado",
+            "body": "En verde: entrada registrada, con el nombre, la empresa, el anfitrión, las áreas permitidas y los avisos (acompañante obligatorio, NDA, solo recepción). El anfitrión recibe una notificación automática.\nEn rojo: no puede entrar y el motivo (pase vencido, de otro sitio, pendiente de aprobación, lista negra, empresa bloqueada, NDA sin aceptar…). Si es lista negra, Seguridad ya fue avisada."
+          },
+          "badge": {
+            "title": "Imprime el gafete",
+            "body": "Tras una entrada válida se abre el panel del gafete. Puedes tomar una foto rápida con la cámara del kiosco (sale en blanco y negro) o continuar sin foto, y pulsar \"Imprimir gafete\".\nEl gafete lleva el QR de la visita, el nombre, la empresa, el anfitrión, el área y las advertencias. Para reimprimirlo, ábrelo desde \"Dentro ahora\"."
+          },
+          "pin": {
+            "title": "Visitante sin QR: entrada con PIN",
+            "body": "Si el visitante no puede mostrar el QR, escribe en \"Entrar con PIN\" el PIN de 6 dígitos que le dio su anfitrión o el de su tarjeta de visitante frecuente, y opcionalmente su nombre.\nEl PIN necesita conexión con el servidor."
+          },
+          "unannounced": {
+            "title": "Visita no anunciada",
+            "body": "Pulsa \"Visita no anunciada\", busca al anfitrión por nombre o departamento, completa los datos del visitante (tipo, nombre, empresa, cédula, placa) y pulsa \"Avisar al anfitrión\".\nLa visita aparece en \"En espera en la puerta\". Cuando el anfitrión aprueba desde su panel o te lo confirma en persona, pulsa \"Registrar entrada\". Si no responde en el tiempo configurado, se escala a Seguridad."
+          },
+          "inside": {
+            "title": "Dentro ahora y salidas",
+            "body": "\"Dentro ahora\" lista a todos los visitantes dentro del sitio con su hora de entrada y puerta. Pulsa \"Marcar salida\" cuando se vayan, o vuelve a escanear su QR.\nLos transportistas en muelle salen con \"Salió del muelle\". Algunas políticas cierran las visitas automáticamente a una hora fija."
+          },
+          "evacuation": {
+            "title": "Lista de evacuación",
+            "body": "Muestra a todas las personas dentro, agrupadas por área y anfitrión, con la hora desde la que están. Pulsa \"Imprimir\" para llevarla al punto de reunión.\nFunciona sin conexión: el kiosco guarda la última copia."
+          },
+          "log": {
+            "title": "Bitácora de turno",
+            "body": "Registra novedades, incidentes, rondas y relevos con una descripción breve y, si quieres, una foto. Cada entrada queda con tu nombre, la puerta y la hora, y aparece en Reportes → Bitácora de turno."
+          },
+          "offline": {
+            "title": "Si se va la conexión",
+            "body": "El kiosco sigue validando con los pases guardados en caché y muestra \"Entrada provisional\". Los escaneos quedan en cola y se envían solos al volver la red; el servidor descarta duplicados.\nLa lista negra y la lista de evacuación también están disponibles sin conexión. El PIN de visitante y la visita no anunciada necesitan red."
+          },
+          "lock": {
+            "title": "Bloquea al terminar el turno",
+            "body": "Pulsa \"Bloquear\" en la pantalla principal del kiosco. El equipo sigue enrolado y el siguiente guardia solo tiene que elegir su nombre y escribir su PIN."
+          }
+        }
+      },
+      "host-passes": {
+        "title": "Invitar visitantes (anfitriones)",
+        "summary": "Crear un pase, compartir el enlace con el QR, pre-registro, NDA y aprobaciones.",
+        "steps": {
+          "home": {
+            "title": "Tu panel de anfitrión",
+            "body": "En \"Mis visitas\" ves tus pases próximos y anteriores con su estado. Desde la barra superior accedes a \"Nuevo pase\", \"Aprobaciones\" y, si eres brigadista, a \"Evacuación\".\nEntras con tu cuenta de Microsoft de Airlink; si tienes acceso a varios sitios, el icono de paneles te permite cambiar."
+          },
+          "new": {
+            "title": "Crea un pase",
+            "body": "Pulsa \"Nuevo pase\", elige el sitio si te lo pide, el tipo de visita, el nombre del visitante y su cédula o pasaporte (solo guardamos los últimos 4 dígitos; el visitante puede completarla después desde su enlace).\nIndica la vigencia: una vez (desde/hasta) o recurrente (días y horario). Marca las áreas a visitar, las puertas permitidas, el acompañante si el área lo exige, y el tamaño del grupo si vienen varias personas (se crea un pase por cada una). Los \"Datos adicionales\" dependen del formulario que RRHH definió para ese tipo de visita."
+          },
+          "detail": {
+            "title": "Comparte el enlace",
+            "body": "Al crear el pase ves su detalle con el enlace para el visitante. Cópialo y envíalo por WhatsApp o usa \"Enviar por correo\": el visitante recibe el QR, la dirección y las indicaciones.\nSi el visitante no tiene celular, marca \"Generar PIN de 6 dígitos\": se muestra una sola vez y le sirve para entrar en el kiosco. Desde aquí también puedes cancelar, duplicar o cambiar el nombre del pase."
+          },
+          "visitor": {
+            "title": "Lo que ve el visitante",
+            "body": "Su enlace muestra el QR, el sitio, el anfitrión y la vigencia. Antes de llegar puede completar su cédula, teléfono, placa y empresa en \"Completa tus datos\" para que la entrada sea más rápida.\nSi el tipo de visita lo exige, debe aceptar la política de visitantes (NDA) firmando con su nombre; sin eso el kiosco no le deja entrar. Los pases recurrentes muestran un QR que cambia cada 30 segundos."
+          },
+          "pending": {
+            "title": "Pases que requieren aprobación",
+            "body": "Contratistas, auditores u otros tipos según la política de cada sitio quedan \"Pendiente de aprobación\". El visitante ve el estado pero todavía no el QR.\nCuando Seguridad o el aprobador designado lo aprueba, el QR aparece en el enlace y tú recibes una notificación. Si lo rechazan, el pase queda cerrado."
+          },
+          "arrival": {
+            "title": "Cuando el visitante llega",
+            "body": "Recibes una notificación (push, Teams o correo según tus preferencias) al registrarse su entrada y, si vino sin pase, una solicitud para aprobar la visita no anunciada desde \"Aprobaciones\".\nAl marcarse la salida en el kiosco, el pase pasa a \"Usado\" y aparece en tu historial."
+          }
+        }
+      },
+      "approvals": {
+        "title": "Aprobar pases y visitas",
+        "summary": "Qué pasa con los pases pendientes y las visitas no anunciadas, y cómo responderlas.",
+        "steps": {
+          "list": {
+            "title": "Revisa los pendientes",
+            "body": "En \"Aprobaciones\" ves los pases y las visitas no anunciadas que esperan tu respuesta: visitante, tipo, anfitrión, sitio, ventana y áreas. Cada fila indica con qué rol apruebas (anfitrión, aprobador o seguridad)."
+          },
+          "decide": {
+            "title": "Aprueba o rechaza",
+            "body": "Pulsa \"Aprobar\" o \"Rechazar\". Al aprobar un pase, el visitante ve su QR al instante; al aprobar una visita no anunciada, el guardia puede registrar la entrada.\nTodo queda en la auditoría con tu nombre y la hora. Si otra persona ya respondió, verás un aviso."
+          },
+          "unannounced": {
+            "title": "Visitas no anunciadas",
+            "body": "Cuando alguien llega sin pase, recepción lo registra y el anfitrión recibe el aviso (push, Teams o correo). Puede aprobar desde \"Aprobaciones\" o decírselo al guardia, que marca \"Aprobado en persona\".\nSi nadie responde en los minutos configurados para el sitio, la solicitud se escala a Seguridad."
+          }
+        }
+      },
+      "admin-setup": {
+        "title": "Configurar sitios y políticas",
+        "summary": "Paneles, sitios, puertas, áreas, políticas por tipo de visita, empresas, lista negra y frecuentes.",
+        "steps": {
+          "panels": {
+            "title": "Paneles según tus roles",
+            "body": "Al entrar eliges el panel: Administración, Seguridad, Anfitrión, Aprobador o Brigadista, por sitio o para todos los sitios. El icono de paneles en la cabecera te permite cambiar en cualquier momento.\nUn administrador con alcance \"todos los sitios\" ve y configura Airlink 2 y Airlink 3; un administrador de sitio solo el suyo."
+          },
+          "sites": {
+            "title": "Sitios, puertas y áreas",
+            "body": "Cada planta es un sitio con su zona horaria, retención de fotos y minutos de espera para escalar visitas no anunciadas. Dentro del sitio defines las puertas (peatonal, vehicular, muelle), la impresora de gafete de cada puerta y el QR de auto-registro para imprimir en recepción.\nLas áreas pueden marcarse como restringidas o con acompañante obligatorio; el kiosco lo muestra como aviso al entrar."
+          },
+          "policies": {
+            "title": "Políticas por tipo de visita",
+            "body": "Para cada sitio y tipo (visita, candidato, contratista, proveedor, auditor, transportista, entrega, recurrente) decides si requiere aprobación y de quién, si pide cédula, NDA, acompañante y gafete, las puertas permitidas, la duración máxima y si es solo recepción.\nTambién puedes deshabilitar un tipo, fijar una hora de salida automática, avisar por correo a direcciones fijas al entrar, imprimir el gafete automáticamente y asignar el formulario de registro. \"Valores por defecto\" restaura la política original."
+          },
+          "companies": {
+            "title": "Empresas y lista negra",
+            "body": "En \"Empresas\" registras proveedores, contratistas, clientes y transportistas (con RNC y notas) y puedes bloquear una empresa: sus visitantes no reciben pases.\nEn \"Lista negra\" vetas personas por cédula o pasaporte, o vehículos por placa, con motivo y vencimiento opcional. La cédula no se guarda completa. El kiosco bloquea la entrada y avisa a Seguridad."
+          },
+          "frequent": {
+            "title": "Visitantes frecuentes",
+            "body": "Contratistas fijos, temporales o choferes habituales se registran una vez como frecuentes con su pase recurrente de larga duración. Desde su ficha imprimes una tarjeta de 85 × 54 mm con QR, o les asignas un PIN si entran sin tarjeta.\nAl crear un pase, el anfitrión puede elegir a un frecuente y el formulario se rellena solo."
+          },
+          "devices": {
+            "title": "Kioscos de seguridad",
+            "body": "Los equipos de recepción se registran en \"Dispositivos de kiosco\" y se enrolan con un código. La guía \"Activar un kiosco de seguridad\" lo explica paso a paso."
+          }
+        }
+      },
+      "admin-people": {
+        "title": "Personas, roles y PIN",
+        "summary": "El directorio de empleados y usuarios: agregar personas, asignar roles, fijar PIN y desactivar.",
+        "steps": {
+          "directory": {
+            "title": "Directorio de personas",
+            "body": "\"Personas\" reúne a los empleados sincronizados desde SPN y Microsoft Entra (anfitriones) y a los usuarios locales. Las pestañas filtran por anfitriones, administradores, seguridad, brigadistas, con PIN e inactivos; la búsqueda acepta nombre, correo o departamento."
+          },
+          "add": {
+            "title": "Agrega una persona",
+            "body": "Pulsa \"Agregar persona\": nombre, correo, departamento, extensión, teléfono y sitio. Marca los roles que necesita y, si va a usar el kiosco, un PIN inicial.\nAdministración, Seguridad y Aprobador abren paneles; Brigadista recibe la lista de evacuación; sin rol, la persona solo puede recibir visitas como anfitrión. Si el correo ya pertenece a una cuenta, agrega los roles desde su fila en lugar de crearla de nuevo."
+          },
+          "roles": {
+            "title": "Roles en línea",
+            "body": "Cada fila muestra los roles como botones: un clic activa o desactiva ese rol en el sitio actual (o en todos los sitios si tu alcance es global). Los empleados sin correo no pueden tener roles.\nLos cambios quedan en la auditoría. Un administrador de sitio no puede tocar cuentas con alcance global."
+          },
+          "pin": {
+            "title": "PIN de kiosco",
+            "body": "\"Fijar PIN\" o \"Cambiar PIN\" en la fila guarda un PIN de 4 a 8 dígitos. Para Seguridad es la llave del kiosco; para el resto de empleados sirve para registrar su presencia en el QR de auto-registro y aparecer en la lista de evacuación.\nEl PIN no se muestra nunca después de guardarlo; si se olvida, se cambia."
+          },
+          "deactivate": {
+            "title": "Desactivar, nunca borrar",
+            "body": "Marca una o varias filas y pulsa \"Desactivar seleccionados\". La persona deja de recibir visitas y de entrar a los paneles, pero su historial se conserva para auditoría. \"Reactivar\" la devuelve.\nLos empleados sincronizados se actualizan solos en cada sincronización; si salen de SPN quedan inactivos."
+          }
+        }
+      },
+      "admin-forms": {
+        "title": "Formularios de registro (RRHH)",
+        "summary": "Armar los formularios por tipo de visita: campos estándar, preguntas propias, documentos y firma.",
+        "steps": {
+          "list": {
+            "title": "Formularios por tipo de visita",
+            "body": "En \"Formularios\" creas plantillas con nombre y sitio (o compartidas por todos los sitios). Cada tipo de visita usa una plantilla o el formulario por defecto con los campos estándar.\nPuedes duplicar, renombrar, desactivar o ver en qué tipos de visita se usa cada una."
+          },
+          "editor": {
+            "title": "Arma el formulario",
+            "body": "La paleta de la izquierda agrega campos estándar (foto, cédula, nombre, teléfono, correo, empresa, placa, áreas, anfitrión, acompañante) y elementos propios: pregunta (texto, número, fecha, sí/no, selección), texto de instrucciones, documento o imagen para que el visitante lea, y firma.\nEn \"Propiedades\" defines la etiqueta, la ayuda, si es obligatorio, dónde se muestra (invitación del anfitrión, enlace del visitante, kiosco) y si se imprime en el gafete. \"Subir\"/\"Bajar\" ordenan y la vista previa muestra el resultado. Guarda al terminar."
+          },
+          "assign": {
+            "title": "Asígnalo a un tipo de visita",
+            "body": "En \"Políticas de visita\", en el tipo que corresponde, elige la plantilla en \"Formulario de registro\" y pulsa \"Guardar\". Desde ahí mismo puedes abrir el editor con \"Editar formulario\"."
+          },
+          "result": {
+            "title": "Dónde se ve",
+            "body": "El anfitrión responde los campos marcados para la invitación al crear el pase; el visitante, los del enlace en \"Completa tus datos\"; recepción, los del kiosco al registrar una visita no anunciada.\nLas respuestas aparecen en el detalle del pase, en el resultado del escaneo, en el gafete si lo marcaste y en los reportes."
+          }
+        }
+      },
+      "reports": {
+        "title": "Reportes, registro manual y auditoría",
+        "summary": "Visitas, auditoría, bitácora, invitaciones, exportar CSV y registrar una visita desde recepción.",
+        "steps": {
+          "overview": {
+            "title": "Reportes",
+            "body": "En \"Reportes\" tienes Visitas, Auditoría, Bitácora de turno e Invitaciones. Usa los rangos rápidos (hoy, ayer, esta semana, este mes) o fechas, y filtra por sitio, puerta, tipo, estado, anfitrión, área, empresa o búsqueda libre. Arriba ves dentro ahora, entradas y salidas del período."
+          },
+          "export": {
+            "title": "Exporta a CSV",
+            "body": "\"Exportar CSV\" descarga el reporte con los mismos filtros, listo para Excel (hasta el máximo de filas indicado). Las horas van en la zona horaria del sitio."
+          },
+          "signIn": {
+            "title": "Registrar una visita a mano",
+            "body": "\"Registrar visita\" permite a Seguridad o Administración registrar la entrada de alguien desde el panel, sin kiosco: sitio, puerta, tipo, anfitrión y datos del visitante. La visita queda aprobada y dentro, y en la auditoría consta como aprobación en persona."
+          },
+          "audit": {
+            "title": "Auditoría",
+            "body": "El reporte de auditoría es la evidencia para ISO y auditorías de clientes: quién estuvo en qué área, con qué anfitrión y acompañante, si aceptó el NDA y qué versión, quién aprobó el pase y la visita, el gafete y las alertas de lista negra."
+          },
+          "shifts": {
+            "title": "Bitácora de turno",
+            "body": "Las novedades, incidentes, rondas y relevos que Seguridad registra en el kiosco se consultan aquí por fecha, sitio y guardia, con sus fotos."
+          }
+        }
+      },
+      "evacuation": {
+        "title": "Evacuación y pase de lista",
+        "summary": "La lista de personas dentro, el pase de lista en simulacros y el envío a brigadistas.",
+        "steps": {
+          "list": {
+            "title": "Lista de evacuación",
+            "body": "En \"Evacuación\" ves a todas las personas dentro: visitantes por área y anfitrión, y empleados que registraron su presencia. \"Actualizar\" la refresca; \"Imprimir\" la lleva al punto de reunión.\nSin conexión muestra la última copia guardada en el dispositivo."
+          },
+          "rollCall": {
+            "title": "Pase de lista",
+            "body": "Pulsa \"Pase de lista (simulacro)\" y marca a cada persona al verla en el punto de reunión. El contador muestra contados de total; \"Reiniciar conteo\" vuelve a empezar y \"Terminar pase de lista\" cierra el modo."
+          },
+          "send": {
+            "title": "Enviar a brigadistas",
+            "body": "\"Enviar lista a brigadistas\" manda por push y correo la lista actual a los brigadistas del sitio. Los brigadistas se asignan con el rol Brigadista en \"Personas\"."
+          },
+          "kiosk": {
+            "title": "En el kiosco",
+            "body": "El kiosco de recepción tiene la misma lista en \"Lista de evacuación\", también sin conexión, y puede imprimirla."
+          }
+        }
+      },
+      "account": {
+        "title": "Mi cuenta y notificaciones",
+        "summary": "Contraseña, PIN, verificación en dos pasos, canales de aviso, horas de silencio, idioma y tema.",
+        "steps": {
+          "account": {
+            "title": "Mi cuenta",
+            "body": "Desde el icono de cuenta cambias tu contraseña (solo cuentas locales), tu PIN de kiosco y activas la verificación en dos pasos con Microsoft Authenticator o similar. Para administradores es muy recomendable."
+          },
+          "notifications": {
+            "title": "Notificaciones",
+            "body": "En \"Notificaciones\" eliges por qué canal te avisamos (push en este dispositivo, Teams, correo) y defines horas de silencio. Los avisos urgentes (visitante en la puerta, lista negra, transportista en muelle) ignoran el silencio.\nLa campana de la cabecera muestra tus avisos recientes."
+          },
+          "language": {
+            "title": "Idioma y tema",
+            "body": "Los iconos de la cabecera cambian el idioma (español/inglés) y el tema claro u oscuro. El kiosco usa siempre el idioma del dispositivo."
+          }
+        }
+      }
     }
   }
 }

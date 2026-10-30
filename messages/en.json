@@ -32,7 +32,8 @@
     "app": "Host",
     "approvals": "Approvals",
     "privacy": "Privacy",
-    "terms": "Terms"
+    "terms": "Terms",
+    "help": "Help"
   },
   "roles": {
     "admin": "Administration",
@@ -343,7 +344,8 @@
     "evacuation": "Evacuation list",
     "people": "People",
     "frequent": "Frequent visitors",
-    "forms": "Forms"
+    "forms": "Forms",
+    "help": "Help"
   },
   "guard": {
     "title": "Security",
@@ -373,7 +375,8 @@
       "log": "Shift log",
       "lock": "Lock",
       "signedInAs": "Session: {name} · {gate}",
-      "logSoon": "Shift log · coming soon"
+      "logSoon": "Shift log · coming soon",
+      "help": "Help"
     },
     "log": {
       "title": "Shift log",
@@ -487,7 +490,8 @@
       "pinOffline": "PIN entry needs a connection to the server.",
       "answers": "Form answers",
       "yes": "Yes",
-      "no": "No"
+      "no": "No",
+      "visitor": "Visitor"
     },
     "unannounced": {
       "title": "Unannounced visit",
@@ -1811,6 +1815,307 @@
       "title": "Form answers",
       "yes": "Yes",
       "no": "No"
+    }
+  },
+  "help": {
+    "title": "Help",
+    "intro": "Step-by-step guides, with screenshots, for every function of Airlink Visitas. Pick the guide for what you need to do.",
+    "audiences": {
+      "admin": "Administration",
+      "security": "Security / reception",
+      "host": "Hosts",
+      "approver": "Approvers",
+      "warden": "Fire wardens",
+      "hr": "Human Resources"
+    },
+    "forLabel": "For",
+    "stepsCount": "{count, plural, one {# step} other {# steps}}",
+    "open": "Open guide",
+    "back": "All guides",
+    "step": "Step {n}",
+    "screenshotAlt": "Screenshot: {title}",
+    "related": "Related guides",
+    "prev": "Previous guide",
+    "next": "Next guide",
+    "notFound": "We could not find that guide.",
+    "kioskLink": "How do I activate a kiosk? See the step-by-step guide.",
+    "guides": {
+      "kiosk-setup": {
+        "title": "Activate a security kiosk",
+        "summary": "From creating the guard's PIN to leaving the reception tablet or PC in kiosk mode.",
+        "steps": {
+          "guardPin": {
+            "title": "Create security staff with a PIN",
+            "body": "In Administration → People press \"Add person\". Enter name, e-mail and site, tick the Security role and set a 4 to 8 digit PIN (avoid 1234 or repeated digits).\nIf the person already exists, use \"Set PIN\" or \"Change PIN\" on their row. That PIN is what they will use to sign in at the kiosk."
+          },
+          "device": {
+            "title": "Register the device",
+            "body": "In Administration → Kiosk devices enter a name that identifies the equipment (for example \"Reception Tablet A2\"), choose the site and the gate where it will sit, and press \"Create device\".\nEach tablet or PC is a separate device tied to a single gate."
+          },
+          "code": {
+            "title": "Copy the enrollment code",
+            "body": "After creating the device a large code appears. It is valid for 15 minutes and a single use.\nIf it expires before you use it, press \"Generate code\" on the device card to get another one."
+          },
+          "enroll": {
+            "title": "Enroll the reception tablet or PC",
+            "body": "On the reception computer open the Visitas address followed by /guard. No sign-in is needed.\nType the code and press \"Enroll\". The browser is now permanently linked to that gate: always use the same browser and never clear its browsing data."
+          },
+          "pin": {
+            "title": "Sign in with the guard's PIN",
+            "body": "The screen switches to \"Sign in with PIN\" and shows the device, site and gate. Pick the guard's name and type their PIN.\nThe session lasts 12 hours. After several failed attempts the kiosk waits one minute."
+          },
+          "home": {
+            "title": "Kiosk mode ready",
+            "body": "From here Security scans QR codes, registers unannounced visits, sees who is inside, prints the evacuation list and keeps the shift log.\nThe \"Lock\" button ends the guard's session without losing the enrollment: it simply asks for a PIN again."
+          },
+          "install": {
+            "title": "Install it as an app (recommended)",
+            "body": "In Chrome or Edge use \"Install app\" (icon in the address bar). The kiosk opens full screen, without an address bar, and keeps working offline: scans are stored and sent when the network returns.\nOn an Android tablet, \"Add to Home screen\" does the same."
+          },
+          "printer": {
+            "title": "Badge printer (optional)",
+            "body": "To print badges on the Zebra ZP450 connected by USB to the reception PC, IT installs the print agent on that PC and in Administration → Sites → the gate selects \"Print agent\" and the shared printer name.\nWithout a printer configured, the kiosk downloads the badge file for manual printing. The technical guide is docs/BADGES.md in the repository."
+          }
+        }
+      },
+      "kiosk-daily": {
+        "title": "Run the kiosk every day",
+        "summary": "Scan passes, register unannounced visitors, print badges, check-outs, evacuation and the shift log.",
+        "steps": {
+          "scan": {
+            "title": "Scan the visitor's QR",
+            "body": "Press \"Scan QR\" and turn on the camera. The visitor shows the QR from their link, their e-mail or their frequent-visitor card.\nIf the camera does not work, paste the code content into \"Manual code\" and press \"Validate\". A second scan of the same pass records the exit."
+          },
+          "result": {
+            "title": "Read the result",
+            "body": "Green: entry recorded, with the name, company, host, allowed areas and warnings (escort required, NDA, reception only). The host gets an automatic notification.\nRed: cannot enter, with the reason (expired pass, other site, pending approval, blacklist, blocked company, NDA not accepted…). On a blacklist hit, Security has already been alerted."
+          },
+          "badge": {
+            "title": "Print the badge",
+            "body": "After a valid entry the badge panel opens. Take a quick photo with the kiosk camera (printed in black and white) or continue without one, then press \"Print badge\".\nThe badge carries the visit QR, name, company, host, area and warnings. To reprint it, open it from \"Inside now\"."
+          },
+          "pin": {
+            "title": "Visitor without QR: PIN entry",
+            "body": "If the visitor cannot show the QR, type in \"Sign in with PIN\" the 6-digit PIN their host gave them or the one on their frequent-visitor card, and optionally their name.\nPIN entry needs a connection to the server."
+          },
+          "unannounced": {
+            "title": "Unannounced visit",
+            "body": "Press \"Unannounced visit\", search the host by name or department, fill in the visitor's details (type, name, company, ID, plate) and press \"Notify host\".\nThe visit appears under \"Waiting at the gate\". When the host approves from their panel or confirms in person, press \"Record entry\". If nobody answers within the configured time, it escalates to Security."
+          },
+          "inside": {
+            "title": "Inside now and check-outs",
+            "body": "\"Inside now\" lists every visitor inside the site with their entry time and gate. Press \"Check out\" when they leave, or scan their QR again.\nCarriers at the dock leave with \"Left the dock\". Some policies close visits automatically at a fixed time."
+          },
+          "evacuation": {
+            "title": "Evacuation list",
+            "body": "Shows everyone inside, grouped by area and host, with the time they have been in. Press \"Print\" to take it to the assembly point.\nIt works offline: the kiosk keeps the last copy."
+          },
+          "log": {
+            "title": "Shift log",
+            "body": "Record notes, incidents, rounds and handovers with a short description and, if you want, a photo. Each entry carries your name, the gate and the time, and shows up under Reports → Shift log."
+          },
+          "offline": {
+            "title": "If the connection drops",
+            "body": "The kiosk keeps validating with cached passes and shows \"Provisional entry\". Scans are queued and sent automatically when the network returns; the server discards duplicates.\nThe blacklist and the evacuation list are also available offline. Visitor PIN and unannounced visits need the network."
+          },
+          "lock": {
+            "title": "Lock at the end of the shift",
+            "body": "Press \"Lock\" on the kiosk home screen. The device stays enrolled and the next guard only has to pick their name and type their PIN."
+          }
+        }
+      },
+      "host-passes": {
+        "title": "Invite visitors (hosts)",
+        "summary": "Create a pass, share the link with the QR, pre-registration, NDA and approvals.",
+        "steps": {
+          "home": {
+            "title": "Your host panel",
+            "body": "\"My visits\" shows your upcoming and past passes with their status. The top bar takes you to \"New pass\", \"Approvals\" and, if you are a fire warden, \"Evacuation\".\nSign in with your Airlink Microsoft account; if you have access to several sites, the panels icon lets you switch."
+          },
+          "new": {
+            "title": "Create a pass",
+            "body": "Press \"New pass\", choose the site if asked, the visit type, the visitor's name and their ID or passport (only the last 4 digits are kept; the visitor can complete it later from their link).\nSet the validity: once (from/until) or recurring (days and hours). Tick the areas to visit, allowed gates, the escort if the area requires one, and the group size if several people are coming (one pass per person is created). \"Additional data\" depends on the form HR defined for that visit type."
+          },
+          "detail": {
+            "title": "Share the link",
+            "body": "After creating the pass you see its detail with the visitor link. Copy it and send it by WhatsApp or use \"Send by e-mail\": the visitor receives the QR, the address and the instructions.\nIf the visitor has no phone, tick \"Generate 6-digit PIN\": it is shown once and lets them enter at the kiosk. From here you can also cancel, duplicate or rename the pass."
+          },
+          "visitor": {
+            "title": "What the visitor sees",
+            "body": "Their link shows the QR, site, host and validity. Before arriving they can complete ID, phone, plate and company under \"Complete your details\" for a faster entry.\nIf the visit type requires it, they must accept the visitor policy (NDA) by signing with their name; without it the kiosk will not let them in. Recurring passes show a QR that changes every 30 seconds."
+          },
+          "pending": {
+            "title": "Passes that need approval",
+            "body": "Contractors, auditors or other types, according to each site's policy, stay \"Pending approval\". The visitor sees the status but not the QR yet.\nWhen Security or the designated approver approves it, the QR appears on the link and you get a notification. If denied, the pass is closed."
+          },
+          "arrival": {
+            "title": "When the visitor arrives",
+            "body": "You get a notification (push, Teams or e-mail according to your preferences) when their entry is recorded and, if they came without a pass, a request to approve the unannounced visit from \"Approvals\".\nWhen the check-out is recorded at the kiosk, the pass becomes \"Used\" and shows in your history."
+          }
+        }
+      },
+      "approvals": {
+        "title": "Approve passes and visits",
+        "summary": "What happens with pending passes and unannounced visits, and how to answer them.",
+        "steps": {
+          "list": {
+            "title": "Review what is pending",
+            "body": "\"Approvals\" lists the passes and unannounced visits waiting for your answer: visitor, type, host, site, window and areas. Each row states the role you approve with (host, approver or security)."
+          },
+          "decide": {
+            "title": "Approve or deny",
+            "body": "Press \"Approve\" or \"Deny\". Approving a pass shows the visitor their QR right away; approving an unannounced visit lets the guard record the entry.\nEverything is audited with your name and the time. If someone else already answered, you will see a notice."
+          },
+          "unannounced": {
+            "title": "Unannounced visits",
+            "body": "When someone arrives without a pass, reception registers them and the host is notified (push, Teams or e-mail). They can approve from \"Approvals\" or tell the guard, who marks \"Approved in person\".\nIf nobody answers within the minutes configured for the site, the request escalates to Security."
+          }
+        }
+      },
+      "admin-setup": {
+        "title": "Configure sites and policies",
+        "summary": "Panels, sites, gates, areas, policies per visit type, companies, blacklist and frequent visitors.",
+        "steps": {
+          "panels": {
+            "title": "Panels by role",
+            "body": "After signing in you pick a panel: Administration, Security, Host, Approver or Fire warden, per site or for all sites. The panels icon in the header lets you switch at any time.\nAn administrator with \"all sites\" scope sees and configures Airlink 2 and Airlink 3; a site administrator only their own."
+          },
+          "sites": {
+            "title": "Sites, gates and areas",
+            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry."
+          },
+          "policies": {
+            "title": "Policies per visit type",
+            "body": "For each site and type (visit, candidate, contractor, vendor, auditor, carrier, delivery, recurring) you decide whether it needs approval and from whom, whether it asks for ID, NDA, escort and badge, the allowed gates, the maximum duration and whether it is reception only.\nYou can also disable a type, set an automatic sign-out time, e-mail fixed addresses on entry, print the badge automatically and assign the sign-in form. \"Defaults\" restores the original policy."
+          },
+          "companies": {
+            "title": "Companies and blacklist",
+            "body": "Under \"Companies\" you register vendors, contractors, clients and carriers (with tax ID and notes) and can block a company: its visitors get no passes.\nUnder \"Blacklist\" you ban people by ID or passport, or vehicles by plate, with a reason and optional expiry. The ID is never stored in full. The kiosk blocks the entry and alerts Security."
+          },
+          "frequent": {
+            "title": "Frequent visitors",
+            "body": "Permanent contractors, temps or regular drivers are registered once as frequent visitors with a long-lived recurring pass. From their record you print an 85 × 54 mm card with a QR, or assign a PIN if they enter without a card.\nWhen creating a pass, the host can pick a frequent visitor and the form fills itself."
+          },
+          "devices": {
+            "title": "Security kiosks",
+            "body": "Reception devices are registered under \"Kiosk devices\" and enrolled with a code. The guide \"Activate a security kiosk\" explains it step by step."
+          }
+        }
+      },
+      "admin-people": {
+        "title": "People, roles and PIN",
+        "summary": "The directory of employees and users: add people, assign roles, set PINs and deactivate.",
+        "steps": {
+          "directory": {
+            "title": "People directory",
+            "body": "\"People\" brings together employees synced from SPN and Microsoft Entra (hosts) and local users. Tabs filter hosts, admins, security, wardens, with PIN and inactive; search accepts name, e-mail or department."
+          },
+          "add": {
+            "title": "Add a person",
+            "body": "Press \"Add person\": name, e-mail, department, extension, phone and site. Tick the roles they need and, if they will use the kiosk, an initial PIN.\nAdministration, Security and Approver open panels; Fire warden receives the evacuation list; with no role, the person can only receive visits as a host. If the e-mail already belongs to an account, add the roles from its row instead of creating it again."
+          },
+          "roles": {
+            "title": "Inline roles",
+            "body": "Each row shows the roles as buttons: one click enables or disables that role on the current site (or on every site if your scope is global). Employees without an e-mail cannot hold roles.\nChanges are audited. A site administrator cannot touch accounts with global scope."
+          },
+          "pin": {
+            "title": "Kiosk PIN",
+            "body": "\"Set PIN\" or \"Change PIN\" on the row stores a 4 to 8 digit PIN. For Security it is the kiosk key; for other employees it records their presence through the self sign-in QR so they appear on the evacuation list.\nThe PIN is never shown after saving; if forgotten, change it."
+          },
+          "deactivate": {
+            "title": "Deactivate, never delete",
+            "body": "Tick one or more rows and press \"Deactivate selected\". The person stops receiving visits and entering panels, but their history is kept for audit. \"Reactivate\" brings them back.\nSynced employees update themselves on every sync; if they leave SPN they become inactive."
+          }
+        }
+      },
+      "admin-forms": {
+        "title": "Sign-in forms (HR)",
+        "summary": "Build the forms per visit type: standard fields, custom questions, documents and signature.",
+        "steps": {
+          "list": {
+            "title": "Forms per visit type",
+            "body": "Under \"Forms\" you create templates with a name and site (or shared by all sites). Each visit type uses a template or the default form with the standard fields.\nYou can duplicate, rename, deactivate or see which visit types use each one."
+          },
+          "editor": {
+            "title": "Build the form",
+            "body": "The palette on the left adds standard fields (photo, ID, name, phone, e-mail, company, plate, areas, host, escort) and custom elements: question (text, number, date, yes/no, choice), instruction text, a document or image for the visitor to read, and signature.\nUnder \"Properties\" you set the label, help text, whether it is required, where it shows (host invitation, visitor link, kiosk) and whether it prints on the badge. \"Up\"/\"Down\" reorder and the preview shows the result. Save when done."
+          },
+          "assign": {
+            "title": "Assign it to a visit type",
+            "body": "Under \"Visit policies\", on the matching type, pick the template under \"Sign-in form\" and press \"Save\". From there you can open the editor with \"Edit form\"."
+          },
+          "result": {
+            "title": "Where it shows",
+            "body": "The host answers the fields marked for the invitation when creating the pass; the visitor, those of the link under \"Complete your details\"; reception, those of the kiosk when registering an unannounced visit.\nAnswers appear on the pass detail, the scan result, the badge if marked and the reports."
+          }
+        }
+      },
+      "reports": {
+        "title": "Reports, manual sign-in and audit",
+        "summary": "Visits, audit, shift log, invitations, CSV export and signing a visit in from reception.",
+        "steps": {
+          "overview": {
+            "title": "Reports",
+            "body": "Under \"Reports\" you have Visits, Audit, Shift log and Invitations. Use the quick ranges (today, yesterday, this week, this month) or dates, and filter by site, gate, type, status, host, area, company or free search. The top shows inside now, entries and exits for the period."
+          },
+          "export": {
+            "title": "Export to CSV",
+            "body": "\"Export CSV\" downloads the report with the same filters, ready for Excel (up to the stated row limit). Times use the site's time zone."
+          },
+          "signIn": {
+            "title": "Sign a visit in by hand",
+            "body": "\"Sign in visit\" lets Security or Administration record someone's entry from the panel, without a kiosk: site, gate, type, host and visitor details. The visit is approved and inside, and the audit records it as an in-person approval."
+          },
+          "audit": {
+            "title": "Audit",
+            "body": "The audit report is the evidence for ISO and client audits: who was in which area, with which host and escort, whether they accepted the NDA and which version, who approved the pass and the visit, the badge and blacklist alerts."
+          },
+          "shifts": {
+            "title": "Shift log",
+            "body": "Notes, incidents, rounds and handovers that Security records at the kiosk are consulted here by date, site and guard, with their photos."
+          }
+        }
+      },
+      "evacuation": {
+        "title": "Evacuation and roll call",
+        "summary": "The list of people inside, roll call during drills and sending it to fire wardens.",
+        "steps": {
+          "list": {
+            "title": "Evacuation list",
+            "body": "Under \"Evacuation\" you see everyone inside: visitors by area and host, and employees who recorded their presence. \"Refresh\" reloads it; \"Print\" takes it to the assembly point.\nOffline it shows the last copy stored on the device."
+          },
+          "rollCall": {
+            "title": "Roll call",
+            "body": "Press \"Roll call (drill)\" and tick each person as you see them at the assembly point. The counter shows counted of total; \"Reset count\" starts over and \"End roll call\" closes the mode."
+          },
+          "send": {
+            "title": "Send to fire wardens",
+            "body": "\"Send list to wardens\" pushes and e-mails the current list to the site's fire wardens. Wardens are assigned with the Fire warden role under \"People\"."
+          },
+          "kiosk": {
+            "title": "At the kiosk",
+            "body": "The reception kiosk has the same list under \"Evacuation list\", also offline, and can print it."
+          }
+        }
+      },
+      "account": {
+        "title": "My account and notifications",
+        "summary": "Password, PIN, two-step verification, notification channels, quiet hours, language and theme.",
+        "steps": {
+          "account": {
+            "title": "My account",
+            "body": "From the account icon you change your password (local accounts only), your kiosk PIN and enable two-step verification with Microsoft Authenticator or similar. Strongly recommended for administrators."
+          },
+          "notifications": {
+            "title": "Notifications",
+            "body": "Under \"Notifications\" you choose the channel we alert you on (push on this device, Teams, e-mail) and set quiet hours. Urgent alerts (visitor at the gate, blacklist, carrier at the dock) ignore quiet hours.\nThe bell in the header shows your recent alerts."
+          },
+          "language": {
+            "title": "Language and theme",
+            "body": "The header icons switch the language (Spanish/English) and the light or dark theme. The kiosk always uses the device language."
+          }
+        }
+      }
     }
   }
 }

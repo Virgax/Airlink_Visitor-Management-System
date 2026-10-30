@@ -2,7 +2,7 @@
   "name": "gate",
   "version": "0.1.0",
   "private": true,
-  "description": "Airlink Visitas — visitor management for Airlink Distribution",
+  "description": "Airlink Visitas \u2014 visitor management for Airlink Distribution",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
@@ -21,7 +21,8 @@
     "postinstall": "prisma generate",
     "cron:tick": "tsx scripts/cron-tick.ts",
     "ops:backup": "tsx scripts/backup.ts",
-    "sync:employees": "tsx scripts/sync-employees.ts"
+    "sync:employees": "tsx scripts/sync-employees.ts",
+    "help:screenshots": "tsx scripts/help-screenshots.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

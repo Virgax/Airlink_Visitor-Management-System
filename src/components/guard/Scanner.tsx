@@ -373,7 +373,7 @@ export function Scanner({ locale, timeZone, badgeConfig }: { locale: string; tim
             {result.pass ? (
               <dl className="mt-4 grid gap-x-4 gap-y-1 text-text sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <dt className="muted">{t("scan.kind")}</dt>
+                  <dt className="muted">{t("scan.visitor")}</dt>
                   <dd className="text-xl font-semibold" data-testid="result-name">{result.pass.visitorName}</dd>
                 </div>
                 <div>

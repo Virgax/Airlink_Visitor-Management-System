@@ -58,6 +58,8 @@ Full brief: `docs/PLAN.md`.
 ## Commands
 - `npm run dev` · `build` · `lint` · `typecheck` · `test` · `test:e2e` · `db:migrate` · `db:deploy` · `db:seed`
 - `npm run cron:tick` · `npm run ops:backup` · `npm run sync:employees`
+- `npm run help:screenshots` regenerates `public/help/*.png` for `/help` (run against a fresh seeded DB on `HELP_BASE_URL`,
+  see the header of `scripts/help-screenshots.ts`); guides are defined in `src/lib/help/guides.ts`, texts in `messages/*.json` (`help.*`).
 - E2E in the Claude container: `PW_CHROMIUM_PATH=/opt/pw-browsers/chromium npm run test:e2e`
   (needs a running `npm run start` or let Playwright start it; Postgres on `DATABASE_URL`, seeded).
 
@@ -93,6 +95,7 @@ Full brief: `docs/PLAN.md`.
 - Phase 2 ✅ merged into `develop` (slices F–I, see `docs/PHASE2_SLICES.md`): Zebra ZP450 badges (`docs/BADGES.md`,
   print agent, kiosk photo), HR visual form editor (`/admin/forms`, `FormTemplate`, policy forms per kind/surface),
   people directory (`/admin/people`: roles incl. `warden`, employee PINs, frequent visitors, presence), visit ops
-  (auto sign-out, auto-print, gate QR self sign-in, manual sign-in, quick date filters, search, policy toggles).
+  (auto sign-out, auto-print, gate QR self sign-in, manual sign-in, quick date filters, search, policy toggles);
+  public step-by-step help with screenshots at `/help`.
   ⏳ per-gate print secret, drag-and-drop ordering in the form editor, NDA attachment admin UI, AirlinkCast, PDF.
 - Phase 3 · AI doc/plate reading, access hardware, self-service kiosk.

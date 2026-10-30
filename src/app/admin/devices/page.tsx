@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { db } from "@/lib/db";
 import { requireMembership } from "@/lib/auth/guards";
@@ -8,6 +9,7 @@ export default async function DevicesPage({ searchParams }: { searchParams: Prom
   const sp = await searchParams;
   const tenant = await requireMembership("admin", "/admin/devices");
   const t = await getTranslations("admin.devicesPage");
+  const th = await getTranslations("help");
   const locale = await getLocale();
   const sites = await db.site.findMany({ where: { active: true, ...(tenant.siteFilter.siteId ? { id: tenant.siteFilter.siteId as string } : {}) }, include: { gates: { where: { active: true }, orderBy: { name: "asc" } } }, orderBy: { name: "asc" } });
   const devices = await db.guardDevice.findMany({ where: { active: true, ...tenant.siteFilter }, include: { site: true, gate: true }, orderBy: { createdAt: "desc" } });
@@ -17,6 +19,7 @@ export default async function DevicesPage({ searchParams }: { searchParams: Prom
       <div>
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
         <p className="muted mt-1">{t("intro")}</p>
+        <p className="mt-1 text-sm"><Link href="/help/kiosk-setup" className="hover:underline">{th("kioskLink")}</Link></p>
       </div>
 
       {sp.code && sp.device ? (

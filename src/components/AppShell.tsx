@@ -68,6 +68,7 @@ export async function AppShell({
           <span>© {new Date().getFullYear()} Airlink Distribution DR</span>
           <Link href="/legal/privacidad" className="hover:underline">{t("nav.privacy")}</Link>
           <Link href="/legal/terminos" className="hover:underline">{t("nav.terms")}</Link>
+          <Link href="/help" className="hover:underline">{t("nav.help")}</Link>
         </div>
       </footer>
     </div>
