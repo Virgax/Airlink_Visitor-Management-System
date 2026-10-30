@@ -10,12 +10,14 @@
  * wrapped so one broken flow does not stop the others; missing shots are listed at the end.
  */
 import "dotenv/config";
+import { createHash } from "node:crypto";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/lib/auth/password";
 import { helpShots } from "../src/lib/help/guides";
+import { signVisitQr } from "../src/lib/badges/visitQr";
 
 const BASE = process.env.HELP_BASE_URL ?? `http://localhost:${process.env.PORT ?? 3000}`;
 const OUT = join(process.cwd(), "public", "help");
@@ -99,8 +101,12 @@ async function seedDemo() {
     if (!c) await db.company.create({ data: { name, kind: name.startsWith("Transporte") ? "carrier" : "vendor" } });
   }
   // Demo devices from previous runs would pile up on the devices page.
-  await db.guardDevice.deleteMany({ where: { name: "Tablet Recepción A2" } });
-  return { site, hostEmployee, hostUser, guardUser, admin };
+  await db.guardDevice.deleteMany({ where: { name: { in: ["Tablet Recepción A2", "Tablet Escalera 2do piso"] } } });
+  // A verification-only post upstairs that controls the office area.
+  const oficinas = await db.area.findFirst({ where: { siteId: site.id, name: "Oficinas" }, select: { id: true } });
+  let checkpoint = await db.gate.findFirst({ where: { siteId: site.id, name: "Escalera 2do piso" } });
+  if (!checkpoint) checkpoint = await db.gate.create({ data: { siteId: site.id, name: "Escalera 2do piso", kind: "checkpoint", settings: { checkpointAreaIds: oficinas ? [oficinas.id] : [] } } });
+  return { site, hostEmployee, hostUser, guardUser, admin, checkpoint };
 }
 
 async function main() {
@@ -147,6 +153,30 @@ async function main() {
   await step("admin-site", async () => {
     await admin.goto(`/admin/sites/${demo.site.id}`);
     await shot(admin, "admin-site", { fullPage: true });
+    const gateCard = admin.locator('[data-gate-name="Escalera 2do piso"]');
+    await gateCard.scrollIntoViewIfNeeded();
+    await gateCard.screenshot({ path: join(OUT, "admin-gate-checkpoint.png") });
+    done.add("admin-gate-checkpoint");
+    console.log("[help] admin-gate-checkpoint.png");
+  });
+  let registerToken = "";
+  await step("host-pass-new-behalf", async () => {
+    // Security/admin generate the invitation links for a host who e-mailed "tengo tal visita a tal hora".
+    await admin.goto(`/app/passes/new?siteId=${demo.site.id}`);
+    await admin.locator("#hostEmployeeId").selectOption({ label: `${HOST.name} · Calidad` });
+    await admin.getByTestId("self-registration").check();
+    await admin.getByLabel("Tipo de visita").selectOption("contractor");
+    await admin.getByLabel("Empresa", { exact: true }).fill("Servicios Eléctricos del Este");
+    await admin.getByLabel("Válido desde").fill(localDate(0, "08:00"));
+    await admin.getByLabel("Válido hasta").fill(localDate(2, "18:00"));
+    await admin.getByLabel("Producción").check().catch(() => undefined);
+    await admin.locator("#groupSize").fill("3");
+    await admin.getByLabel("Motivo o nota").fill("Mantenimiento de la subestación, 3 técnicos").catch(() => undefined);
+    await shot(admin, "host-pass-new-behalf", { fullPage: true });
+    await admin.getByRole("button", { name: "Crear pase" }).click();
+    await admin.waitForURL(/\/app\/passes\/[a-z0-9]+/);
+    const links = (await admin.getByTestId("group-links").inputValue()).split("\n");
+    registerToken = links[0]!.split("/v/")[1]!;
   });
   await step("admin-policies", async () => {
     await admin.goto(`/admin/policies?site=${demo.site.id}`);
@@ -226,6 +256,12 @@ async function main() {
   });
 
   // ---------- Visitor link ----------
+  await step("visitor-register", async () => {
+    const v = await (await ctx({ width: 480, height: 900 })).newPage();
+    await v.goto(`/v/${registerToken}`);
+    await v.getByTestId("register-form").locator("#name").fill("Pedro Técnico");
+    await shot(v, "visitor-register", { fullPage: true });
+  });
   await step("visitor", async () => {
     const v = await (await ctx({ width: 480, height: 900 })).newPage();
     await v.goto(`/v/${token1}`);
@@ -273,6 +309,25 @@ async function main() {
       await k.goto(`/guard/badge/${visit.id}`);
       await shot(k, "kiosk-badge", { fullPage: true });
     }
+  });
+  await step("kiosk-checkpoint", async () => {
+    const code = "CK" + Date.now().toString(36).toUpperCase().slice(-5);
+    await db.guardDevice.create({ data: { siteId: demo.site.id, gateId: demo.checkpoint.id, name: "Tablet Escalera 2do piso", enrollCodeHash: createHash("sha256").update(code).digest("hex"), enrollExpiresAt: new Date(Date.now() + 600_000) } });
+    const c = await (await ctx(KIOSK)).newPage();
+    await c.goto("/guard");
+    await c.getByLabel("Código").fill(code);
+    await c.getByRole("button", { name: "Enrolar" }).click();
+    await c.locator("#userId").selectOption({ label: GUARD.name });
+    await c.getByLabel("PIN").fill(GUARD.pin);
+    await c.getByRole("button", { name: "Entrar" }).click();
+    await c.getByRole("heading", { name: "Modo kiosco" }).waitFor();
+    await c.goto("/guard/scan");
+    // Upstairs the guard scans the badge printed at reception (visit QR), signed with the same key as the server.
+    const visit = await db.visit.findFirstOrThrow({ where: { passId: pass1Id }, orderBy: { createdAt: "desc" } });
+    await c.getByTestId("manual-payload").fill(signVisitQr({ visitId: visit.id, siteId: demo.site.id }, process.env.PASS_SIGNING_KEY!));
+    await c.getByRole("button", { name: "Validar" }).click();
+    await c.getByTestId("scan-result").waitFor();
+    await shot(c, "kiosk-checkpoint");
   });
   await step("kiosk-scan-pin", async () => {
     await k.goto("/guard/scan");
@@ -323,6 +378,21 @@ async function main() {
       await admin.getByLabel("Opciones").fill("Laptop\nHerramientas\nNinguno");
       await admin.getByLabel("Obligatorio", { exact: true }).check();
       await shot(admin, "admin-form-editor", { fullPage: true });
+      // Contractor recipe: tools list, plant rules (es + en), signature.
+      await admin.getByTestId("add-question").click();
+      await admin.getByLabel("Etiqueta", { exact: true }).fill("Herramientas y equipos que trae");
+      await admin.getByLabel("Tipo de respuesta").selectOption("list");
+      await admin.getByLabel("Obligatorio", { exact: true }).check();
+      await admin.getByLabel("Invitación del anfitrión").uncheck();
+      await admin.getByTestId("add-text").click();
+      await admin.getByLabel("Etiqueta", { exact: true }).fill("Normas de planta");
+      await admin.getByLabel("Texto de las instrucciones", { exact: true }).fill("- Uso obligatorio de chaleco y zapatos cerrados\n- Prohibido fotografiar las líneas de producción\n- Wi-Fi de visitantes: Airlink-Guest\n- Sigue la ruta de evacuación señalizada hasta el punto de reunión");
+      await admin.getByText("Textos en inglés (opcional)").click();
+      await admin.getByLabel("Etiqueta (inglés)").fill("Plant rules");
+      await admin.getByLabel("Texto de las instrucciones (inglés)").fill("- Vest and closed shoes required\n- No photos of the production lines\n- Visitor Wi-Fi: Airlink-Guest\n- Follow the marked evacuation route to the assembly point");
+      await admin.getByTestId("add-signature").click();
+      await admin.getByLabel("Etiqueta", { exact: true }).fill("Firma: leí las normas e instrucciones");
+      await shot(admin, "admin-form-contractor", { fullPage: true });
       await admin.getByRole("button", { name: "Guardar formulario" }).click();
       await admin.waitForLoadState("networkidle");
     } else {
