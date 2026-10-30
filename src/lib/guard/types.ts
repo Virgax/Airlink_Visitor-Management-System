@@ -21,13 +21,25 @@ export type ScanPassInfo = {
 
 export type ScanAnswer = { id: string; label: string; value: string | number | boolean };
 
-export type ScanReason = DenyReason | "invalid_body" | "rate_limited" | "network" | "visit_closed";
+export type ScanReason = DenyReason | "invalid_body" | "rate_limited" | "network" | "visit_closed" | "not_inside" | "area_not_allowed";
+
+/** Result of a scan at a verification-only post (`Gate.kind = checkpoint`): nothing is entered or closed. */
+export type CheckpointInfo = {
+  /** The visit may pass this checkpoint (its areas include one the checkpoint controls, or the checkpoint controls none). */
+  allowed: boolean;
+  /** Areas this checkpoint controls (names), for the guard. */
+  controlledAreas: string[];
+  /** When the visitor entered the site. */
+  enteredAt: string | null;
+  badgeNo: string | null;
+};
 
 /** Badge step after a green scan or an in-person approval: which visit to print and whether to print without a tap. */
 export type BadgeInfo = { visitId: string; badgeNo: string | null; autoPrint: boolean };
 
 export type ScanResponse =
   | { ok: false; reason: ScanReason; pass?: ScanPassInfo }
-  | { ok: true; action: "entered" | "left"; duplicate?: boolean; conflict?: boolean; visit: VisitJson; pass: ScanPassInfo; badge?: BadgeInfo };
+  | { ok: true; action: "entered" | "left"; duplicate?: boolean; conflict?: boolean; visit: VisitJson; pass: ScanPassInfo; badge?: BadgeInfo }
+  | { ok: true; action: "verified"; visit: VisitJson; pass: ScanPassInfo; checkpoint: CheckpointInfo };
 
 export type EmployeeHit = { id: string; name: string; department: string | null };

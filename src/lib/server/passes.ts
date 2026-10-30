@@ -108,6 +108,11 @@ export type CreatePassInput = {
   answers?: Answers;
   /** Resolved form; loaded from the policy when not given. */
   form?: FormElement[];
+  /**
+   * Invitation link: the visitor fills in their own name and details from /v/<token>. `visitorName` may be empty
+   * (members are named "<placeholder> N" until they register); the QR and the kiosk wait for the registration.
+   */
+  selfRegistration?: boolean;
 };
 
 export type CreatePassError = "missing_doc" | "missing_plate" | "gate_not_allowed" | "company_blocked" | "missing_field";
@@ -130,18 +135,22 @@ export async function createPass(input: CreatePassInput): Promise<CreatePassResu
 
   const loaded = await loadPolicyAndForm(input.siteId, input.kind);
   const form = input.form ?? loaded.form.elements;
+  const selfRegistration = input.selfRegistration === true;
+  const placeholder = input.groupPlaceholder ?? "Visitante";
+  // Self-registration: the visitor supplies name, document, phone… from the link, so the host form only needs the frame.
+  const leadName = input.visitorName.trim() || (input.groupSize > 1 ? `${placeholder} 1` : placeholder);
   const evaluation = evaluatePolicy(loaded.policy, {
     kind: input.kind,
-    visitorDocHash,
-    plate,
+    visitorDocHash: selfRegistration ? (visitorDocHash ?? "pending") : visitorDocHash,
+    plate: selfRegistration ? (plate ?? "pending") : plate,
     gateIds: input.gateIds,
     form,
     surface: "host",
     answers: input.answers ?? {},
-    visitorName: input.visitorName,
-    visitorPhone: input.visitorPhone,
-    visitorEmail: input.visitorEmail,
-    company: input.companyName,
+    visitorName: leadName,
+    visitorPhone: selfRegistration ? (input.visitorPhone ?? "pending") : input.visitorPhone,
+    visitorEmail: selfRegistration ? (input.visitorEmail ?? "pending") : input.visitorEmail,
+    company: selfRegistration ? (input.companyName ?? "pending") : input.companyName,
     areaIds: input.areaIds,
     escortEmployeeId: input.escortEmployeeId,
     hostEmployeeId: input.hostEmployeeId,
@@ -160,7 +169,7 @@ export async function createPass(input: CreatePassInput): Promise<CreatePassResu
     companyId = company.id;
   }
 
-  const names = groupVisitorNames(input.visitorName, input.groupSize, input.groupPlaceholder);
+  const names = groupVisitorNames(leadName, input.groupSize, placeholder);
   const groupId = names.length > 1 ? randomToken(8) : null;
   const schedule = input.schedule ?? null;
   const status = input.skipApproval ? "active" : evaluation.initialStatus;
@@ -191,6 +200,7 @@ export async function createPass(input: CreatePassInput): Promise<CreatePassResu
     groupId,
     pinHash,
     extra,
+    selfRegistration,
   }));
 
   const passes = await db.$transaction(async (tx) => {
@@ -207,7 +217,7 @@ export async function createPass(input: CreatePassInput): Promise<CreatePassResu
       actorId: input.createdById,
       targetType: "Pass",
       targetId: pass.id,
-      meta: { kind: pass.kind, status: pass.status, groupId, warnings: evaluation.warnings, pin: Boolean(pinHash), ...(input.skipApproval ? { skipApproval: true } : {}), ...(input.auditMeta ?? {}) },
+      meta: { kind: pass.kind, status: pass.status, groupId, warnings: evaluation.warnings, pin: Boolean(pinHash), selfRegistration, ...(input.skipApproval ? { skipApproval: true } : {}), ...(input.auditMeta ?? {}) },
     });
   }
 

@@ -16,10 +16,10 @@ import { loadPolicyAndForm } from "@/lib/server/forms";
 import { evaluatePolicy } from "@/lib/policies/evaluate";
 import { collectAnswers, elementsFor, mergeAnswers, readAnswers } from "@/lib/forms/schema";
 import { mediaConfigured, mediaKey, putFile, sniffImage } from "@/lib/media/putFile";
-import { isOpenForVisitor, TOKEN_RE } from "@/lib/passes/visitor";
+import { canEditFromLink, isOpenForVisitor, registrationPending, TOKEN_RE } from "@/lib/passes/visitor";
 import { log } from "@/lib/log";
 
-async function loadOpenPass(tokenRaw: unknown, scope: string) {
+async function loadOpenPass(tokenRaw: unknown, scope: string, mode: "edit" | "nda" = "edit") {
   const token = typeof tokenRaw === "string" ? tokenRaw : "";
   if (!TOKEN_RE.test(token)) notFound();
   const ip = clientIp(await headers()) ?? "unknown";
@@ -27,13 +27,16 @@ async function loadOpenPass(tokenRaw: unknown, scope: string) {
   if (!limit.ok) redirect(`/v/${token}?error=rateLimited`);
   const pass = await db.pass.findUnique({ where: { token } });
   if (!pass) notFound();
-  if (!isOpenForVisitor(pass)) redirect(`/v/${token}?error=closed`);
+  // Pre-registration closes once a self-registered link is completed (the link is consumed); the NDA step does not.
+  const open = mode === "nda" ? isOpenForVisitor(pass) : canEditFromLink(pass);
+  if (!open) redirect(`/v/${token}?error=closed`);
   return pass;
 }
 
 const optional = (max: number) => z.string().trim().max(max).optional().transform((v) => (v ? v : null));
 const preregSchema = z.object({
   token: z.string(),
+  name: optional(120),
   doc: optional(40),
   phone: optional(40),
   email: z.string().trim().max(200).optional().transform((v) => (v ? v.toLowerCase() : null)).refine((v) => v === null || z.string().email().safeParse(v).success),
@@ -49,7 +52,14 @@ export async function preregisterAction(formData: FormData): Promise<void> {
   const pass = await loadOpenPass(d.token, "prereg");
   if (d.doc && d.doc.replace(/[^0-9a-z]/gi, "").length < 5) redirect(`/v/${pass.token}?error=invalid`);
 
-  const data: { visitorDocHash?: string; visitorDocLast4?: string; visitorPhone?: string; visitorEmail?: string; plate?: string; companyId?: string; extra?: Prisma.InputJsonObject } = {};
+  const data: { visitorName?: string; registeredAt?: Date; visitorDocHash?: string; visitorDocLast4?: string; visitorPhone?: string; visitorEmail?: string; plate?: string; companyId?: string; extra?: Prisma.InputJsonObject } = {};
+  // Invitation link: the visitor names themselves; from then on the link belongs to that person.
+  const registering = registrationPending(pass);
+  if (registering) {
+    if (!d.name || d.name.length < 2) redirect(`/v/${pass.token}?error=invalid`);
+    data.visitorName = d.name;
+    data.registeredAt = new Date();
+  }
   if (d.doc && !pass.visitorDocHash) {
     data.visitorDocHash = docHash(d.doc, await getSecret("DOC_HASH_KEY"));
     data.visitorDocLast4 = docLast4(d.doc);
@@ -80,6 +90,10 @@ export async function preregisterAction(formData: FormData): Promise<void> {
   });
   if (evaluation.missing.length > 0) redirect(`/v/${pass.token}?error=missing`);
   if (Object.keys(data).length > 0) await db.pass.update({ where: { id: pass.id }, data });
+  if (registering) {
+    await audit({ action: "pass.updated", siteId: pass.siteId, targetType: "Pass", targetId: pass.id, meta: { field: "selfRegistered", groupId: pass.groupId } });
+    redirect(`/v/${pass.token}?ok=registered`);
+  }
   redirect(`/v/${pass.token}?ok=prereg`);
 }
 
@@ -112,7 +126,7 @@ export async function acceptNdaAction(formData: FormData): Promise<void> {
   const parsed = ndaSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) redirect(`/v/${String(formData.get("token") ?? "")}?error=invalid`);
   const d = parsed.data;
-  const pass = await loadOpenPass(d.token, "nda");
+  const pass = await loadOpenPass(d.token, "nda", "nda");
   const { form } = await loadPolicyAndForm(pass.siteId, pass.kind);
   const signatureElement = elementsFor(form.elements, "visitor").find((e) => e.type === "signature");
   const signature = signatureElement ? decodeSignature(d.signature) : null;

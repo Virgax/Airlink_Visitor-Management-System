@@ -10,7 +10,7 @@ export async function HostNav({ userId }: { userId: string }) {
   const roles = await db.membership.findMany({ where: { userId, status: "active" }, select: { role: true }, distinct: ["role"] });
   const has = (r: "host" | "approver" | "security" | "warden" | "admin") => roles.some((m) => m.role === r);
   const items = [
-    ...(has("host") ? [{ href: "/app", label: t("passes"), icon: ListChecks }, { href: "/app/passes/new", label: t("new"), icon: CalendarPlus }] : []),
+    ...(has("host") || has("admin") || has("security") ? [{ href: "/app", label: t("passes"), icon: ListChecks }, { href: "/app/passes/new", label: t("new"), icon: CalendarPlus }] : []),
     ...(has("approver") || has("security") ? [{ href: "/app/approvals", label: t("approvals"), icon: UserCheck }] : []),
     ...(has("warden") || has("security") || has("admin") ? [{ href: "/app/evacuacion", label: t("evacuation"), icon: Siren }] : []),
   ];

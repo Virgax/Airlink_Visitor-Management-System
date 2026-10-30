@@ -2,19 +2,19 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { AlertTriangle, Camera, CameraOff, CheckCircle2, CloudOff, KeyRound, LogOut, Wifi, WifiOff, XCircle } from "lucide-react";
+import { AlertTriangle, Camera, CameraOff, CheckCircle2, CloudOff, KeyRound, LogOut, ShieldCheck, Wifi, WifiOff, XCircle } from "lucide-react";
 import { Icon } from "@/components/Icon";
 import { BadgePanel } from "@/components/guard/BadgePanel";
 import type { KioskBadgeConfig } from "@/lib/badges/config";
 import { fmtDate } from "@/lib/format";
-import type { BadgeInfo, ScanPassInfo, ScanReason, ScanResponse } from "@/lib/guard/types";
+import type { BadgeInfo, CheckpointInfo, ScanPassInfo, ScanReason, ScanResponse } from "@/lib/guard/types";
 import { cacheIsFresh, provisionalCheck, type PassCache } from "@/lib/offline/provisional";
 import { countQueuedScans, enqueueScan, flushQueue, loadPassCache, outcomeForStatus, savePassCache, type QueuedScan } from "@/lib/offline/queue";
 
 const CACHE_REFRESH_MS = 5 * 60_000;
 const SAME_PAYLOAD_DEBOUNCE_MS = 4_000;
 
-type Tone = "ok" | "deny" | "left" | "provisional";
+type Tone = "ok" | "deny" | "left" | "provisional" | "verified";
 type ResultView = {
   tone: Tone;
   reason?: ScanReason;
@@ -24,6 +24,7 @@ type ResultView = {
   atDock?: boolean;
   at: string;
   badge?: BadgeInfo;
+  checkpoint?: CheckpointInfo;
 };
 
 /** Minimal typing of the Shape Detection API (not in lib.dom yet). */
@@ -43,7 +44,8 @@ async function postPin(body: { pin: string; name?: string }): Promise<Response> 
   return fetch("/api/guard/pin", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
 }
 
-export function Scanner({ locale, timeZone, badgeConfig }: { locale: string; timeZone: string; badgeConfig: KioskBadgeConfig }) {
+/** `checkpoint`: verification-only gate — no PIN entry, no badge printing, no offline provisional entries. */
+export function Scanner({ locale, timeZone, badgeConfig, checkpoint = false }: { locale: string; timeZone: string; badgeConfig: KioskBadgeConfig; checkpoint?: boolean }) {
   const t = useTranslations("guard");
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const stopRef = useRef<(() => void) | null>(null);
@@ -132,6 +134,10 @@ export function Scanner({ locale, timeZone, badgeConfig }: { locale: string; tim
       setResult({ tone: "deny", reason: data.reason, pass: data.pass, at });
       return;
     }
+    if (data.action === "verified") {
+      setResult({ tone: data.checkpoint.allowed ? "verified" : "deny", reason: data.checkpoint.allowed ? undefined : "area_not_allowed", pass: data.pass, checkpoint: data.checkpoint, at });
+      return;
+    }
     setResult({
       tone: data.action === "left" ? "left" : "ok",
       pass: data.pass,
@@ -145,6 +151,11 @@ export function Scanner({ locale, timeZone, badgeConfig }: { locale: string; tim
 
   const offlineScan = useCallback(
     async (payload: string, id: string, at: string) => {
+      if (checkpoint) {
+        // A checkpoint answers "is this person inside?", which only the server knows.
+        setResult({ tone: "deny", reason: "network", at });
+        return;
+      }
       const cache = cacheIsFresh(cacheRef.current) ? cacheRef.current : null;
       const check = provisionalCheck(cache, payload);
       if (!check.ok) {
@@ -160,7 +171,7 @@ export function Scanner({ locale, timeZone, badgeConfig }: { locale: string; tim
       await refreshQueued();
       setResult({ tone: "provisional", pass: { ...check.pass, warnings: check.pass.warnings as ScanPassInfo["warnings"] }, atDock: check.pass.kind === "carrier", at });
     },
-    [applyCache, refreshQueued],
+    [applyCache, checkpoint, refreshQueued],
   );
 
   const submit = useCallback(
@@ -284,13 +295,14 @@ export function Scanner({ locale, timeZone, badgeConfig }: { locale: string; tim
 
   const toneClass: Record<Tone, string> = {
     ok: "border-success bg-success-bg text-success",
+    verified: "border-success bg-success-bg text-success",
     provisional: "border-warning bg-warning-bg text-warning",
     left: "border-border bg-surface-2 text-text",
     deny: "border-danger bg-danger-bg text-danger",
   };
-  const toneIcon: Record<Tone, typeof CheckCircle2> = { ok: CheckCircle2, provisional: CloudOff, left: LogOut, deny: XCircle };
+  const toneIcon: Record<Tone, typeof CheckCircle2> = { ok: CheckCircle2, verified: ShieldCheck, provisional: CloudOff, left: LogOut, deny: XCircle };
   const toneTitle = (r: ResultView) =>
-    r.tone === "deny" ? t("scan.denied") : r.tone === "left" ? t("scan.left") : r.tone === "provisional" ? t("scan.provisional") : r.atDock ? t("scan.atDock") : t("scan.entered");
+    r.tone === "deny" ? (r.checkpoint ? t("scan.checkpointDenied") : t("scan.denied")) : r.tone === "verified" ? t("scan.verified") : r.tone === "left" ? t("scan.left") : r.tone === "provisional" ? t("scan.provisional") : r.atDock ? t("scan.atDock") : t("scan.entered");
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
@@ -329,6 +341,7 @@ export function Scanner({ locale, timeZone, badgeConfig }: { locale: string; tim
             <button type="submit" className="btn-secondary" disabled={busy || !manual.trim()}>{t("scan.manualSubmit")}</button>
           </div>
         </form>
+        {checkpoint ? null : (
         <form
           className="card space-y-2"
           data-testid="pin-entry"
@@ -354,6 +367,7 @@ export function Scanner({ locale, timeZone, badgeConfig }: { locale: string; tim
           </div>
           {!online ? <p className="muted">{t("scan.pinOffline")}</p> : null}
         </form>
+        )}
       </div>
 
       <div aria-live="polite">
@@ -392,13 +406,20 @@ export function Scanner({ locale, timeZone, badgeConfig }: { locale: string; tim
                   <dt className="muted">{t("scan.kind")}</dt>
                   <dd>{result.pass.kind ? t(`kinds.${result.pass.kind as "visit"}`) : "—"}{result.pass.docLast4 ? ` · ${t("scan.document")} ****${result.pass.docLast4}` : ""}{result.pass.plate ? ` · ${t("scan.plate")} ${result.pass.plate}` : ""}</dd>
                 </div>
+                {result.checkpoint ? (
+                  <div className="sm:col-span-2" data-testid="result-checkpoint" data-allowed={result.checkpoint.allowed ? "1" : "0"}>
+                    <dt className="muted">{t("scan.checkpointAreas")}</dt>
+                    <dd>{result.checkpoint.controlledAreas.length ? result.checkpoint.controlledAreas.join(", ") : t("scan.checkpointAnyArea")}</dd>
+                    {result.checkpoint.enteredAt ? <dd className="muted">{t("scan.enteredAt", { time: fmtDate(result.checkpoint.enteredAt, locale, { timeZone, dateStyle: undefined, timeStyle: "short" }) })}{result.checkpoint.badgeNo ? ` · ${t("scan.badgeNo", { badgeNo: result.checkpoint.badgeNo })}` : ""}</dd> : null}
+                  </div>
+                ) : null}
                 {result.pass.answers?.length ? (
                   <div className="sm:col-span-2" data-testid="result-answers">
                     <dt className="muted">{t("scan.answers")}</dt>
                     <dd>
                       <ul className="flex flex-wrap gap-x-4 gap-y-1">
                         {result.pass.answers.map((a) => (
-                          <li key={a.id}><span className="muted">{a.label}:</span> {typeof a.value === "boolean" ? t(a.value ? "scan.yes" : "scan.no") : String(a.value)}</li>
+                          <li key={a.id} className="whitespace-pre-wrap"><span className="muted">{a.label}:</span> {typeof a.value === "boolean" ? t(a.value ? "scan.yes" : "scan.no") : String(a.value)}</li>
                         ))}
                       </ul>
                     </dd>

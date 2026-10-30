@@ -17,7 +17,7 @@ export async function GET(): Promise<Response> {
     const horizon = new Date(now.getTime() + 24 * 3_600_000);
     const [passes, policies, areas, blacklistCount] = await Promise.all([
       db.pass.findMany({
-        where: { siteId: site.id, status: "active", validFrom: { lte: horizon }, validUntil: { gte: now } },
+        where: { siteId: site.id, status: "active", validFrom: { lte: horizon }, validUntil: { gte: now }, OR: [{ selfRegistration: false }, { registeredAt: { not: null } }] },
         select: { id: true, kind: true, visitorName: true, validFrom: true, validUntil: true, maxUses: true, uses: true, areaIds: true, company: { select: { name: true } }, host: { select: { name: true } } },
         orderBy: { validFrom: "asc" },
         take: 2000,

@@ -45,7 +45,7 @@ test("HR builds a form template, assigns it to vendors; host, visitor and CSV us
 
   // Select question shown to the host only.
   await page.getByTestId("add-question").click();
-  await page.getByLabel("Etiqueta").fill(selectLabel);
+  await page.getByLabel("Etiqueta", { exact: true }).fill(selectLabel);
   await page.getByLabel("Tipo de respuesta").selectOption("select");
   await page.getByLabel("Opciones").fill("iPhone\nSamsung");
   await page.getByLabel("Obligatorio", { exact: true }).check();
@@ -53,7 +53,7 @@ test("HR builds a form template, assigns it to vendors; host, visitor and CSV us
   await page.getByLabel("Kiosco").uncheck();
   // Required checkbox shown to the visitor only.
   await page.getByTestId("add-question").click();
-  await page.getByLabel("Etiqueta").fill(checkboxLabel);
+  await page.getByLabel("Etiqueta", { exact: true }).fill(checkboxLabel);
   await page.getByLabel("Tipo de respuesta").selectOption("checkbox");
   await page.getByLabel("Obligatorio", { exact: true }).check();
   await page.getByLabel("Invitación del anfitrión").uncheck();
@@ -163,7 +163,7 @@ test("a signature element replaces the typed-name NDA acceptance with a drawn si
   await page.getByRole("button", { name: "Crear formulario" }).click();
   await expect(page).toHaveURL(/\?ok=created$/);
   await page.getByTestId("add-signature").click();
-  await page.getByLabel("Etiqueta").fill("Firma del contratista");
+  await page.getByLabel("Etiqueta", { exact: true }).fill("Firma del contratista");
   await expect(page.getByTestId("form-preview").getByTestId("signature-pad")).toBeVisible();
   await page.getByRole("button", { name: "Guardar formulario" }).click();
   await expect(page).toHaveURL(/\?ok=saved$/);

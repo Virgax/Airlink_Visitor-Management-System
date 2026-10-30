@@ -11,9 +11,9 @@ export default async function GuardScanPage() {
   const locale = await getLocale();
   return (
     <AppShell user={user} kiosk subtitle={`${site.name} · ${gate.name}`}>
-      <KioskBar title={t("title")} />
-      <p className="muted mb-4">{t("intro")} {t("hint")}</p>
-      <Scanner locale={locale} timeZone={site.timezone} badgeConfig={kioskBadgeConfig(site, gate)} />
+      <KioskBar title={gate.kind === "checkpoint" ? t("checkpointTitle") : t("title")} />
+      <p className="muted mb-4">{gate.kind === "checkpoint" ? t("checkpointIntro") : `${t("intro")} ${t("hint")}`}</p>
+      <Scanner locale={locale} timeZone={site.timezone} badgeConfig={kioskBadgeConfig(site, gate)} checkpoint={gate.kind === "checkpoint"} />
     </AppShell>
   );
 }

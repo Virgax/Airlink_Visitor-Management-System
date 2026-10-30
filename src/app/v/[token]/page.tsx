@@ -13,10 +13,11 @@ import { qrPayloadFor } from "@/lib/server/passes";
 import { loadPolicyAndForm } from "@/lib/server/forms";
 import { evaluatePolicy, missingDoc } from "@/lib/policies/evaluate";
 import { parseSchedule } from "@/lib/passes/validate";
-import { isOpenForVisitor, TOKEN_RE } from "@/lib/passes/visitor";
+import { canEditFromLink, isOpenForVisitor, registrationPending, TOKEN_RE } from "@/lib/passes/visitor";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { FormFields } from "@/components/forms/FormFields";
 import { formLabels } from "@/lib/forms/labels";
-import { builtinMode, elementsFor, hasAnswer, readAnswers, type BuiltinElement } from "@/lib/forms/schema";
+import { builtinMode, elementsFor, elementText, hasAnswer, readAnswers, type BuiltinElement } from "@/lib/forms/schema";
 import { acceptNdaAction, preregisterAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +50,9 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const tz = pass.site.timezone;
   const now = new Date();
   const open = isOpenForVisitor(pass, now);
+  const registering = registrationPending(pass);
+  const editable = canEditFromLink(pass, now);
+  const tl = await getTranslations("locale");
   const { policy, form } = await loadPolicyAndForm(pass.siteId, pass.kind);
   const answers = readAnswers(pass.extra);
   const evaluation = evaluatePolicy(policy, {
@@ -71,16 +75,16 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const questions = visitorElements.filter((e) => e.type === "question");
   const unansweredQuestions = questions.some((e) => !hasAnswer(answers[e.id]?.value));
   const hasVisitorBlocks = visitorElements.some((e) => e.type === "text" || e.type === "media");
-  const showPrereg = open && (needsDoc || (mode("document") !== "off" && !pass.visitorDocHash) || (mode("phone") !== "off" && !pass.visitorPhone) || unansweredQuestions || hasVisitorBlocks);
+  const showPrereg = editable && (registering || needsDoc || (mode("document") !== "off" && !pass.visitorDocHash) || (mode("phone") !== "off" && !pass.visitorPhone) || unansweredQuestions || hasVisitorBlocks);
   const nda = open && needsNda ? await activeNda(pass.siteId) : null;
   const labels = await formLabels();
   const mediaHref = (key: string) => `/api/media/${key}?pass=${encodeURIComponent(token)}`;
   const schedule = parseSchedule(pass.schedule);
-  const showQr = pass.status === "active" && pass.validUntil > now;
+  const showQr = pass.status === "active" && pass.validUntil > now && !registering;
   const qr = showQr ? await qrPayloadFor(pass, now) : null;
   const dataUrl = qr ? await QRCode.toDataURL(qr.payload, { margin: 1, width: 288, errorCorrectionLevel: "M" }) : null;
   const instructions = typeof pass.site.settings === "object" && pass.site.settings && "arrivalInstructions" in pass.site.settings ? String((pass.site.settings as Record<string, unknown>).arrivalInstructions ?? "") : "";
-  const okKey = sp.ok === "prereg" ? "prereg" : sp.ok === "nda" ? "nda" : null;
+  const okKey = sp.ok === "prereg" ? "prereg" : sp.ok === "nda" ? "nda" : sp.ok === "registered" ? "register" : null;
   const errorKey = sp.error && ["invalid", "rateLimited", "closed", "missing"].includes(sp.error) ? sp.error : null;
   const statusClass = pass.status === "active" ? "bg-success-bg text-success" : pass.status === "pending_approval" ? "bg-warning-bg text-warning" : "bg-danger-bg text-danger";
 
@@ -90,6 +94,7 @@ export default async function VisitorPassPage({ params, searchParams }: { params
         <div className="flex items-center gap-3">
           <Logo className="h-9 w-auto" />
           <span className="border-l border-border pl-3 text-text-muted">Visitas</span>
+          <div className="ml-auto"><LocaleSwitcher current={locale} label={tl("switch")} /></div>
         </div>
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
         <p className="text-xl">{pass.visitorName}{pass.company ? <span className="muted"> · {pass.company.name}</span> : null}</p>
@@ -108,6 +113,8 @@ export default async function VisitorPassPage({ params, searchParams }: { params
             <p className="muted">{t("qr.help")}</p>
             {qr.rotating ? <p className="muted">{t("qr.rotating")}</p> : null}
           </section>
+        ) : registering && open ? (
+          <p className="muted" data-testid="qr-register-note">{t("qr.register")}</p>
         ) : pass.status === "pending_approval" ? (
           <p className="muted">{t("qr.pending")}</p>
         ) : (
@@ -126,11 +133,19 @@ export default async function VisitorPassPage({ params, searchParams }: { params
         {instructions ? <p className="muted whitespace-pre-wrap">{instructions}</p> : null}
         {pass.visitorDocLast4 ? <p className="muted">{t("prereg.docSaved", { last4: pass.visitorDocLast4 })}</p> : null}
 
+        {pass.selfRegistration && pass.registeredAt && !registering ? <p className="muted" data-testid="link-locked">{t("register.locked", { name: pass.visitorName })}</p> : null}
+
         {showPrereg ? (
-          <form action={preregisterAction} className="space-y-3 rounded-lg border border-border p-3">
+          <form action={preregisterAction} className="space-y-3 rounded-lg border border-border p-3" data-testid={registering ? "register-form" : "prereg-form"}>
             <input type="hidden" name="token" value={token} />
-            <h2 className="font-medium">{t("prereg.title")}</h2>
-            <p className="muted">{t("prereg.intro")}</p>
+            <h2 className="font-medium">{registering ? t("register.title") : t("prereg.title")}</h2>
+            <p className="muted">{registering ? t("register.intro") : t("prereg.intro")}</p>
+            {registering ? (
+              <div>
+                <label className="label" htmlFor="name">{t("register.name")}</label>
+                <input id="name" name="name" required minLength={2} maxLength={120} className="input" autoComplete="name" />
+              </div>
+            ) : null}
             <FormFields
               elements={form.elements}
               surface="visitor"
@@ -138,42 +153,44 @@ export default async function VisitorPassPage({ params, searchParams }: { params
               answers={answers}
               mediaHref={mediaHref}
               exclude={["signature"]}
+              locale={locale}
               renderBuiltin={(e) => {
                 const required = e.mode === "required";
+                const text = elementText(e, locale);
                 switch (e.type) {
                   case "document":
                     return pass.visitorDocHash ? null : (
                       <div>
-                        <label className="label" htmlFor="doc">{e.label || t("prereg.doc")}</label>
+                        <label className="label" htmlFor="doc">{text.label || t("prereg.doc")}</label>
                         <input id="doc" name="doc" required={required} minLength={5} maxLength={40} className="input" autoComplete="off" inputMode="text" />
-                        {e.help ? <p className="muted mt-1">{e.help}</p> : null}
+                        {text.help ? <p className="muted mt-1">{text.help}</p> : null}
                       </div>
                     );
                   case "phone":
                     return (
                       <div>
-                        <label className="label" htmlFor="phone">{e.label || t("prereg.phone")}</label>
+                        <label className="label" htmlFor="phone">{text.label || t("prereg.phone")}</label>
                         <input id="phone" name="phone" type="tel" maxLength={40} className="input" defaultValue={pass.visitorPhone ?? ""} autoComplete="tel" required={required && !pass.visitorPhone} />
                       </div>
                     );
                   case "email":
                     return (
                       <div>
-                        <label className="label" htmlFor="email">{e.label || t("prereg.email")}</label>
+                        <label className="label" htmlFor="email">{text.label || t("prereg.email")}</label>
                         <input id="email" name="email" type="email" maxLength={200} className="input" defaultValue={pass.visitorEmail ?? ""} autoComplete="email" required={required && !pass.visitorEmail} />
                       </div>
                     );
                   case "plate":
                     return (
                       <div>
-                        <label className="label" htmlFor="plate">{e.label || t("prereg.plate")}</label>
+                        <label className="label" htmlFor="plate">{text.label || t("prereg.plate")}</label>
                         <input id="plate" name="plate" maxLength={20} className="input" defaultValue={pass.plate ?? ""} required={required && !pass.plate} />
                       </div>
                     );
                   case "company":
                     return pass.companyId ? null : (
                       <div>
-                        <label className="label" htmlFor="company">{e.label || t("prereg.company")}</label>
+                        <label className="label" htmlFor="company">{text.label || t("prereg.company")}</label>
                         <input id="company" name="company" maxLength={120} className="input" autoComplete="organization" required={required} />
                       </div>
                     );
@@ -182,8 +199,14 @@ export default async function VisitorPassPage({ params, searchParams }: { params
                 }
               }}
             />
-            <button type="submit" className="btn-primary w-full">{t("prereg.submit")}</button>
+            <button type="submit" className="btn-primary w-full">{registering ? t("register.submit") : t("prereg.submit")}</button>
           </form>
+        ) : null}
+
+        {!showPrereg && hasVisitorBlocks ? (
+          <div className="space-y-3" data-testid="visitor-blocks">
+            <FormFields elements={form.elements} surface="visitor" labels={labels} mediaHref={mediaHref} exclude={["question", "signature"]} locale={locale} />
+          </div>
         ) : null}
 
         {nda ? (
@@ -199,7 +222,7 @@ export default async function VisitorPassPage({ params, searchParams }: { params
               <input type="checkbox" name="accept" required className="mt-1" /> {t("nda.accept")}
             </label>
             {signatureElement ? (
-              <FormFields elements={[signatureElement]} surface="visitor" labels={labels} />
+              <FormFields elements={[signatureElement]} surface="visitor" labels={labels} locale={locale} />
             ) : (
               <div>
                 <label className="label" htmlFor="name">{t("nda.name")}</label>

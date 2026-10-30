@@ -9,11 +9,12 @@ import { getManagedSite, readSiteSettings, timeZoneOptions } from "@/lib/server/
 import { readGateSettings, selfSignInPath } from "@/lib/server/gates";
 import { VISIT_KINDS } from "@/lib/passes/form";
 import { absoluteUrl } from "@/lib/notifications/channels/types";
+import { readCheckpointAreaIds } from "@/lib/guard/checkpoint";
 import { PRINTER_KINDS, readPrinter } from "@/lib/badges/config";
 import { BADGE_TEMPLATES } from "@/lib/badges/zpl";
-import { createAreaAction, createGateAction, toggleAreaAction, toggleGateAction, toggleSelfSignInAction, updateAreaAction, updateGatePrinterAction, updateSelfSignInKindsAction, updateSiteAction } from "../actions";
+import { createAreaAction, createGateAction, toggleAreaAction, toggleGateAction, toggleSelfSignInAction, updateAreaAction, updateGatePrinterAction, updateCheckpointAreasAction, updateSelfSignInKindsAction, updateSiteAction } from "../actions";
 
-const GATE_KINDS = ["pedestrian", "vehicle", "dock"] as const;
+const GATE_KINDS = ["pedestrian", "vehicle", "dock", "checkpoint"] as const;
 
 export default async function SiteDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { id } = await params;
@@ -161,6 +162,23 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
                     </div>
                     <button type="submit" className="btn-secondary text-sm">{tb("admin.savePrinter")}</button>
                   </form>
+                  {g.kind === "checkpoint" ? (
+                    <form action={updateCheckpointAreasAction} className="rounded-lg bg-surface-2 p-3" data-testid="checkpoint-settings">
+                      <input type="hidden" name="gateId" value={g.id} />
+                      <fieldset>
+                        <legend className="label">{t("checkpointAreas")}</legend>
+                        <div className="flex flex-wrap gap-3">
+                          {areas.filter((a) => a.active).map((a) => (
+                            <label key={a.id} className="flex items-center gap-2 text-sm">
+                              <input type="checkbox" name="checkpointAreaIds" value={a.id} defaultChecked={readCheckpointAreaIds(g.settings).includes(a.id)} /> {a.name}
+                            </label>
+                          ))}
+                        </div>
+                        <p className="muted mt-1 text-xs">{t("checkpointAreasHelp")}</p>
+                      </fieldset>
+                      <button type="submit" className="btn-secondary mt-2 text-sm">{tc("save")}</button>
+                    </form>
+                  ) : null}
                   {g.selfSignInToken ? (
                     <form action={updateSelfSignInKindsAction} className="rounded-lg bg-surface-2 p-3" data-testid="self-sign-in-settings">
                       <input type="hidden" name="gateId" value={g.id} />

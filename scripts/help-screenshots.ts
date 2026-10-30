@@ -318,7 +318,7 @@ async function main() {
       await admin.getByRole("button", { name: "Crear formulario" }).click();
       await admin.waitForURL(/\/admin\/forms\/[a-z0-9]+/);
       await admin.getByTestId("add-question").click();
-      await admin.getByLabel("Etiqueta").fill("Equipo que trae");
+      await admin.getByLabel("Etiqueta", { exact: true }).fill("Equipo que trae");
       await admin.getByLabel("Tipo de respuesta").selectOption("select");
       await admin.getByLabel("Opciones").fill("Laptop\nHerramientas\nNinguno");
       await admin.getByLabel("Obligatorio", { exact: true }).check();

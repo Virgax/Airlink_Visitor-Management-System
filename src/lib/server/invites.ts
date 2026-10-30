@@ -110,6 +110,7 @@ export async function sendPassInviteEmail(input: InviteEmailInput): Promise<Invi
     ...(instructions ? [instructions] : []),
     ...(needsNda ? [t("nda")] : []),
     ...(pass.status === "pending_approval" ? [t("pending")] : []),
+    ...(pass.selfRegistration && !pass.registeredAt ? [t("register")] : []),
   ];
   const body = lines.join("\n\n");
   const title = t("subject", { site: pass.site.name });

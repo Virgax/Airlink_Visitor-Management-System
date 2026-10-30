@@ -11,6 +11,8 @@ import type { ScanResponse } from "@/lib/guard/types";
 import { parseVisitQr, verifyVisitQr } from "@/lib/badges/visitQr";
 import { enterWithPass, findBlacklistHit, findOpenVisit, loadPass, passInfo, passInfoFromVisit, reportBlacklistHit } from "@/lib/server/scan";
 import { checkoutVisit, visitJson, visitSummarySelect } from "@/lib/server/visits";
+import { verifyAtCheckpoint } from "@/lib/server/checkpoint";
+import { registrationPending } from "@/lib/passes/visitor";
 import { log } from "@/lib/log";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +38,9 @@ export async function POST(request: NextRequest): Promise<Response> {
     const offline = parsed.data.offline === true;
     const now = new Date();
     const at = validationInstant(parsed.data.at ? new Date(parsed.data.at) : null, offline, now);
+
+    // Verification-only post: show the visit and whether it may be here; never enter, consume or close anything.
+    if (gate.kind === "checkpoint") return Response.json(await verifyAtCheckpoint({ payload, scanId, kiosk, now }));
 
     // Idempotency: a scan already recorded (queued twice, double tap) returns the same visit.
     const existing = await db.visit.findUnique({ where: { scanId }, select: visitSummarySelect });
@@ -78,7 +83,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     const decision = decideScan({
       payload,
-      pass: pass ? { ...pass, schedule: pass.schedule ?? undefined } : null,
+      pass: pass ? { ...pass, schedule: pass.schedule ?? undefined, registrationPending: registrationPending(pass) } : null,
       ctx: {
         siteId: site.id,
         gateId: gate.id,

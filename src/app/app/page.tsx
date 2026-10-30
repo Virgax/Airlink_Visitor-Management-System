@@ -8,7 +8,7 @@ import { HostNav } from "@/components/passes/HostNav";
 import { PassStatusBadge } from "@/components/passes/PassStatusBadge";
 import { db } from "@/lib/db";
 import { fmtDate } from "@/lib/format";
-import { requireMembership } from "@/lib/auth/guards";
+import { requireHostTenant } from "@/lib/auth/host-access";
 import { ownPassWhere } from "@/lib/server/host-passes";
 import { parseSchedule } from "@/lib/passes/validate";
 
@@ -17,7 +17,7 @@ const OPEN_STATUSES: PassStatus[] = ["active", "pending_approval"];
 type Row = Pass & { company: { name: string } | null; site: { name: string; timezone: string } };
 
 export default async function HostHome() {
-  const tenant = await requireMembership("host", "/app");
+  const tenant = await requireHostTenant("/app");
   const t = await getTranslations("host");
   const tk = await getTranslations("passes");
   const ts = await getTranslations("selectPanel");
@@ -70,7 +70,7 @@ export default async function HostHome() {
                 </td>
                 <td className="px-3 py-2">{tk(`kinds.${p.kind}.label`)}</td>
                 <td className="px-3 py-2 whitespace-nowrap">{windowText(p)}</td>
-                <td className="px-3 py-2"><PassStatusBadge status={p.status} /></td>
+                <td className="px-3 py-2"><PassStatusBadge status={p.status} />{p.selfRegistration && !p.registeredAt ? <span className="muted block text-xs">{t("list.registrationPending")}</span> : null}</td>
                 <td className="px-3 py-2 text-right"><Link href={`/app/passes/${p.id}`} className="btn-secondary px-3 py-1 text-xs">{t("list.open")}</Link></td>
               </tr>
             ))}

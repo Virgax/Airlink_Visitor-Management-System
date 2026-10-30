@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { AppShell } from "@/components/AppShell";
 import { HostNav } from "@/components/passes/HostNav";
 import { db } from "@/lib/db";
-import { requireMembership } from "@/lib/auth/guards";
+import { requireHostTenant } from "@/lib/auth/host-access";
 import { ownPassWhere } from "@/lib/server/host-passes";
 import { evaluatePolicy } from "@/lib/policies/evaluate";
 import { enabledKinds } from "@/lib/server/policies";
@@ -14,6 +14,7 @@ import { KindFormSwitch, type KindFormRules } from "@/components/forms/KindFormS
 import { builtinRule, BUILTIN_TYPES, elementsFor, readAnswers, type BuiltinType } from "@/lib/forms/schema";
 import { formLabels } from "@/lib/forms/labels";
 import { loadFormsForSite } from "@/lib/server/forms";
+import { canInviteForOthers } from "@/lib/auth/host-access";
 import { createPassAction, searchFrequentAction } from "../actions";
 
 type Search = { siteId?: string; from?: string; error?: string; frequent?: string };
@@ -22,12 +23,13 @@ const WEEK = [1, 2, 3, 4, 5, 6, 0];
 
 export default async function NewPassPage({ searchParams }: { searchParams: Promise<Search> }) {
   const sp = await searchParams;
-  const tenant = await requireMembership("host", "/app/passes/new");
+  const tenant = await requireHostTenant("/app/passes/new");
   const t = await getTranslations("host.new");
   const tk = await getTranslations("passes");
   const tr = await getTranslations("roles");
   const ts = await getTranslations("selectPanel");
   const ta = await getTranslations("app");
+  const locale = await getLocale();
 
   // Site: the active one from the panel selector, or chosen here when the membership covers every site.
   const site = tenant.site ?? tenant.sites.find((s) => s.id === sp.siteId) ?? (tenant.sites.length === 1 ? tenant.sites[0] : null) ?? null;
@@ -51,6 +53,7 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
   }
 
   const tp = await getTranslations("people");
+  const forOthers = await canInviteForOthers(tenant.user.id, site.id);
   const [areas, gates, employees, forms, from, VISIT_KINDS, frequent, labels] = await Promise.all([
     db.area.findMany({ where: { siteId: site.id, active: true }, orderBy: { name: "asc" } }),
     db.gate.findMany({ where: { siteId: site.id, active: true }, orderBy: { name: "asc" } }),
@@ -109,9 +112,26 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
             ))}
           </ul>
         </div>
+        {forOthers ? (
+          <div className="sm:col-span-2" data-testid="host-on-behalf">
+            <label className="label" htmlFor="hostEmployeeId">{t("hostEmployee")}</label>
+            <select id="hostEmployeeId" name="hostEmployeeId" className="input" defaultValue={from?.hostEmployeeId ?? ""}>
+              <option value="">{t("hostSelf")}</option>
+              {employees.map((e) => <option key={e.id} value={e.id}>{e.name}{e.department ? ` · ${e.department}` : ""}</option>)}
+            </select>
+            <p className="muted mt-1">{t("hostEmployeeHelp")}</p>
+          </div>
+        ) : null}
+        <div className="sm:col-span-2">
+          <label className="flex items-start gap-2 text-sm">
+            <input type="checkbox" name="selfRegistration" className="mt-1" defaultChecked={from?.selfRegistration ?? false} data-testid="self-registration" />
+            <span>{t("selfRegistration")}<span className="muted block">{t("selfRegistrationHelp")}</span></span>
+          </label>
+        </div>
         <div {...box("name")}>
           <label className="label" htmlFor="visitorName">{t("visitorName")}</label>
-          <input id="visitorName" name="visitorName" required minLength={2} maxLength={120} className="input" defaultValue={from?.visitorName ?? frequent?.name ?? ""} />
+          <input id="visitorName" name="visitorName" minLength={2} maxLength={120} className="input" defaultValue={from?.selfRegistration ? "" : (from?.visitorName ?? frequent?.name ?? "")} />
+          <p className="muted mt-1">{t("visitorNameHelp")}</p>
         </div>
         <div {...box("company")}>
           <label className="label" htmlFor="company">{t("company")}</label>
@@ -154,7 +174,7 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
             return (
               <div key={kind} data-kind-section={kind} hidden={!active || undefined} className="space-y-4">
                 <fieldset disabled={!active || undefined} className="space-y-4">
-                  <FormFields elements={forms[kind].form.elements} surface="host" labels={labels} answers={storedAnswers} exclude={["signature"]} idPrefix={`${kind}-`} />
+                  <FormFields elements={forms[kind].form.elements} surface="host" labels={labels} answers={storedAnswers} exclude={["signature"]} idPrefix={`${kind}-`} locale={locale} />
                 </fieldset>
               </div>
             );

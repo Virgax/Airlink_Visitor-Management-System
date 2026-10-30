@@ -190,3 +190,26 @@ describe("built-in surface rules", () => {
     expect(builtinCollectableOn("document", "kiosk")).toBe(true);
   });
 });
+
+describe("list questions and English texts", () => {
+  it("stores one item per line and rejects an oversized list", async () => {
+    const { collectAnswers } = await import("@/lib/forms/schema");
+    const form: FormElement[] = [{ id: "tools", type: "question", label: "Herramientas", questionType: "list", options: [], required: true, showOn: ["visitor"], onBadge: false }];
+    const ok = collectAnswers(form, "visitor", values({ q_tools: " Escalera \r\n\nTaladro\n  " }));
+    expect(ok.invalid).toEqual([]);
+    expect(ok.answers.tools?.value).toBe("Escalera\nTaladro");
+    const empty = collectAnswers(form, "visitor", values({ q_tools: "\n \n" }));
+    expect(empty.answers.tools).toBeUndefined();
+    const big = collectAnswers(form, "visitor", values({ q_tools: Array.from({ length: 300 }, (_, i) => `item ${i} xxxxxxxxxx`).join("\n") }));
+    expect(big.invalid).toEqual(["tools"]);
+  });
+
+  it("falls back to the Spanish text when no English text is set", async () => {
+    const { elementText, formElementsSchema } = await import("@/lib/forms/schema");
+    const el = { id: "t1", type: "text", label: "Normas", help: "Sin shorts", labelEn: "Rules", showOn: ["visitor"], onBadge: false } as const;
+    expect(formElementsSchema.safeParse([el]).success).toBe(true);
+    expect(elementText(el, "en")).toEqual({ label: "Rules", help: "Sin shorts" });
+    expect(elementText(el, "es")).toEqual({ label: "Normas", help: "Sin shorts" });
+    expect(elementText(el)).toEqual({ label: "Normas", help: "Sin shorts" });
+  });
+});

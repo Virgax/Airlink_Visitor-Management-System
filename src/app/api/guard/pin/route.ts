@@ -13,6 +13,7 @@ import { isPassPin, matchPins, normalizePin, pinCandidates, type PinCandidate } 
 import { enterWithPass, findBlacklistHit, findOpenVisit, loadPass, passInfo, reportBlacklistHit } from "@/lib/server/scan";
 import { checkoutVisit, visitJson } from "@/lib/server/visits";
 import { log } from "@/lib/log";
+import { registrationPending } from "@/lib/passes/visitor";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     const pin = normalizePin(parsed.data.pin);
     if (!isPassPin(pin)) return Response.json({ ok: false, reason: "invalid_body" } satisfies ScanResponse, { status: 400 });
     const now = new Date();
+    // A checkpoint verifies badges; it never registers an entry, so the PIN path is closed there.
+    if (gate.kind === "checkpoint") return Response.json({ ok: false, reason: "not_inside" } satisfies ScanResponse);
 
     const select = { id: true, siteId: true, status: true, validFrom: true, validUntil: true, schedule: true, visitorName: true, pinHash: true } as const;
     const [passes, frequent] = await Promise.all([
@@ -73,6 +76,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     const pass = await loadPass(match.passId);
     if (!pass || pass.siteId !== site.id) return Response.json({ ok: false, reason: "not_found" } satisfies ScanResponse);
+    if (registrationPending(pass)) return Response.json({ ok: false, reason: "not_registered", pass: await passInfo(pass, site.id) } satisfies ScanResponse);
     const info = await passInfo(pass, site.id);
     const scanId = `pin-${randomToken(12)}`;
 

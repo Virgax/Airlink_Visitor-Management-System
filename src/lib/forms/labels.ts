@@ -10,6 +10,7 @@ export async function formLabels(): Promise<FormLabels> {
     choose: t("choose"),
     openDocument: t("openDocument"),
     mediaMissing: t("mediaMissing"),
+    listPlaceholder: t("listPlaceholder"),
     signature: { draw: t("signature.draw"), clear: t("signature.clear"), typedName: t("signature.typedName"), typedNameHelp: t("signature.typedNameHelp"), drawn: t("signature.drawn") },
   };
 }

@@ -58,6 +58,7 @@ export function FormEditor({ template, readOnly, save, upload }: Props) {
     choose: tr("choose"),
     openDocument: tr("openDocument"),
     mediaMissing: tr("mediaMissing"),
+    listPlaceholder: tr("listPlaceholder"),
     signature: { draw: tr("signature.draw"), clear: tr("signature.clear"), typedName: tr("signature.typedName"), typedNameHelp: tr("signature.typedNameHelp"), drawn: tr("signature.drawn") },
   };
 
@@ -165,6 +166,20 @@ export function FormEditor({ template, readOnly, save, upload }: Props) {
               <textarea id="prop-help" className="input" rows={selected.type === "text" ? 5 : 2} maxLength={2000} value={selected.help ?? ""} onChange={(ev) => update(selected.id, { help: ev.target.value })} />
               <p className="muted mt-1">{t("helpHint")}</p>
             </div>
+            <details className="rounded-lg border border-border p-2" data-testid="english-texts" open={Boolean(selected.labelEn || selected.helpEn)}>
+              <summary className="cursor-pointer text-sm font-medium">{t("english")}</summary>
+              <p className="muted mt-1 text-xs">{t("englishHint")}</p>
+              <div className="mt-2 space-y-2">
+                <div>
+                  <label className="label" htmlFor="prop-label-en">{t("labelEn")}</label>
+                  <input id="prop-label-en" className="input" maxLength={120} value={selected.labelEn ?? ""} onChange={(ev) => update(selected.id, { labelEn: ev.target.value })} />
+                </div>
+                <div>
+                  <label className="label" htmlFor="prop-help-en">{selected.type === "text" ? t("textBodyEn") : t("helpEn")}</label>
+                  <textarea id="prop-help-en" className="input" rows={selected.type === "text" ? 4 : 2} maxLength={2000} value={selected.helpEn ?? ""} onChange={(ev) => update(selected.id, { helpEn: ev.target.value })} />
+                </div>
+              </div>
+            </details>
             {isBuiltin(selected) ? (
               <div>
                 <label className="label" htmlFor="prop-mode">{t("mode")}</label>
@@ -184,6 +199,7 @@ export function FormEditor({ template, readOnly, save, upload }: Props) {
                     <option value="number">{t("questionTypes.number")}</option>
                     <option value="select">{t("questionTypes.select")}</option>
                     <option value="checkbox">{t("questionTypes.checkbox")}</option>
+                    <option value="list">{t("questionTypes.list")}</option>
                   </select>
                 </div>
                 {selected.questionType === "select" ? (

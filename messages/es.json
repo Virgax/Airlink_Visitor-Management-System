@@ -162,7 +162,8 @@
     "gateKinds": {
       "pedestrian": "Peatonal",
       "vehicle": "Vehicular",
-      "dock": "Muelle"
+      "dock": "Muelle",
+      "checkpoint": "Punto de control (solo verifica)"
     },
     "companyKinds": {
       "vendor": "Proveedor",
@@ -207,7 +208,9 @@
         "exists": "Ya existe un sitio con ese identificador.",
         "areaExists": "Ya existe un área con ese nombre en este sitio.",
         "timezone": "Zona horaria inválida."
-      }
+      },
+      "checkpointAreas": "Áreas que controla este punto",
+      "checkpointAreasHelp": "Al escanear un gafete aquí, el visitante pasa solo si su pase incluye alguna de estas áreas. Sin selección, pasa cualquier visitante que haya entrado por recepción."
     },
     "policiesPage": {
       "title": "Políticas de visita",
@@ -376,7 +379,8 @@
       "lock": "Bloquear",
       "signedInAs": "Sesión: {name} · {gate}",
       "logSoon": "Bitácora · próximamente",
-      "help": "Ayuda"
+      "help": "Ayuda",
+      "verify": "Verificar acceso"
     },
     "log": {
       "title": "Bitácora de turno",
@@ -443,7 +447,10 @@
       "rate_limited": "Demasiados escaneos. Espera un momento.",
       "invalid_body": "Solicitud inválida.",
       "network": "Sin conexión con el servidor.",
-      "visit_closed": "Este gafete ya registró la salida."
+      "visit_closed": "Este gafete ya registró la salida.",
+      "not_inside": "No ha registrado entrada en recepción. Debe pasar primero por el kiosco de la entrada.",
+      "area_not_allowed": "Su pase no incluye las áreas de este punto. Verifica con el anfitrión o con Seguridad.",
+      "not_registered": "El visitante no ha completado su registro desde el enlace de invitación."
     },
     "warnings": {
       "escort": "Debe ir acompañado",
@@ -491,7 +498,15 @@
       "answers": "Respuestas del formulario",
       "yes": "Sí",
       "no": "No",
-      "visitor": "Visitante"
+      "visitor": "Visitante",
+      "checkpointTitle": "Verificar acceso",
+      "checkpointIntro": "Escanea el gafete o el QR del visitante. Este punto solo verifica que entró por recepción y que puede estar en esta área; no registra entradas ni salidas.",
+      "verified": "Acceso verificado",
+      "checkpointDenied": "No puede pasar",
+      "checkpointAreas": "Áreas de este punto de control",
+      "checkpointAnyArea": "Cualquier visitante dentro del sitio",
+      "enteredAt": "Entró a las {time}",
+      "badgeNo": "Gafete {badgeNo}"
     },
     "unannounced": {
       "title": "Visita no anunciada",
@@ -576,7 +591,8 @@
       "status": "Estado",
       "group": "Grupo de {count, plural, one {# persona} other {# personas}}",
       "open": "Ver",
-      "recurringWindow": "{days} · {from}–{to}"
+      "recurringWindow": "{days} · {from}–{to}",
+      "registrationPending": "Pendiente de registro"
     },
     "new": {
       "title": "Nuevo pase",
@@ -628,7 +644,13 @@
         "missing_field": "Faltan campos obligatorios del formulario de registro.",
         "pin_group": "El PIN solo aplica a pases individuales. Para un grupo, comparte el enlace de cada integrante."
       },
-      "customFields": "Datos adicionales"
+      "customFields": "Datos adicionales",
+      "hostEmployee": "Anfitrión de la visita",
+      "hostSelf": "Yo mismo",
+      "hostEmployeeHelp": "Como Seguridad o Administración puedes generar el enlace para otro anfitrión: él recibe los avisos y aprueba la visita.",
+      "selfRegistration": "El visitante completa sus datos desde el enlace",
+      "selfRegistrationHelp": "Tú indicas tipo, áreas, fechas y cuántas personas vienen; cada persona recibe su propio enlace y llena nombre, cédula, teléfono y lo que pida el formulario. El QR aparece cuando termina su registro y el enlace queda ligado a esa persona.",
+      "visitorNameHelp": "Opcional si el visitante completa sus datos desde el enlace."
     },
     "detail": {
       "title": "Pase de {name}",
@@ -680,7 +702,12 @@
       },
       "errors": {
         "invalid": "No se pudo guardar. Revisa los datos."
-      }
+      },
+      "registrationPending": "Registro pendiente: el visitante todavía no ha completado sus datos desde el enlace. El QR aparecerá cuando lo haga.",
+      "registeredAt": "Registro completado por el visitante el {date}.",
+      "groupPending": "pendiente de registro",
+      "groupLinksHelp": "Un enlace por persona. Cópialos todos y envía a cada uno el suyo; cada enlace se consume al registrarse.",
+      "copyAll": "Copiar todos los enlaces"
     },
     "approvalsPage": {
       "title": "Aprobaciones pendientes",
@@ -756,7 +783,8 @@
       "loading": "Generando código…",
       "offline": "Sin conexión. Recarga la página para obtener un código nuevo.",
       "pending": "El QR aparecerá cuando el pase sea aprobado.",
-      "unavailable": "Este pase ya no está vigente."
+      "unavailable": "Este pase ya no está vigente.",
+      "register": "El QR aparecerá cuando completes tu registro."
     },
     "prereg": {
       "title": "Completa tus datos",
@@ -794,7 +822,15 @@
       "expired": "Vencido",
       "denied": "Rechazado"
     },
-    "qrSoon": "El código QR estará disponible en la siguiente fase."
+    "qrSoon": "El código QR estará disponible en la siguiente fase.",
+    "register": {
+      "title": "Completa tu registro",
+      "intro": "Tu anfitrión te invitó. Escribe tus datos para activar tu pase; este enlace es personal y queda ligado a ti al terminar.",
+      "name": "Nombre completo",
+      "submit": "Completar registro",
+      "ok": "Registro completado. Tu pase está listo.",
+      "locked": "Este enlace ya fue registrado y no admite cambios. Si no eres {name}, pide a tu anfitrión un enlace nuevo."
+    }
   },
   "passes": {
     "status": {
@@ -803,7 +839,8 @@
       "used": "Usado",
       "revoked": "Cancelado",
       "expired": "Vencido",
-      "denied": "Rechazado"
+      "denied": "Rechazado",
+      "pending_registration": "Pendiente de registro"
     },
     "kinds": {
       "visit": {
@@ -1641,7 +1678,8 @@
       "pending": "El pase está pendiente de aprobación; el QR aparecerá en el enlace cuando lo aprueben.",
       "rotating": "Este pase usa un QR que cambia cada 30 segundos: ábrelo desde el enlace al llegar.",
       "open": "Abrir mi pase",
-      "footer": "Airlink Visitas · Tus datos se usan solo para el control de acceso."
+      "footer": "Airlink Visitas · Tus datos se usan solo para el control de acceso.",
+      "register": "Antes de llegar, abre el enlace y completa tu registro (nombre, cédula y teléfono): el código QR aparece al terminar."
     },
     "invites": {
       "title": "Invitaciones",
@@ -1745,7 +1783,8 @@
         "text": "Texto",
         "number": "Número",
         "select": "Lista de opciones",
-        "checkbox": "Casilla (sí/no)"
+        "checkbox": "Casilla (sí/no)",
+        "list": "Lista (una por línea: herramientas, equipos…)"
       },
       "options": "Opciones",
       "optionsHint": "Una opción por línea.",
@@ -1780,7 +1819,12 @@
         "saved": "Formulario guardado.",
         "created": "Formulario creado. Agrega elementos y guarda.",
         "duplicated": "Formulario duplicado."
-      }
+      },
+      "english": "Textos en inglés (opcional)",
+      "englishHint": "Se muestran cuando el visitante o el usuario tiene la interfaz en inglés. Si quedan vacíos se usa el texto en español.",
+      "labelEn": "Etiqueta (inglés)",
+      "helpEn": "Texto de ayuda (inglés)",
+      "textBodyEn": "Texto de las instrucciones (inglés)"
     },
     "types": {
       "photo": "Foto",
@@ -1809,7 +1853,8 @@
         "typedName": "O escribe tu nombre completo como firma",
         "typedNameHelp": "Si no puedes dibujar, tu nombre completo vale como firma.",
         "drawn": "Firma registrada."
-      }
+      },
+      "listPlaceholder": "Una por línea"
     },
     "answers": {
       "title": "Respuestas del formulario",
@@ -1875,6 +1920,10 @@
           "printer": {
             "title": "Impresora de gafetes (opcional)",
             "body": "Para imprimir gafetes en la Zebra ZP450 conectada por USB a la PC de recepción, IT instala el agente de impresión en esa PC y en Administración → Sitios → la puerta elige \"Agente de impresión\" y el nombre de la impresora compartida.\nSin impresora configurada, el kiosco descarga el archivo del gafete para imprimirlo a mano. La guía técnica está en docs/BADGES.md del repositorio."
+          },
+          "checkpoint": {
+            "title": "Punto de control en el segundo piso (verificación)",
+            "body": "Si hay un puesto de seguridad después de recepción (la escalera al segundo piso, el pasillo a las áreas seguras), crea en Sitios una puerta de tipo \"Punto de control\" y marca las áreas que controla. Enrola ahí otra tablet igual que la de recepción.\nEn ese kiosco el guardia solo escanea el gafete o el QR: ve que la persona entró por recepción, quién la invitó y si su pase incluye esa área. No registra entradas, salidas ni visitas no anunciadas; nadie debe subir sin gafete."
           }
         }
       },
@@ -1921,6 +1970,10 @@
           "lock": {
             "title": "Bloquea al terminar el turno",
             "body": "Pulsa \"Bloquear\" en la pantalla principal del kiosco. El equipo sigue enrolado y el siguiente guardia solo tiene que elegir su nombre y escribir su PIN."
+          },
+          "checkpoint": {
+            "title": "Verificar en un punto de control",
+            "body": "En las tablets configuradas como punto de control, \"Verificar acceso\" muestra en verde que el visitante está dentro, su anfitrión, las áreas permitidas y la hora de entrada. En rojo: no pasó por recepción, su pase no incluye las áreas de ese punto, o la visita ya cerró. Avisa a Seguridad y mándalo a recepción.\nEste kiosco necesita conexión; no hay PIN ni impresión de gafete."
           }
         }
       },
@@ -1951,6 +2004,14 @@
           "arrival": {
             "title": "Cuando el visitante llega",
             "body": "Recibes una notificación (push, Teams o correo según tus preferencias) al registrarse su entrada y, si vino sin pase, una solicitud para aprobar la visita no anunciada desde \"Aprobaciones\".\nAl marcarse la salida en el kiosco, el pase pasa a \"Usado\" y aparece en tu historial."
+          },
+          "selfRegister": {
+            "title": "Enlace de invitación: el visitante llena sus datos",
+            "body": "Marca \"El visitante completa sus datos desde el enlace\" cuando solo sepas el tipo de visita, las áreas, las fechas y cuántas personas vienen. Indica el tamaño del grupo y se genera un enlace por persona; copia todos los enlaces desde el detalle y envía a cada uno el suyo.\nCada persona abre su enlace, escribe su nombre, cédula, teléfono y lo que pida el formulario, y al terminar aparece su QR. El enlace queda ligado a esa persona y no admite cambios; el kiosco no deja entrar a quien no completó su registro."
+          },
+          "onBehalf": {
+            "title": "Seguridad o Administración generan el enlace por ti",
+            "body": "Si prefieres pedir el enlace por correo (\"tengo tal visita a tal hora\"), Seguridad o Administración entran a \"Nuevo pase\", eligen tu nombre en \"Anfitrión de la visita\" y lo crean. Tú recibes los avisos y apruebas como anfitrión; ellos ven el pase en su lista para reenviar el enlace."
           }
         }
       },
@@ -2047,6 +2108,10 @@
           "result": {
             "title": "Dónde se ve",
             "body": "El anfitrión responde los campos marcados para la invitación al crear el pase; el visitante, los del enlace en \"Completa tus datos\"; recepción, los del kiosco al registrar una visita no anunciada.\nLas respuestas aparecen en el detalle del pase, en el resultado del escaneo, en el gafete si lo marcaste y en los reportes."
+          },
+          "contractor": {
+            "title": "Formulario de contratistas: herramientas, normas y firma",
+            "body": "Para contratistas agrega una pregunta de tipo \"Lista (una por línea)\" llamada por ejemplo \"Herramientas y equipos que trae\" y márcala obligatoria: el visitante escribe escalera, taladro, bultos… y Seguridad lo ve al escanear y al salir.\nAgrega bloques de \"Texto / instrucciones\" con lo permitido y lo prohibido en planta, el Wi-Fi de visitantes y la ruta de evacuación como \"Documento o imagen\" (mapa). Cada elemento tiene campos opcionales en inglés para visitantes extranjeros. Cierra con \"Firma\" obligatoria junto a la política de visitantes para dejar constancia de que leyó las instrucciones."
           }
         }
       },

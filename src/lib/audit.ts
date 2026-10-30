@@ -41,6 +41,7 @@ export type AuditAction =
   | "visit.denied"
   | "visit.entered"
   | "visit.left"
+  | "visit.checkpoint"
   | "blacklist.hit"
   | "blacklist.added"
   | "blacklist.removed"

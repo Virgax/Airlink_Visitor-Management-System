@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { assertSiteAllowed, getMembershipOrThrow } from "@/lib/auth/guards";
+import { assertSiteAllowed } from "@/lib/auth/guards";
+import { canInviteForOthers, getHostTenantOrThrow } from "@/lib/auth/host-access";
 import { audit } from "@/lib/audit";
 import { ensureEmployeeForUser } from "@/lib/server/employees-link";
 import { ownPassWhere } from "@/lib/server/host-passes";
@@ -25,7 +26,9 @@ const optional = (max: number) => z.string().trim().max(max).optional().transfor
 const schema = z.object({
   siteId: z.string().min(1).max(64),
   kind: z.string(),
-  visitorName: z.string().trim().min(2).max(120),
+  visitorName: z.string().trim().max(120).default(""),
+  selfRegistration: z.string().optional(),
+  hostEmployeeId: optional(64),
   company: optional(120),
   phone: optional(40),
   email: z
@@ -54,13 +57,15 @@ function fail(siteId: string, error: string): never {
 }
 
 export async function createPassAction(formData: FormData): Promise<void> {
-  const tenant = await getMembershipOrThrow("host");
+  const tenant = await getHostTenantOrThrow();
   const raw = Object.fromEntries(formData) as Record<string, unknown>;
   const siteIdRaw = typeof raw.siteId === "string" ? raw.siteId : "";
   const parsed = schema.safeParse(raw);
   if (!parsed.success) fail(siteIdRaw, "invalid");
   const d = parsed.data;
   if (!isVisitKind(d.kind)) fail(d.siteId, "invalid");
+  const selfRegistration = d.selfRegistration === "on";
+  if (!selfRegistration && d.visitorName.length < 2) fail(d.siteId, "invalid");
 
   // The site posted by the browser is re-checked against the membership.
   assertSiteAllowed(tenant, d.siteId);
@@ -87,7 +92,14 @@ export async function createPassAction(formData: FormData): Promise<void> {
   ]);
   const escort = d.escortEmployeeId ? await db.employee.findFirst({ where: { id: d.escortEmployeeId, active: true }, select: { id: true } }) : null;
 
-  const host = await ensureEmployeeForUser(tenant.user);
+  // Admins and security may issue the pass on behalf of another host (the e-mail "tengo tal visita, necesito el link").
+  let host = await ensureEmployeeForUser(tenant.user);
+  if (d.hostEmployeeId && d.hostEmployeeId !== host.id) {
+    if (!(await canInviteForOthers(tenant.user.id, site.id))) fail(site.id, "invalid");
+    const other = await db.employee.findFirst({ where: { id: d.hostEmployeeId, active: true, OR: [{ siteId: site.id }, { siteId: null }] } });
+    if (!other) fail(site.id, "invalid");
+    host = other;
+  }
   const t = await getTranslations("host.new");
   // Custom questions of the sign-in form for this kind (host surface).
   const { form } = await loadPolicyAndForm(site.id, d.kind);
@@ -124,6 +136,7 @@ export async function createPassAction(formData: FormData): Promise<void> {
     pin,
     answers: collected.answers,
     form: form.elements,
+    selfRegistration,
   });
   if (!result.ok) fail(site.id, result.error);
   const lead = result.passes[0]!;
@@ -133,7 +146,7 @@ export async function createPassAction(formData: FormData): Promise<void> {
 
 /** Frequent-visitor lookup for the invite form (called from the FrequentPicker client component). */
 export async function searchFrequentAction(siteId: string, q: string): Promise<FrequentHit[]> {
-  const tenant = await getMembershipOrThrow("host");
+  const tenant = await getHostTenantOrThrow();
   if (typeof siteId !== "string" || !siteId) return [];
   assertSiteAllowed(tenant, siteId);
   return searchFrequentVisitors(siteId, typeof q === "string" ? q : "");
@@ -143,7 +156,7 @@ const emailSchema = z.object({ passId: z.string().min(1).max(64), email: z.strin
 
 /** Sends the invitation e-mail (link + QR inline + window + instructions + NDA note) to the visitor. */
 export async function emailPassAction(formData: FormData): Promise<void> {
-  const tenant = await getMembershipOrThrow("host");
+  const tenant = await getHostTenantOrThrow();
   const parsed = emailSchema.safeParse(Object.fromEntries(formData));
   const passId = String(formData.get("passId") ?? "");
   if (!parsed.success) redirect(`/app/passes/${encodeURIComponent(passId)}?error=email_invalid`);
@@ -157,7 +170,7 @@ export async function emailPassAction(formData: FormData): Promise<void> {
 }
 
 async function loadOwnPassId(passId: unknown): Promise<{ id: string; siteId: string }> {
-  const tenant = await getMembershipOrThrow("host");
+  const tenant = await getHostTenantOrThrow();
   const id = typeof passId === "string" ? passId : "";
   const pass = await db.pass.findFirst({ where: { id, ...ownPassWhere(tenant) }, select: { id: true, siteId: true } });
   if (!pass) redirect("/app");
@@ -166,7 +179,7 @@ async function loadOwnPassId(passId: unknown): Promise<{ id: string; siteId: str
 }
 
 export async function revokePassAction(formData: FormData): Promise<void> {
-  const tenant = await getMembershipOrThrow("host");
+  const tenant = await getHostTenantOrThrow();
   const pass = await loadOwnPassId(formData.get("passId"));
   await revokePass(pass.id, tenant.user.id);
   redirect(`/app/passes/${pass.id}?ok=revoked`);
@@ -176,7 +189,7 @@ const renameSchema = z.object({ passId: z.string().min(1), visitorName: z.string
 
 /** Group members start as "Visitante N"; the host renames them here. */
 export async function renamePassAction(formData: FormData): Promise<void> {
-  const tenant = await getMembershipOrThrow("host");
+  const tenant = await getHostTenantOrThrow();
   const parsed = renameSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) redirect("/app?error=invalid");
   const pass = await loadOwnPassId(parsed.data.passId);

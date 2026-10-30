@@ -7,10 +7,12 @@ import { Icon } from "@/components/Icon";
 import { HostNav } from "@/components/passes/HostNav";
 import { PassStatusBadge } from "@/components/passes/PassStatusBadge";
 import { ShareLink } from "@/components/passes/ShareLink";
+import { CopyAll } from "@/components/passes/CopyAll";
+import { registrationPending } from "@/lib/passes/visitor";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { fmtDate } from "@/lib/format";
-import { requireMembership } from "@/lib/auth/guards";
+import { requireHostTenant } from "@/lib/auth/host-access";
 import { ownPassWhere } from "@/lib/server/host-passes";
 import { loadPolicy } from "@/lib/server/passes";
 import { evaluatePolicy } from "@/lib/policies/evaluate";
@@ -24,7 +26,7 @@ type Search = { ok?: string; error?: string };
 export default async function PassDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Search> }) {
   const { id } = await params;
   const sp = await searchParams;
-  const tenant = await requireMembership("host", `/app/passes/${id}`);
+  const tenant = await requireHostTenant(`/app/passes/${id}`);
   const pass = await db.pass.findFirst({
     where: { id, ...ownPassWhere(tenant) },
     include: {
@@ -45,12 +47,14 @@ export default async function PassDetailPage({ params, searchParams }: { params:
   const [areas, gates, group, policy] = await Promise.all([
     pass.areaIds.length ? db.area.findMany({ where: { id: { in: pass.areaIds } }, select: { name: true } }) : [],
     pass.gateIds.length ? db.gate.findMany({ where: { id: { in: pass.gateIds } }, select: { name: true } }) : [],
-    pass.groupId ? db.pass.findMany({ where: { groupId: pass.groupId, ...ownPassWhere(tenant) }, select: { id: true, visitorName: true, status: true }, orderBy: { createdAt: "asc" } }) : [],
+    pass.groupId ? db.pass.findMany({ where: { groupId: pass.groupId, ...ownPassWhere(tenant) }, select: { id: true, visitorName: true, status: true, token: true, selfRegistration: true, registeredAt: true }, orderBy: { createdAt: "asc" } }) : [],
     loadPolicy(pass.siteId, pass.kind),
   ]);
   const evaluation = evaluatePolicy(policy, { kind: pass.kind });
   const requiresNda = evaluation.warnings.includes("nda");
-  const url = `${env().APP_URL.replace(/\/$/, "")}/v/${pass.token}`;
+  const base = env().APP_URL.replace(/\/$/, "");
+  const url = `${base}/v/${pass.token}`;
+  const groupLinks = group.map((g) => `${g.visitorName}: ${base}/v/${g.token}`).join("\n");
   const schedule = parseSchedule(pass.schedule);
   const canRevoke = pass.status === "active" || pass.status === "pending_approval";
   const okKey = sp.ok && ["created", "createdGroup", "revoked", "renamed", "emailed"].includes(sp.ok) ? sp.ok : null;
@@ -86,6 +90,8 @@ export default async function PassDetailPage({ params, searchParams }: { params:
             <span className="muted">· {t("created", { date: date(pass.createdAt) })}</span>
           </div>
           {pass.status === "pending_approval" ? <p className="alert-error border-warning/30 bg-warning-bg text-warning">{t("pendingNotice", { role: tr(evaluation.approverRole ?? "security") })}</p> : null}
+          {registrationPending(pass) ? <p className="alert-error border-warning/30 bg-warning-bg text-warning" data-testid="registration-pending">{t("registrationPending")}</p> : null}
+          {pass.selfRegistration && pass.registeredAt ? <p className="muted" data-testid="registration-done">{t("registeredAt", { date: date(pass.registeredAt) })}</p> : null}
           {pass.approvedBy && pass.approvedAt && pass.status === "active" ? <p className="muted">{t("approvedBy", { name: pass.approvedBy.name, date: date(pass.approvedAt) })}</p> : null}
           {pass.approvedBy && pass.approvedAt && pass.status === "denied" ? <p className="muted">{t("deniedBy", { name: pass.approvedBy.name, date: date(pass.approvedAt) })}</p> : null}
 
@@ -120,7 +126,7 @@ export default async function PassDetailPage({ params, searchParams }: { params:
                 {answers.map((a) => (
                   <div key={a.id} className="contents" data-answer={a.id}>
                     <dt className="muted">{a.label}</dt>
-                    <dd>{formatAnswer(a.value, { yes: tf("yes"), no: tf("no") })}</dd>
+                    <dd className="whitespace-pre-wrap">{formatAnswer(a.value, { yes: tf("yes"), no: tf("no") })}</dd>
                   </div>
                 ))}
               </dl>
@@ -133,10 +139,16 @@ export default async function PassDetailPage({ params, searchParams }: { params:
               <ul className="flex flex-wrap gap-2 text-sm">
                 {group.map((g) => (
                   <li key={g.id}>
-                    <Link href={`/app/passes/${g.id}`} className={`btn-secondary px-3 py-1 text-xs ${g.id === pass.id ? "ring-2 ring-ring" : ""}`}>{g.visitorName}</Link>
+                    <Link href={`/app/passes/${g.id}`} className={`btn-secondary px-3 py-1 text-xs ${g.id === pass.id ? "ring-2 ring-ring" : ""}`}>
+                      {g.visitorName}{registrationPending(g) ? <span className="muted"> · {t("groupPending")}</span> : null}
+                    </Link>
                   </li>
                 ))}
               </ul>
+              <div className="mt-3">
+                <p className="muted mb-1">{t("groupLinksHelp")}</p>
+                <CopyAll text={groupLinks} labels={{ copy: t("copyAll"), copied: t("copied") }} />
+              </div>
             </div>
           ) : null}
         </section>

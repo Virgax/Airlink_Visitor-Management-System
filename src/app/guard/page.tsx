@@ -77,9 +77,11 @@ export default async function GuardPage({ searchParams }: { searchParams: Promis
     db.visit.count({ where: { siteId: device.siteId, status: "pending", passId: null } }),
   ]);
 
+  const checkpoint = device.gate.kind === "checkpoint";
   const tiles = [
-    { icon: ScanLine, label: t("kiosk.scan"), href: "/guard/scan", badge: null as number | null },
-    { icon: UserPlus, label: t("kiosk.unannounced"), href: "/guard/unannounced", badge: waiting || null },
+    { icon: ScanLine, label: checkpoint ? t("kiosk.verify") : t("kiosk.scan"), href: "/guard/scan", badge: null as number | null },
+    // A checkpoint verifies people who already entered at reception; it registers nobody.
+    ...(checkpoint ? [] : [{ icon: UserPlus, label: t("kiosk.unannounced"), href: "/guard/unannounced", badge: waiting || null }]),
     { icon: QrCode, label: t("kiosk.inside"), href: "/guard/inside", badge: inside || null },
     { icon: Siren, label: t("kiosk.evacuation"), href: "/guard/evacuation", badge: null },
     { icon: ClipboardList, label: t("kiosk.log"), href: "/guard/log", badge: null },

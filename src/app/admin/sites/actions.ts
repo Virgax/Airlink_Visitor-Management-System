@@ -69,7 +69,7 @@ export async function updateSiteAction(formData: FormData): Promise<void> {
   redirect(`/admin/sites/${site.id}?ok=saved`);
 }
 
-const gateSchema = z.object({ siteId: z.string().min(1), name: nameSchema, kind: z.enum(["pedestrian", "vehicle", "dock"]) });
+const gateSchema = z.object({ siteId: z.string().min(1), name: nameSchema, kind: z.enum(["pedestrian", "vehicle", "dock", "checkpoint"]) });
 
 export async function createGateAction(formData: FormData): Promise<void> {
   const tenant = await getMembershipOrThrow("admin");
@@ -116,6 +116,23 @@ export async function updateGatePrinterAction(formData: FormData): Promise<void>
   await db.gate.update({ where: { id: gate.id }, data: { settings } });
   await audit({ action: "gate.changed", siteId: site.id, actorId: tenant.user.id, targetType: "Gate", targetId: gate.id, meta: { op: "printer", printer: readPrinter({ printer }) } });
   redirect(`/admin/sites/${site.id}?ok=printer`);
+}
+
+/** Areas a checkpoint gate controls (`Gate.settings.checkpointAreaIds`); empty = any visitor inside may pass. */
+export async function updateCheckpointAreasAction(formData: FormData): Promise<void> {
+  const tenant = await getMembershipOrThrow("admin");
+  const gateId = field(formData, "gateId");
+  const gate = await db.gate.findUnique({ where: { id: gateId } });
+  if (!gate || gate.kind !== "checkpoint") redirect("/admin/sites?error=invalid");
+  const site = await getManagedSite(tenant, gate.siteId);
+  if (!site) redirect("/admin/sites?error=invalid");
+  const wanted = [...new Set(formData.getAll("checkpointAreaIds").map(String))].slice(0, 100);
+  const areas = wanted.length ? await db.area.findMany({ where: { id: { in: wanted }, siteId: site.id }, select: { id: true } }) : [];
+  const checkpointAreaIds = areas.map((a) => a.id);
+  const settings = { ...readGateSettings(gate), checkpointAreaIds } as unknown as Prisma.InputJsonObject;
+  await db.gate.update({ where: { id: gate.id }, data: { settings } });
+  await audit({ action: "gate.changed", siteId: site.id, actorId: tenant.user.id, targetType: "Gate", targetId: gate.id, meta: { op: "checkpointAreas", checkpointAreaIds } });
+  redirect(`/admin/sites/${site.id}?ok=saved#gate-${gate.id}`);
 }
 
 const areaSchema = z.object({ siteId: z.string().min(1), name: nameSchema });

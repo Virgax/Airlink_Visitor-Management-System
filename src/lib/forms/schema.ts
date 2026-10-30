@@ -17,7 +17,10 @@ export const CUSTOM_TYPES = ["text", "question", "media", "signature"] as const;
 export const ELEMENT_TYPES = [...BUILTIN_TYPES, ...CUSTOM_TYPES] as const;
 export const SURFACES = ["host", "visitor", "kiosk"] as const;
 export const MODES = ["off", "optional", "required"] as const;
-export const QUESTION_TYPES = ["text", "number", "select", "checkbox"] as const;
+export const QUESTION_TYPES = ["text", "number", "select", "checkbox", "list"] as const;
+/** Longest free-text answer; `list` answers (one item per line, e.g. tools a contractor brings) get more room. */
+export const MAX_TEXT_ANSWER = 500;
+export const MAX_LIST_ANSWER = 2000;
 export const MAX_ELEMENTS = 60;
 export const MAX_OPTIONS = 30;
 
@@ -33,8 +36,17 @@ const label = z.string().trim().max(120).optional();
 const help = z.string().trim().max(2000).optional();
 const showOn = z.array(z.enum(SURFACES)).max(3).default([...SURFACES]);
 const onBadge = z.boolean().default(false);
+/** Optional English texts (the Spanish `label`/`help` are the source); shown when the reader's UI language is English. */
+const labelEn = z.string().trim().max(120).optional();
+const helpEn = z.string().trim().max(2000).optional();
 
-const base = { id, label, help, showOn, onBadge };
+const base = { id, label, help, labelEn, helpEn, showOn, onBadge };
+
+/** Label and help of an element in the reader's language (falls back to the Spanish source). */
+export function elementText(e: { label?: string; help?: string; labelEn?: string; helpEn?: string }, locale?: string): { label: string | undefined; help: string | undefined } {
+  if (locale === "en") return { label: e.labelEn || e.label, help: e.helpEn || e.help };
+  return { label: e.label, help: e.help };
+}
 
 export const builtinElementSchema = z
   .object({ ...base, type: z.enum(BUILTIN_TYPES), mode: z.enum(MODES).default("optional") })
@@ -299,9 +311,18 @@ export function collectAnswers(elements: FormElement[], surface: FormSurface, va
         if (!e.options.includes(text)) invalid.push(e.id);
         else keep(text);
         break;
+      case "list": {
+        // One item per line (tools, equipment, people…); stored as the cleaned multi-line text.
+        const items = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+        if (items.length === 0) break;
+        const joined = items.join("\n");
+        if (joined.length > MAX_LIST_ANSWER) invalid.push(e.id);
+        else keep(joined);
+        break;
+      }
       default:
         if (text === "") break;
-        if (text.length > 500) invalid.push(e.id);
+        if (text.length > MAX_TEXT_ANSWER) invalid.push(e.id);
         else keep(text);
     }
   }

@@ -127,6 +127,8 @@ export type PassForValidation = {
   schedule?: unknown;
   gateIds: string[];
   ndaAcceptedAt?: Date | null;
+  /** Invitation link whose visitor has not completed their registration yet (`selfRegistration && !registeredAt`). */
+  registrationPending?: boolean;
 };
 
 export type ValidationContext = {
@@ -157,6 +159,7 @@ export type DenyReason =
   | "blacklisted"
   | "company_blocked"
   | "nda_required"
+  | "not_registered"
   | "not_found";
 
 export type PassValidation = { ok: true; qr: QrStatic | QrRotating } | { ok: false; reason: DenyReason };
@@ -190,6 +193,7 @@ export function validatePassState(pass: PassForValidation, ctx: Omit<ValidationC
   if (ctx.companyBlocked) return { ok: false, reason: "company_blocked" };
 
   if (pass.status === "pending_approval") return { ok: false, reason: "pending_approval" };
+  if (pass.registrationPending) return { ok: false, reason: "not_registered" };
   if (pass.status === "revoked") return { ok: false, reason: "revoked" };
   if (pass.status === "denied") return { ok: false, reason: "denied" };
   if (pass.status === "used") return { ok: false, reason: "used" };

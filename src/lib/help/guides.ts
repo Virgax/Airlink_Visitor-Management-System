@@ -37,6 +37,7 @@ export const HELP_GUIDES: readonly HelpGuide[] = [
       { key: "home", shot: "kiosk-home", kiosk: true },
       { key: "install" },
       { key: "printer" },
+      { key: "checkpoint" },
     ],
     related: ["kiosk-daily", "admin-people"],
   },
@@ -53,6 +54,7 @@ export const HELP_GUIDES: readonly HelpGuide[] = [
       { key: "inside", shot: "kiosk-inside", kiosk: true },
       { key: "evacuation", shot: "kiosk-evacuation", kiosk: true },
       { key: "log", shot: "kiosk-log", kiosk: true },
+      { key: "checkpoint" },
       { key: "offline" },
       { key: "lock" },
     ],
@@ -65,6 +67,8 @@ export const HELP_GUIDES: readonly HelpGuide[] = [
     steps: [
       { key: "home", shot: "host-home" },
       { key: "new", shot: "host-pass-new" },
+      { key: "selfRegister" },
+      { key: "onBehalf" },
       { key: "detail", shot: "host-pass-detail" },
       { key: "visitor", shot: "visitor-link" },
       { key: "pending", shot: "visitor-pending" },
@@ -117,6 +121,7 @@ export const HELP_GUIDES: readonly HelpGuide[] = [
     steps: [
       { key: "list", shot: "admin-forms" },
       { key: "editor", shot: "admin-form-editor" },
+      { key: "contractor" },
       { key: "assign", shot: "admin-policies-form" },
       { key: "result" },
     ],

@@ -46,6 +46,8 @@ enum GateKind {
   pedestrian
   vehicle
   dock
+  /// Verification-only post (e.g. the stairs to the second floor): scans show the visit and its allowed areas, never enter or exit
+  checkpoint
 }
 
 model Gate {
@@ -346,6 +348,10 @@ model Pass {
   extra            Json?
   /// Optional 6-digit code typed at the kiosk when the visitor has no QR at hand (scrypt hash)
   pinHash          String?
+  /// Invitation link: the visitor fills in their own name and details from /v/<token>; the QR and the kiosk wait for it
+  selfRegistration Boolean    @default(false)
+  /// When the visitor completed the self-registration (the link no longer accepts changes)
+  registeredAt     DateTime?
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 

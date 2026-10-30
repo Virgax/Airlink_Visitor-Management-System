@@ -23,10 +23,19 @@ Full brief: `docs/PLAN.md`.
 - `Employee` is a read-only mirror of SPN (`spn.dbo.empleados`) + Entra; synced hourly (`src/lib/sync/employees.ts`,
   Phase 1) or pushed by `tools/sync-agent` to `/api/sync/employees` (HMAC `SYNC_SECRET`). Never write to SPN.
 - Dates stored UTC; displayed in `Site.timezone` (default America/Santo_Domingo). `src/lib/time/tz.ts` for wall-clock math.
+- Invitation links: `Pass.selfRegistration` passes are created with only the frame (kind, areas, window, group size);
+  each member's `/v/<token>` asks for name + details, sets `registeredAt` and is then consumed (`canEditFromLink`);
+  the kiosk, the QR API and the offline cache refuse unregistered passes (`not_registered`). Admins/security create
+  passes on behalf of a host (`canInviteForOthers`, `requireHostTenant`); `ownPassWhere` gives them the site's passes.
+- `Gate.kind = checkpoint` (verification post, e.g. the stairs upstairs): the kiosk scan runs `verifyAtCheckpoint`
+  (never enters/exits/consumes, audited as `visit.checkpoint`), allowed when the visit's areas intersect
+  `Gate.settings.checkpointAreaIds` (empty = anyone inside). No PIN, no badge, no offline on checkpoint devices.
 - Passes: QR payload `passId.exp.sig` (HMAC `PASS_SIGNING_KEY`, 16-byte base64url) or `passId.r<step>.sig` for the
   rotating TOTP QR of recurring passes; validation only in `src/lib/passes/validate.ts` (pure, unit-tested) +
   atomic `uses` increment in `src/lib/server/passes.ts` (`consumePassUse`). Policies (`VisitPolicy`) are data,
   evaluated by `src/lib/policies/evaluate.ts`; `DEFAULT_POLICIES` only seeds them.
+- Forms (`src/lib/forms/schema.ts`): elements carry Spanish `label`/`help` plus optional `labelEn`/`helpEn`
+  (`elementText(e, locale)`); question type `list` = one item per line (tools a contractor brings).
 - Identity documents: never store the full number — `docHash` (HMAC `DOC_HASH_KEY`) + `docLast4`
   (`src/lib/crypto/docHash.ts`); photos private in the bucket (`s/<siteId>/visits/…`), served by `/api/media`
   with an access check, purged after `settings.retentionDays`.

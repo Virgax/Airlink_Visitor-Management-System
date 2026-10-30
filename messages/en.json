@@ -162,7 +162,8 @@
     "gateKinds": {
       "pedestrian": "Pedestrian",
       "vehicle": "Vehicle",
-      "dock": "Dock"
+      "dock": "Dock",
+      "checkpoint": "Checkpoint (verification only)"
     },
     "companyKinds": {
       "vendor": "Vendor",
@@ -207,7 +208,9 @@
         "exists": "A site with that identifier already exists.",
         "areaExists": "An area with that name already exists at this site.",
         "timezone": "Invalid time zone."
-      }
+      },
+      "checkpointAreas": "Areas this checkpoint controls",
+      "checkpointAreasHelp": "When a badge is scanned here, the visitor passes only if their pass includes one of these areas. With none selected, any visitor who entered through reception passes."
     },
     "policiesPage": {
       "title": "Visit policies",
@@ -376,7 +379,8 @@
       "lock": "Lock",
       "signedInAs": "Session: {name} · {gate}",
       "logSoon": "Shift log · coming soon",
-      "help": "Help"
+      "help": "Help",
+      "verify": "Verify access"
     },
     "log": {
       "title": "Shift log",
@@ -443,7 +447,10 @@
       "rate_limited": "Too many scans. Wait a moment.",
       "invalid_body": "Invalid request.",
       "network": "No connection to the server.",
-      "visit_closed": "This badge already recorded the exit."
+      "visit_closed": "This badge already recorded the exit.",
+      "not_inside": "No entry recorded at reception. They must go through the entrance kiosk first.",
+      "area_not_allowed": "Their pass does not include the areas of this post. Check with the host or Security.",
+      "not_registered": "The visitor has not completed their registration from the invitation link."
     },
     "warnings": {
       "escort": "Escort required",
@@ -491,7 +498,15 @@
       "answers": "Form answers",
       "yes": "Yes",
       "no": "No",
-      "visitor": "Visitor"
+      "visitor": "Visitor",
+      "checkpointTitle": "Verify access",
+      "checkpointIntro": "Scan the visitor's badge or QR. This post only verifies that they entered through reception and may be in this area; it records no entries or exits.",
+      "verified": "Access verified",
+      "checkpointDenied": "May not pass",
+      "checkpointAreas": "Areas of this checkpoint",
+      "checkpointAnyArea": "Any visitor inside the site",
+      "enteredAt": "Entered at {time}",
+      "badgeNo": "Badge {badgeNo}"
     },
     "unannounced": {
       "title": "Unannounced visit",
@@ -576,7 +591,8 @@
       "status": "Status",
       "group": "Group of {count, plural, one {# person} other {# people}}",
       "open": "View",
-      "recurringWindow": "{days} · {from}–{to}"
+      "recurringWindow": "{days} · {from}–{to}",
+      "registrationPending": "Registration pending"
     },
     "new": {
       "title": "New pass",
@@ -628,7 +644,13 @@
         "missing_field": "Required sign-in form fields are missing.",
         "pin_group": "A PIN only applies to single passes. For a group, share each member’s link."
       },
-      "customFields": "Additional details"
+      "customFields": "Additional details",
+      "hostEmployee": "Host of the visit",
+      "hostSelf": "Myself",
+      "hostEmployeeHelp": "As Security or Administration you can generate the link for another host: they get the notifications and approve the visit.",
+      "selfRegistration": "The visitor fills in their own details from the link",
+      "selfRegistrationHelp": "You set the type, areas, dates and how many people are coming; each person gets their own link and fills in name, ID, phone and whatever the form asks. The QR appears once they finish and the link is tied to that person.",
+      "visitorNameHelp": "Optional when the visitor fills in their details from the link."
     },
     "detail": {
       "title": "Pass for {name}",
@@ -680,7 +702,12 @@
       },
       "errors": {
         "invalid": "Could not save. Check the data."
-      }
+      },
+      "registrationPending": "Registration pending: the visitor has not completed their details from the link yet. The QR will appear once they do.",
+      "registeredAt": "Registration completed by the visitor on {date}.",
+      "groupPending": "registration pending",
+      "groupLinksHelp": "One link per person. Copy them all and send each person theirs; each link is consumed on registration.",
+      "copyAll": "Copy all links"
     },
     "approvalsPage": {
       "title": "Pending approvals",
@@ -756,7 +783,8 @@
       "loading": "Generating code…",
       "offline": "Offline. Reload the page to get a fresh code.",
       "pending": "The QR will appear once the pass is approved.",
-      "unavailable": "This pass is no longer valid."
+      "unavailable": "This pass is no longer valid.",
+      "register": "The QR will appear once you complete your registration."
     },
     "prereg": {
       "title": "Complete your details",
@@ -794,7 +822,15 @@
       "expired": "Expired",
       "denied": "Denied"
     },
-    "qrSoon": "The QR code will be available in the next phase."
+    "qrSoon": "The QR code will be available in the next phase.",
+    "register": {
+      "title": "Complete your registration",
+      "intro": "Your host invited you. Enter your details to activate your pass; this link is personal and is tied to you once you finish.",
+      "name": "Full name",
+      "submit": "Complete registration",
+      "ok": "Registration completed. Your pass is ready.",
+      "locked": "This link has already been registered and accepts no changes. If you are not {name}, ask your host for a new link."
+    }
   },
   "passes": {
     "status": {
@@ -803,7 +839,8 @@
       "used": "Used",
       "revoked": "Cancelled",
       "expired": "Expired",
-      "denied": "Denied"
+      "denied": "Denied",
+      "pending_registration": "Registration pending"
     },
     "kinds": {
       "visit": {
@@ -1641,7 +1678,8 @@
       "pending": "The pass is pending approval; the QR will appear on the link once approved.",
       "rotating": "This pass uses a QR that changes every 30 seconds: open it from the link when you arrive.",
       "open": "Open my pass",
-      "footer": "Airlink Visitas · Your data is used only for access control."
+      "footer": "Airlink Visitas · Your data is used only for access control.",
+      "register": "Before arriving, open the link and complete your registration (name, ID and phone): the QR code appears when you finish."
     },
     "invites": {
       "title": "Invites",
@@ -1745,7 +1783,8 @@
         "text": "Text",
         "number": "Number",
         "select": "Option list",
-        "checkbox": "Checkbox (yes/no)"
+        "checkbox": "Checkbox (yes/no)",
+        "list": "List (one per line: tools, equipment…)"
       },
       "options": "Options",
       "optionsHint": "One option per line.",
@@ -1780,7 +1819,12 @@
         "saved": "Form saved.",
         "created": "Form created. Add elements and save.",
         "duplicated": "Form duplicated."
-      }
+      },
+      "english": "English texts (optional)",
+      "englishHint": "Shown when the visitor or user has the interface in English. When empty, the Spanish text is used.",
+      "labelEn": "Label (English)",
+      "helpEn": "Help text (English)",
+      "textBodyEn": "Instructions text (English)"
     },
     "types": {
       "photo": "Photo",
@@ -1809,7 +1853,8 @@
         "typedName": "Or type your full name as signature",
         "typedNameHelp": "If you cannot draw, your full name counts as your signature.",
         "drawn": "Signature captured."
-      }
+      },
+      "listPlaceholder": "One per line"
     },
     "answers": {
       "title": "Form answers",
@@ -1875,6 +1920,10 @@
           "printer": {
             "title": "Badge printer (optional)",
             "body": "To print badges on the Zebra ZP450 connected by USB to the reception PC, IT installs the print agent on that PC and in Administration → Sites → the gate selects \"Print agent\" and the shared printer name.\nWithout a printer configured, the kiosk downloads the badge file for manual printing. The technical guide is docs/BADGES.md in the repository."
+          },
+          "checkpoint": {
+            "title": "Checkpoint on the second floor (verification)",
+            "body": "If there is a security post after reception (the stairs to the second floor, the corridor to the secure areas), create under Sites a gate of kind \"Checkpoint\" and tick the areas it controls. Enroll another tablet there just like the reception one.\nAt that kiosk the guard only scans the badge or the QR: it shows that the person entered through reception, who invited them and whether their pass includes that area. It records no entries, exits or unannounced visits; nobody should go upstairs without a badge."
           }
         }
       },
@@ -1921,6 +1970,10 @@
           "lock": {
             "title": "Lock at the end of the shift",
             "body": "Press \"Lock\" on the kiosk home screen. The device stays enrolled and the next guard only has to pick their name and type their PIN."
+          },
+          "checkpoint": {
+            "title": "Verify at a checkpoint",
+            "body": "On tablets configured as a checkpoint, \"Verify access\" shows in green that the visitor is inside, their host, the allowed areas and the entry time. In red: they did not go through reception, their pass does not include this post's areas, or the visit is already closed. Alert Security and send them to reception.\nThis kiosk needs a connection; there is no PIN entry or badge printing."
           }
         }
       },
@@ -1951,6 +2004,14 @@
           "arrival": {
             "title": "When the visitor arrives",
             "body": "You get a notification (push, Teams or e-mail according to your preferences) when their entry is recorded and, if they came without a pass, a request to approve the unannounced visit from \"Approvals\".\nWhen the check-out is recorded at the kiosk, the pass becomes \"Used\" and shows in your history."
+          },
+          "selfRegister": {
+            "title": "Invitation link: the visitor fills in their details",
+            "body": "Tick \"The visitor fills in their own details from the link\" when you only know the visit type, areas, dates and how many people are coming. Set the group size and one link per person is generated; copy all links from the detail and send each person theirs.\nEach person opens their link, enters name, ID, phone and whatever the form asks, and their QR appears when done. The link is tied to that person and accepts no changes; the kiosk refuses anyone who has not completed their registration."
+          },
+          "onBehalf": {
+            "title": "Security or Administration generate the link for you",
+            "body": "If you prefer to request the link by e-mail (\"I have a visit at such time\"), Security or Administration open \"New pass\", pick your name under \"Host of the visit\" and create it. You get the notifications and approve as host; they see the pass in their list to resend the link."
           }
         }
       },
@@ -2047,6 +2108,10 @@
           "result": {
             "title": "Where it shows",
             "body": "The host answers the fields marked for the invitation when creating the pass; the visitor, those of the link under \"Complete your details\"; reception, those of the kiosk when registering an unannounced visit.\nAnswers appear on the pass detail, the scan result, the badge if marked and the reports."
+          },
+          "contractor": {
+            "title": "Contractor form: tools, rules and signature",
+            "body": "For contractors add a question of type \"List (one per line)\" named for example \"Tools and equipment brought\" and make it required: the visitor types ladder, drill, bags… and Security sees it at the scan and on the way out.\nAdd \"Text / instructions\" blocks with what is allowed and forbidden on the floor, the visitor Wi-Fi and the evacuation route as a \"Document or image\" (map). Each element has optional English texts for foreign visitors. Close with a required \"Signature\" next to the visitor policy to record that they read the instructions."
           }
         }
       },

@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { clientIp } from "@/lib/auth/session";
 import { rateLimit } from "@/lib/rateLimit";
 import { qrPayloadFor } from "@/lib/server/passes";
-import { TOKEN_RE } from "@/lib/passes/visitor";
+import { registrationPending, TOKEN_RE } from "@/lib/passes/visitor";
 
 export const dynamic = "force-dynamic";
 const NO_STORE = { "cache-control": "no-store" };
@@ -20,12 +20,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const [byIp, byToken] = await Promise.all([rateLimit(`qr:ip:${ip}`, 120, 60), rateLimit(`qr:token:${token}`, 60, 60)]);
   if (!byIp.ok || !byToken.ok) return Response.json({ error: "rate_limited" }, { status: 429, headers: NO_STORE });
 
-  const pass = await db.pass.findUnique({ where: { token }, select: { id: true, siteId: true, kind: true, schedule: true, validFrom: true, validUntil: true, status: true } });
+  const pass = await db.pass.findUnique({ where: { token }, select: { id: true, siteId: true, kind: true, schedule: true, validFrom: true, validUntil: true, status: true, selfRegistration: true, registeredAt: true } });
   if (!pass) return Response.json({ error: "not_found" }, { status: 404, headers: NO_STORE });
   const now = new Date();
   if (pass.status !== "active" || pass.validUntil <= now) {
     return Response.json({ error: "not_active", status: pass.status }, { status: 409, headers: NO_STORE });
   }
+  // An invitation link has no QR until its visitor registers (the kiosk would refuse it anyway).
+  if (registrationPending(pass)) return Response.json({ error: "not_registered", status: pass.status }, { status: 409, headers: NO_STORE });
   const qr = await qrPayloadFor(pass, now);
   const format = request.nextUrl.searchParams.get("format") ?? "json";
   if (format === "text") return new Response(qr.payload, { headers: { ...NO_STORE, "content-type": "text/plain; charset=utf-8" } });
