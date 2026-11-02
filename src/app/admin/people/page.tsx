@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import type { MembershipRole } from "@prisma/client";
-import { KeyRound, UserMinus, UserPlus } from "lucide-react";
+import { KeyRound, Pencil, UserMinus, UserPlus } from "lucide-react";
 import { Icon } from "@/components/Icon";
 import { requireMembership } from "@/lib/auth/guards";
 import { parsePeopleQuery, PEOPLE_PAGE_SIZES, PEOPLE_TABS, queryPeople, type PersonRow } from "@/lib/server/people";
@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 type Search = Record<string, string | string[] | undefined>;
 const CHIP_ROLES = ["admin", "security", "approver", "warden"] as const satisfies readonly MembershipRole[];
-const OK_KEYS = ["added", "saved", "pinSet", "deactivated", "roleOn", "roleOff"];
+const OK_KEYS = ["added", "saved", "pinSet", "deactivated", "roleOn", "roleOff", "deleted"];
 const ERROR_KEYS = ["invalid", "exists", "pin", "weakPin", "forbidden", "noEmail", "needEmail", "nothing", "self"];
 
 export default async function PeoplePage({ searchParams }: { searchParams: Promise<Search> }) {
@@ -214,12 +214,15 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
                   </td>
                   <td className="px-3 py-2">{row.active ? tc("active") : tc("inactive")}</td>
                   <td className="px-3 py-2">
-                    <form action={toggleActiveAction}>
-                      {hidden}
-                      <input type="hidden" name="key" value={row.key} />
-                      <input type="hidden" name="active" value={row.active ? "0" : "1"} />
-                      <button type="submit" className="btn-secondary px-3 py-1 text-xs">{row.active ? t("deactivate") : t("activate")}</button>
-                    </form>
+                    <div className="flex flex-wrap gap-1">
+                      <Link href={`/admin/people/edit?key=${encodeURIComponent(row.key)}`} className="btn-secondary px-3 py-1 text-xs" data-testid="edit-person"><Icon icon={Pencil} size={14} /> {tc("edit")}</Link>
+                      <form action={toggleActiveAction}>
+                        {hidden}
+                        <input type="hidden" name="key" value={row.key} />
+                        <input type="hidden" name="active" value={row.active ? "0" : "1"} />
+                        <button type="submit" className="btn-secondary px-3 py-1 text-xs">{row.active ? t("deactivate") : t("activate")}</button>
+                      </form>
+                    </div>
                   </td>
                 </tr>
               ))}

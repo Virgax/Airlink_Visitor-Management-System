@@ -1541,7 +1541,8 @@
         "pinSet": "PIN guardado.",
         "deactivated": "{count, plural, =0 {Nada que desactivar.} one {# persona desactivada.} other {# personas desactivadas.}}",
         "roleOn": "Rol activado.",
-        "roleOff": "Rol desactivado."
+        "roleOff": "Rol desactivado.",
+        "deleted": "Persona eliminada."
       },
       "errors": {
         "invalid": "Datos inválidos. Revisa el formulario.",
@@ -1763,6 +1764,56 @@
         "pin": "Con PIN"
       },
       "empty": "No hay invitaciones en ese rango."
+    },
+    "edit": {
+      "back": "Personas",
+      "data": "Datos",
+      "syncedNote": "Esta persona viene de SPN o Microsoft: nombre, correo y departamento se editan en el origen y se actualizan en la próxima sincronización. Aquí solo cambias sus roles, PIN y contraseña.",
+      "roles": "Permisos",
+      "rolesHelp": "Cada permiso aplica a un sitio o a todos los sitios. Administración, Seguridad y Aprobador abren paneles; Brigadista recibe la lista de evacuación.",
+      "hostNote": "Recibe visitas como anfitrión mientras esté activo.",
+      "noRoles": "Sin permisos: solo puede recibir visitas como anfitrión.",
+      "removeRole": "Quitar",
+      "removeRoleConfirm": "¿Quitar el permiso {role} ({scope})?",
+      "addRole": "Agregar permiso",
+      "addRoleSite": "Sitio",
+      "addRoleButton": "Agregar",
+      "access": "Acceso",
+      "password": "Contraseña",
+      "passwordHas": "Tiene contraseña local.",
+      "passwordNone": "Sin contraseña local: entra con Microsoft o solo usa el kiosco.",
+      "totpOn": "Verificación en dos pasos activada.",
+      "newPassword": "Nueva contraseña (mínimo {min} caracteres)",
+      "confirmPassword": "Repite la contraseña",
+      "resetTotp": "Reiniciar la verificación en dos pasos (perdió el autenticador)",
+      "setPassword": "Guardar contraseña",
+      "passwordHelp": "Al guardar se cierran sus sesiones abiertas. Entrégasela en persona; no la envíes por chat.",
+      "delete": "Eliminar persona",
+      "deleteHelp": "Borra la ficha y su acceso. Solo es posible si no tiene historial (pases, visitas, bitácora, aprobaciones); si lo tiene, desactívala desde la lista para conservar la auditoría.",
+      "deleteSynced": "Las personas sincronizadas desde SPN o Microsoft no se eliminan (volverían en la próxima sincronización): desactívalas desde la lista.",
+      "deleteConfirm": "¿Eliminar a {name}? No se puede deshacer.",
+      "deleteButton": "Eliminar definitivamente",
+      "ok": {
+        "saved": "Datos guardados.",
+        "roleOn": "Permiso agregado.",
+        "roleOff": "Permiso quitado.",
+        "password": "Contraseña guardada.",
+        "pinSet": "PIN guardado."
+      },
+      "errors": {
+        "invalid": "Datos inválidos. Revisa el formulario.",
+        "exists": "Ya existe otra persona con ese correo.",
+        "forbidden": "No tienes permiso para esa acción.",
+        "synced": "Esa persona se sincroniza desde SPN o Microsoft; edítala en el origen.",
+        "needEmail": "Una persona con acceso necesita correo.",
+        "noEmail": "Esa persona no tiene correo; agrégalo antes de dar permisos o contraseña.",
+        "self": "No puedes quitarte tu propio acceso de administración ni eliminarte.",
+        "password": "La contraseña debe tener al menos 10 caracteres.",
+        "mismatch": "Las contraseñas no coinciden.",
+        "hasHistory": "Esa persona tiene historial (pases, visitas o bitácora) y no se puede eliminar: desactívala.",
+        "pin": "El PIN debe tener de 4 a 8 dígitos.",
+        "weakPin": "Ese PIN es demasiado fácil (dígitos repetidos o seguidos)."
+      }
     }
   },
   "forms": {
@@ -2139,6 +2190,10 @@
           "deactivate": {
             "title": "Desactivar, nunca borrar",
             "body": "Marca una o varias filas y pulsa \"Desactivar seleccionados\". La persona deja de recibir visitas y de entrar a los paneles, pero su historial se conserva para auditoría. \"Reactivar\" la devuelve.\nLos empleados sincronizados se actualizan solos en cada sincronización; si salen de SPN quedan inactivos."
+          },
+          "edit": {
+            "title": "Editar una persona: datos, permisos, contraseña, eliminar",
+            "body": "El botón \"Editar\" de cada fila abre su ficha. Arriba corriges nombre, correo, departamento, extensión, teléfono y sitio (solo personas manuales; las que vienen de SPN o Microsoft se corrigen en el origen).\nEn \"Permisos\" ves cada rol con su sitio, lo quitas con \"Quitar\" o agregas otro eligiendo rol y sitio (o todos los sitios si eres administrador global). En \"Acceso\" le pones una contraseña nueva para entrar por /login (se cierran sus sesiones y puedes reiniciar su verificación en dos pasos) y cambias su PIN de kiosco. Al final, \"Eliminar persona\" borra la ficha y el acceso si no tiene historial; con historial, desactívala."
           }
         }
       },

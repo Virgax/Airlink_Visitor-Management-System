@@ -110,6 +110,7 @@ export const HELP_GUIDES: readonly HelpGuide[] = [
     steps: [
       { key: "directory", shot: "admin-people" },
       { key: "add", shot: "admin-people-add" },
+      { key: "edit", shot: "admin-person-edit" },
       { key: "roles" },
       { key: "pin" },
       { key: "deactivate" },

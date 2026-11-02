@@ -1541,7 +1541,8 @@
         "pinSet": "PIN saved.",
         "deactivated": "{count, plural, =0 {Nothing to deactivate.} one {# person deactivated.} other {# people deactivated.}}",
         "roleOn": "Role enabled.",
-        "roleOff": "Role disabled."
+        "roleOff": "Role disabled.",
+        "deleted": "Person deleted."
       },
       "errors": {
         "invalid": "Invalid data. Check the form.",
@@ -1763,6 +1764,56 @@
         "pin": "With PIN"
       },
       "empty": "No invites in that range."
+    },
+    "edit": {
+      "back": "People",
+      "data": "Details",
+      "syncedNote": "This person comes from SPN or Microsoft: name, e-mail and department are edited at the source and refresh on the next sync. Here you only change their roles, PIN and password.",
+      "roles": "Permissions",
+      "rolesHelp": "Each permission applies to one site or to every site. Administration, Security and Approver open panels; Fire warden receives the evacuation list.",
+      "hostNote": "Receives visits as a host while active.",
+      "noRoles": "No permissions: can only receive visits as a host.",
+      "removeRole": "Remove",
+      "removeRoleConfirm": "Remove the {role} permission ({scope})?",
+      "addRole": "Add permission",
+      "addRoleSite": "Site",
+      "addRoleButton": "Add",
+      "access": "Access",
+      "password": "Password",
+      "passwordHas": "Has a local password.",
+      "passwordNone": "No local password: signs in with Microsoft or only uses the kiosk.",
+      "totpOn": "Two-step verification enabled.",
+      "newPassword": "New password (at least {min} characters)",
+      "confirmPassword": "Repeat the password",
+      "resetTotp": "Reset two-step verification (lost authenticator)",
+      "setPassword": "Save password",
+      "passwordHelp": "Saving closes their open sessions. Hand it over in person; never send it by chat.",
+      "delete": "Delete person",
+      "deleteHelp": "Removes the record and their access. Only possible without history (passes, visits, logs, approvals); otherwise deactivate them from the list to keep the audit trail.",
+      "deleteSynced": "People synced from SPN or Microsoft are not deleted (they would return on the next sync): deactivate them from the list.",
+      "deleteConfirm": "Delete {name}? This cannot be undone.",
+      "deleteButton": "Delete permanently",
+      "ok": {
+        "saved": "Details saved.",
+        "roleOn": "Permission added.",
+        "roleOff": "Permission removed.",
+        "password": "Password saved.",
+        "pinSet": "PIN saved."
+      },
+      "errors": {
+        "invalid": "Invalid data. Check the form.",
+        "exists": "Another person already has that e-mail.",
+        "forbidden": "You do not have permission for that action.",
+        "synced": "That person is synced from SPN or Microsoft; edit them at the source.",
+        "needEmail": "A person with access needs an e-mail.",
+        "noEmail": "That person has no e-mail; add one before granting permissions or a password.",
+        "self": "You cannot remove your own admin access or delete yourself.",
+        "password": "The password needs at least 10 characters.",
+        "mismatch": "The passwords do not match.",
+        "hasHistory": "That person has history (passes, visits or logs) and cannot be deleted: deactivate them.",
+        "pin": "The PIN must have 4 to 8 digits.",
+        "weakPin": "That PIN is too easy (repeated or sequential digits)."
+      }
     }
   },
   "forms": {
@@ -2139,6 +2190,10 @@
           "deactivate": {
             "title": "Deactivate, never delete",
             "body": "Tick one or more rows and press \"Deactivate selected\". The person stops receiving visits and entering panels, but their history is kept for audit. \"Reactivate\" brings them back.\nSynced employees update themselves on every sync; if they leave SPN they become inactive."
+          },
+          "edit": {
+            "title": "Edit a person: details, permissions, password, delete",
+            "body": "The \"Edit\" button on each row opens their record. At the top you correct name, e-mail, department, extension, phone and site (manual people only; those from SPN or Microsoft are corrected at the source).\nUnder \"Permissions\" you see each role with its site, remove it with \"Remove\" or add another by picking role and site (or every site if you are a global admin). Under \"Access\" you set a new password for signing in at /login (their sessions close and you can reset their two-step verification) and change their kiosk PIN. At the bottom, \"Delete person\" removes the record and access when there is no history; with history, deactivate instead."
           }
         }
       },

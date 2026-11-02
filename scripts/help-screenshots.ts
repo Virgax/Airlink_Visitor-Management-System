@@ -139,6 +139,9 @@ async function main() {
     if (!existing) await admin.getByRole("button", { name: "Agregar persona" }).click();
     await admin.goto("/admin/people");
     await shot(admin, "admin-people");
+    await admin.getByTestId("person-row").filter({ hasText: "demo-ramon@airlink.test" }).getByTestId("edit-person").click();
+    await admin.getByTestId("person-edit").waitFor();
+    await shot(admin, "admin-person-edit", { fullPage: true });
   });
   await step("admin-devices", async () => {
     await admin.goto("/admin/devices");
