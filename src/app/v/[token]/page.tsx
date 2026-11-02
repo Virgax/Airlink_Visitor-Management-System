@@ -17,7 +17,7 @@ import { canEditFromLink, isOpenForVisitor, registrationPending, TOKEN_RE } from
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { FormFields } from "@/components/forms/FormFields";
 import { formLabels } from "@/lib/forms/labels";
-import { builtinMode, elementsFor, elementText, hasAnswer, readAnswers, type BuiltinElement } from "@/lib/forms/schema";
+import { builtinMode, elementsFor, elementText, hasAnswer, readAnswers, readDevices, readDevicesNone, type BuiltinElement } from "@/lib/forms/schema";
 import { activeNda, ndaText } from "@/lib/server/nda";
 import { acceptNdaAction, preregisterAction } from "./actions";
 
@@ -51,6 +51,10 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const tl = await getTranslations("locale");
   const { policy, form } = await loadPolicyAndForm(pass.siteId, pass.kind);
   const answers = readAnswers(pass.extra);
+  const devices = readDevices(pass.extra);
+  const devicesNone = readDevicesNone(pass.extra);
+  const devicesBlock = elementsFor(form.elements, "visitor").find((e) => e.type === "devices");
+  const devicesPending = Boolean(devicesBlock && "required" in devicesBlock && devicesBlock.required && devices.length === 0 && !devicesNone);
   const evaluation = evaluatePolicy(policy, {
     kind: pass.kind,
     visitorDocHash: pass.visitorDocHash,
@@ -58,6 +62,8 @@ export default async function VisitorPassPage({ params, searchParams }: { params
     form: form.elements,
     surface: "visitor",
     answers,
+    devices,
+    devicesNone,
     visitorPhone: pass.visitorPhone,
     visitorEmail: pass.visitorEmail,
     company: pass.companyId,
@@ -71,7 +77,7 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const questions = visitorElements.filter((e) => e.type === "question");
   const unansweredQuestions = questions.some((e) => !hasAnswer(answers[e.id]?.value));
   const hasVisitorBlocks = visitorElements.some((e) => e.type === "text" || e.type === "media");
-  const showPrereg = editable && (registering || needsDoc || (mode("document") !== "off" && !pass.visitorDocHash) || (mode("phone") !== "off" && !pass.visitorPhone) || unansweredQuestions || hasVisitorBlocks);
+  const showPrereg = editable && (registering || needsDoc || (mode("document") !== "off" && !pass.visitorDocHash) || (mode("phone") !== "off" && !pass.visitorPhone) || unansweredQuestions || hasVisitorBlocks || devicesPending || Boolean(devicesBlock));
   const nda = open && needsNda ? await activeNda(pass.siteId, now) : null;
   const ndaCopy = nda ? ndaText(nda, locale) : null;
   const labels = await formLabels();
@@ -82,7 +88,7 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const dataUrl = qr ? await QRCode.toDataURL(qr.payload, { margin: 1, width: 288, errorCorrectionLevel: "M" }) : null;
   const instructions = typeof pass.site.settings === "object" && pass.site.settings && "arrivalInstructions" in pass.site.settings ? String((pass.site.settings as Record<string, unknown>).arrivalInstructions ?? "") : "";
   const okKey = sp.ok === "prereg" ? "prereg" : sp.ok === "nda" ? "nda" : sp.ok === "registered" ? "register" : null;
-  const errorKey = sp.error && ["invalid", "rateLimited", "closed", "missing"].includes(sp.error) ? sp.error : null;
+  const errorKey = sp.error && ["invalid", "rateLimited", "closed", "missing", "devices"].includes(sp.error) ? sp.error : null;
   const statusClass = pass.status === "active" ? "bg-success-bg text-success" : pass.status === "pending_approval" ? "bg-warning-bg text-warning" : "bg-danger-bg text-danger";
 
   return (
@@ -151,6 +157,8 @@ export default async function VisitorPassPage({ params, searchParams }: { params
               mediaHref={mediaHref}
               exclude={["signature"]}
               locale={locale}
+              devices={devices}
+              devicesNone={devicesNone}
               renderBuiltin={(e) => {
                 const required = e.mode === "required";
                 const text = elementText(e, locale);
@@ -200,9 +208,9 @@ export default async function VisitorPassPage({ params, searchParams }: { params
           </form>
         ) : null}
 
-        {!showPrereg && hasVisitorBlocks ? (
+        {!showPrereg && (hasVisitorBlocks || devicesBlock) ? (
           <div className="space-y-3" data-testid="visitor-blocks">
-            <FormFields elements={form.elements} surface="visitor" labels={labels} mediaHref={mediaHref} exclude={["question", "signature"]} locale={locale} />
+            <FormFields elements={form.elements} surface="visitor" labels={labels} mediaHref={mediaHref} exclude={["question", "signature"]} locale={locale} devices={devices} devicesNone={devicesNone} devicesReadOnly />
           </div>
         ) : null}
 

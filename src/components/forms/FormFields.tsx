@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { elementsFor, elementText, fieldName, isBuiltin, isRequired, MAX_LIST_ANSWER, MAX_TEXT_ANSWER, parseHelp, splitBold, type Answers, type BuiltinElement, type ElementType, type FormElement, type FormSurface, type MediaElement, type QuestionElement, type SignatureElement } from "@/lib/forms/schema";
+import { elementsFor, elementText, fieldName, isBuiltin, isRequired, MAX_LIST_ANSWER, MAX_TEXT_ANSWER, parseHelp, splitBold, type Answers, type BuiltinElement, type Device, type DevicesElement, type ElementType, type FormElement, type FormSurface, type MediaElement, type QuestionElement, type SignatureElement } from "@/lib/forms/schema";
 import { SignaturePad } from "./SignaturePad";
+import { DevicesField, type DeviceLabels } from "./DevicesField";
 
 /** UI words the renderer needs (from `forms.render.*`), passed in so this component works on the server and in the client preview. */
 export type FormLabels = {
@@ -10,6 +11,7 @@ export type FormLabels = {
   mediaMissing: string;
   /** Placeholder of a `list` question ("Una por línea"). */
   listPlaceholder: string;
+  devices: DeviceLabels;
   signature: { draw: string; clear: string; typedName: string; typedNameHelp: string; drawn: string };
 };
 
@@ -31,13 +33,18 @@ export type FormFieldsProps = {
   preview?: boolean;
   /** Reader's UI language: English texts of the elements are used when present. */
   locale?: string;
+  /** Devices already registered on the pass (defaults of the devices block) and the "none" declaration. */
+  devices?: Device[];
+  devicesNone?: boolean;
+  /** Show the devices block as a read-only list (locked visitor link). */
+  devicesReadOnly?: boolean;
 };
 
 /**
  * Renders the elements of a sign-in form for one surface, in the order HR set. Custom elements are rendered here;
  * built-in fields come from the page through `renderBuiltin` so each surface keeps its own inputs and names.
  */
-export function FormFields({ elements, surface, labels, answers = {}, mediaHref, renderBuiltin, exclude = [], idPrefix = "", preview = false, locale }: FormFieldsProps) {
+export function FormFields({ elements, surface, labels, answers = {}, mediaHref, renderBuiltin, exclude = [], idPrefix = "", preview = false, locale, devices = [], devicesNone = false, devicesReadOnly = false }: FormFieldsProps) {
   const visible = elementsFor(elements, surface).filter((e) => !exclude.includes(e.type));
   if (visible.length === 0) return null;
   return (
@@ -53,6 +60,8 @@ export function FormFields({ elements, surface, labels, answers = {}, mediaHref,
             return <Media key={e.id} element={e} labels={labels} href={mediaHref} locale={locale} />;
           case "signature":
             return <Signature key={e.id} element={e} labels={labels} idPrefix={idPrefix} preview={preview} locale={locale} />;
+          case "devices":
+            return <Devices key={e.id} element={e} labels={labels} idPrefix={idPrefix} preview={preview} locale={locale} devices={devices} none={devicesNone} readOnly={devicesReadOnly} />;
           default:
             return null;
         }
@@ -153,6 +162,17 @@ function Media({ element: e, labels, href, locale }: { element: MediaElement; la
         // eslint-disable-next-line @next/next/no-img-element -- private media served by /api/media
         <img src={url} alt={text.label ?? ""} className="max-h-80 w-auto rounded-lg border border-border" />
       )}
+    </div>
+  );
+}
+
+function Devices({ element: e, labels, idPrefix, preview, locale, devices, none, readOnly }: { element: DevicesElement; labels: FormLabels; idPrefix: string; preview: boolean; locale?: string; devices: Device[]; none: boolean; readOnly: boolean }) {
+  const text = elementText(e, locale);
+  return (
+    <div className="space-y-2" data-element={e.id} data-element-type="devices">
+      <h3 className="font-medium">{text.label || labels.devices.registered}<RequiredMark element={e} labels={labels} /></h3>
+      {text.help ? <HelpText text={text.help} /> : null}
+      <DevicesField kinds={e.kinds} initial={devices} none={none} required={e.required} labels={labels.devices} idPrefix={idPrefix} preview={preview} readOnly={readOnly} />
     </div>
   );
 }

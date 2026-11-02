@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import { ArrowDown, ArrowUp, Eye, Plus, Save, Trash2, Upload } from "lucide-react";
 import { Icon } from "@/components/Icon";
 import { FormFields, type FormLabels } from "@/components/forms/FormFields";
-import { BUILTIN_TYPES, CUSTOM_TYPES, formElementsSchema, isBuiltin, newElementId, SURFACES, withDefaultBuiltins, type BuiltinElement, type ElementType, type FormElement, type FormSurface, BUILTIN_SURFACES } from "@/lib/forms/schema";
+import { BUILTIN_TYPES, CUSTOM_TYPES, DEVICE_KINDS, formElementsSchema, isBuiltin, newElementId, SURFACES, withDefaultBuiltins, type BuiltinElement, type DeviceKind, type ElementType, type FormElement, type FormSurface, BUILTIN_SURFACES } from "@/lib/forms/schema";
+import { deviceLabels } from "@/lib/forms/deviceLabels";
 import type { UploadResult } from "@/app/admin/forms/actions";
 
 type Template = { id: string; name: string; elements: FormElement[] };
@@ -25,6 +26,7 @@ function makeElement(type: ElementType, existing: FormElement[]): FormElement {
     case "question": return { ...base, type, questionType: "text", options: [], required: false, showOn: ["host", "visitor", "kiosk"] };
     case "media": return { ...base, type };
     case "signature": return { ...base, type, required: true, showOn: ["visitor"] };
+    case "devices": return { ...base, type, required: true, kinds: [...DEVICE_KINDS], showOn: ["host", "visitor", "kiosk"] };
     default: return { ...base, type, mode: "optional", showOn: [...BUILTIN_SURFACES[type]] };
   }
 }
@@ -59,6 +61,7 @@ export function FormEditor({ template, readOnly, save, upload }: Props) {
     openDocument: tr("openDocument"),
     mediaMissing: tr("mediaMissing"),
     listPlaceholder: tr("listPlaceholder"),
+    devices: deviceLabels((k) => tr(k as "required")),
     signature: { draw: tr("signature.draw"), clear: tr("signature.clear"), typedName: tr("signature.typedName"), typedNameHelp: tr("signature.typedNameHelp"), drawn: tr("signature.drawn") },
   };
 
@@ -214,6 +217,21 @@ export function FormEditor({ template, readOnly, save, upload }: Props) {
             ) : null}
             {selected.type === "signature" ? (
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={selected.required} onChange={(ev) => update(selected.id, { required: ev.target.checked })} /> {t("required")}</label>
+            ) : null}
+            {selected.type === "devices" ? (
+              <>
+                <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={selected.required} onChange={(ev) => update(selected.id, { required: ev.target.checked })} /> {t("devicesRequired")}</label>
+                <fieldset>
+                  <legend className="label">{t("deviceKinds")}</legend>
+                  <div className="flex flex-wrap gap-3 text-sm">
+                    {DEVICE_KINDS.map((k) => (
+                      <label key={k} className="flex items-center gap-2">
+                        <input type="checkbox" checked={selected.kinds.includes(k)} onChange={(ev) => update(selected.id, { kinds: ev.target.checked ? [...selected.kinds, k] : selected.kinds.filter((x: DeviceKind) => x !== k) })} /> {labels.devices.kinds[k]}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              </>
             ) : null}
             {selected.type === "media" ? (
               <div className="space-y-2">

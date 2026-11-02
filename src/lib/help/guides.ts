@@ -55,6 +55,7 @@ export const HELP_GUIDES: readonly HelpGuide[] = [
       { key: "evacuation", shot: "kiosk-evacuation", kiosk: true },
       { key: "log", shot: "kiosk-log", kiosk: true },
       { key: "checkpoint", shot: "kiosk-checkpoint", kiosk: true },
+      { key: "devices" },
       { key: "offline" },
       { key: "lock" },
     ],

@@ -1,5 +1,5 @@
 import type { MembershipRole, VisitKind } from "@prisma/client";
-import { elementsFor, hasAnswer, isBuiltin, isRequired, type Answers, type BuiltinType, type FormElement, type FormSurface, builtinCollectableOn } from "@/lib/forms/schema";
+import { elementsFor, hasAnswer, isBuiltin, isRequired, type Answers, type BuiltinType, type FormElement, type FormSurface, builtinCollectableOn, devicesSatisfied, type Device } from "@/lib/forms/schema";
 
 export type PolicyInput = {
   kind: VisitKind;
@@ -41,6 +41,9 @@ export type PassDraft = {
   surface?: FormSurface;
   /** Custom answers given so far (`Pass.extra.answers`). */
   answers?: Answers | null;
+  /** Personal devices registered so far (`Pass.extra.devices`) and the "brings none" declaration. */
+  devices?: Device[] | null;
+  devicesNone?: boolean;
   /** Built-in values beyond document and plate, checked against the form's required fields. */
   visitorName?: string | null;
   visitorPhone?: string | null;
@@ -126,6 +129,8 @@ export function missingFormFields(form: FormElement[], surface: FormSurface, dra
       if (!hasAnswer(answers[e.id]?.value)) out.push(e.id);
     } else if (e.type === "signature") {
       if (!draft.ndaAcceptedAt) out.push(e.id);
+    } else if (e.type === "devices") {
+      if (!devicesSatisfied(draft.devices ?? undefined, draft.devicesNone)) out.push(e.id);
     }
   }
   return out;

@@ -1,6 +1,7 @@
 import "server-only";
 import { getTranslations } from "next-intl/server";
 import type { FormLabels } from "@/components/forms/FormFields";
+import { deviceLabels } from "@/lib/forms/deviceLabels";
 
 /** Renderer labels in the reader's language (`forms.render.*`) for server-rendered forms. */
 export async function formLabels(): Promise<FormLabels> {
@@ -11,6 +12,7 @@ export async function formLabels(): Promise<FormLabels> {
     openDocument: t("openDocument"),
     mediaMissing: t("mediaMissing"),
     listPlaceholder: t("listPlaceholder"),
+    devices: deviceLabels((k) => t(k as "required")),
     signature: { draw: t("signature.draw"), clear: t("signature.clear"), typedName: t("signature.typedName"), typedNameHelp: t("signature.typedNameHelp"), drawn: t("signature.drawn") },
   };
 }

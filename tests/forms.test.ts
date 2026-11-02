@@ -213,3 +213,37 @@ describe("list questions and English texts", () => {
     expect(elementText(el)).toEqual({ label: "Normas", help: "Sin shorts" });
   });
 });
+
+describe("personal devices block", () => {
+  const form: FormElement[] = [{ id: "dev", type: "devices", required: true, kinds: ["phone", "laptop"], showOn: ["host", "visitor", "kiosk"], onBadge: false }];
+  const multi = (map: Record<string, string[] | string>) => ({ get: (n: string) => (Array.isArray(map[n]) ? map[n]![0] : map[n]), getAll: (n: string) => (Array.isArray(map[n]) ? map[n]! : map[n] ? [map[n]!] : []) });
+
+  it("collects rows with a normalised IMEI, skipping empty rows and duplicates", async () => {
+    const { collectDevices } = await import("@/lib/forms/schema");
+    const r = collectDevices(form, "visitor", multi({ dev_kind: ["phone", "laptop", "phone"], dev_id: [" 35-123456 789012-3 ", "", "351234567890123"], dev_model: ["iPhone 15", "", "x"], dev_color: ["negro", "", ""] }));
+    expect(r.invalid).toBe(false);
+    expect(r.present).toBe(true);
+    expect(r.devices).toEqual([{ kind: "phone", id: "351234567890123", model: "iPhone 15", color: "negro" }]);
+  });
+
+  it("flags a kind the form does not allow or a bad id, and reads the none declaration", async () => {
+    const { collectDevices, devicesSatisfied, readDevices, readDevicesNone } = await import("@/lib/forms/schema");
+    expect(collectDevices(form, "visitor", multi({ dev_kind: ["watch"], dev_id: ["ABCDE12345"] })).invalid).toBe(true);
+    expect(collectDevices(form, "visitor", multi({ dev_kind: ["phone"], dev_id: ["123"] })).invalid).toBe(true);
+    const none = collectDevices(form, "visitor", multi({ dev_none: "on" }));
+    expect(none).toMatchObject({ devices: [], none: true, invalid: false });
+    expect(collectDevices(form, "host", multi({})).present).toBe(true);
+    expect(collectDevices([], "host", multi({})).present).toBe(false);
+    expect(devicesSatisfied([], false)).toBe(false);
+    expect(devicesSatisfied([], true)).toBe(true);
+    expect(readDevices({ devices: [{ kind: "laptop", id: "SN1", model: "Dell", color: "gris" }, { kind: "nope", id: "x" }] })).toEqual([{ kind: "laptop", id: "SN1", model: "Dell", color: "gris" }]);
+    expect(readDevicesNone({ devicesNone: true })).toBe(true);
+  });
+
+  it("is a required field for policy evaluation", async () => {
+    const { missingFormFields } = await import("@/lib/policies/evaluate");
+    expect(missingFormFields(form, "visitor", { kind: "vendor", form })).toEqual(["dev"]);
+    expect(missingFormFields(form, "visitor", { kind: "vendor", form, devicesNone: true })).toEqual([]);
+    expect(missingFormFields(form, "visitor", { kind: "vendor", form, devices: [{ kind: "phone", id: "351234567890123", model: "", color: "" }] })).toEqual([]);
+  });
+});

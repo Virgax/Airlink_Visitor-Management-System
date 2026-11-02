@@ -17,11 +17,16 @@ export type ScanPassInfo = {
   plate: string | null;
   /** Custom answers of the sign-in form (host + visitor surfaces). */
   answers?: ScanAnswer[];
+  /** Personal devices registered on the pass (kind, IMEI/serial, model, colour); `devicesNone` = declared none. */
+  devices?: ScanDevice[];
+  devicesNone?: boolean;
 };
+
+export type ScanDevice = { kind: string; id: string; model: string; color: string };
 
 export type ScanAnswer = { id: string; label: string; value: string | number | boolean };
 
-export type ScanReason = DenyReason | "invalid_body" | "rate_limited" | "network" | "visit_closed" | "not_inside" | "area_not_allowed";
+export type ScanReason = DenyReason | "invalid_body" | "rate_limited" | "network" | "visit_closed" | "not_inside" | "area_not_allowed" | "device_not_found" | "devices_required";
 
 /** Result of a scan at a verification-only post (`Gate.kind = checkpoint`): nothing is entered or closed. */
 export type CheckpointInfo = {
@@ -40,6 +45,8 @@ export type BadgeInfo = { visitId: string; badgeNo: string | null; autoPrint: bo
 export type ScanResponse =
   | { ok: false; reason: ScanReason; pass?: ScanPassInfo }
   | { ok: true; action: "entered" | "left"; duplicate?: boolean; conflict?: boolean; visit: VisitJson; pass: ScanPassInfo; badge?: BadgeInfo }
-  | { ok: true; action: "verified"; visit: VisitJson; pass: ScanPassInfo; checkpoint: CheckpointInfo };
+  | { ok: true; action: "verified"; visit: VisitJson; pass: ScanPassInfo; checkpoint: CheckpointInfo }
+  /** An IMEI / serial was typed or scanned: the device belongs to this pass; `visit` is its open visit, if inside. */
+  | { ok: true; action: "device"; device: ScanDevice; pass: ScanPassInfo; visit: VisitJson | null };
 
 export type EmployeeHit = { id: string; name: string; department: string | null };

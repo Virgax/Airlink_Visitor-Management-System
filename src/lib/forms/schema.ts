@@ -13,7 +13,10 @@ import type { VisitKind } from "@prisma/client";
 import { z } from "zod";
 
 export const BUILTIN_TYPES = ["photo", "document", "name", "phone", "email", "company", "plate", "areas", "host", "escort"] as const;
-export const CUSTOM_TYPES = ["text", "question", "media", "signature"] as const;
+export const CUSTOM_TYPES = ["text", "question", "media", "signature", "devices"] as const;
+/** Personal devices a visitor may bring; registered with IMEI/serial, model and colour so security can trace them. */
+export const DEVICE_KINDS = ["phone", "laptop", "tablet", "watch", "other"] as const;
+export const MAX_DEVICES = 8;
 export const ELEMENT_TYPES = [...BUILTIN_TYPES, ...CUSTOM_TYPES] as const;
 export const SURFACES = ["host", "visitor", "kiosk"] as const;
 export const MODES = ["off", "optional", "required"] as const;
@@ -30,6 +33,7 @@ export type ElementType = (typeof ELEMENT_TYPES)[number];
 export type FormSurface = (typeof SURFACES)[number];
 export type FieldMode = (typeof MODES)[number];
 export type QuestionType = (typeof QUESTION_TYPES)[number];
+export type DeviceKind = (typeof DEVICE_KINDS)[number];
 
 const id = z.string().regex(/^[A-Za-z0-9_-]{1,40}$/);
 const label = z.string().trim().max(120).optional();
@@ -85,8 +89,10 @@ export const questionElementSchema = z
   .refine((e) => e.questionType !== "select" || e.options.length > 0, { message: "select_needs_options", path: ["options"] });
 export const mediaElementSchema = z.object({ ...base, type: z.literal("media"), mediaKey: z.string().max(200).optional(), mediaType: z.enum(["image", "pdf"]).optional() });
 export const signatureElementSchema = z.object({ ...base, type: z.literal("signature"), required: z.boolean().default(true) });
+/** `required`: the visitor must list their devices or declare they bring none. `kinds`: what may be registered. */
+export const devicesElementSchema = z.object({ ...base, type: z.literal("devices"), required: z.boolean().default(false), kinds: z.array(z.enum(DEVICE_KINDS)).min(1).max(DEVICE_KINDS.length).default([...DEVICE_KINDS]) });
 
-export const formElementSchema = z.discriminatedUnion("type", [builtinElementSchema, textElementSchema, questionElementSchema, mediaElementSchema, signatureElementSchema]);
+export const formElementSchema = z.discriminatedUnion("type", [builtinElementSchema, textElementSchema, questionElementSchema, mediaElementSchema, signatureElementSchema, devicesElementSchema]);
 
 /** The element list as stored. Ids are unique; at most one element per built-in type. */
 export const formElementsSchema = z
@@ -111,6 +117,7 @@ export type QuestionElement = z.infer<typeof questionElementSchema>;
 export type MediaElement = z.infer<typeof mediaElementSchema>;
 export type SignatureElement = z.infer<typeof signatureElementSchema>;
 export type TextElement = z.infer<typeof textElementSchema>;
+export type DevicesElement = z.infer<typeof devicesElementSchema>;
 
 export function isBuiltin(e: FormElement): e is BuiltinElement {
   return (BUILTIN_TYPES as readonly string[]).includes(e.type);
@@ -226,7 +233,7 @@ export function builtinRule(elements: FormElement[], type: BuiltinType, surface:
 
 export function isRequired(e: FormElement): boolean {
   if (isBuiltin(e)) return e.mode === "required";
-  if (e.type === "question" || e.type === "signature") return e.required;
+  if (e.type === "question" || e.type === "signature" || e.type === "devices") return e.required;
   return false;
 }
 
@@ -236,8 +243,75 @@ export type AnswerValue = string | number | boolean;
 /** One stored answer: self-describing so reports and badges do not depend on the template still existing. */
 export type Answer = { label: string; value: AnswerValue; onBadge?: boolean };
 export type Answers = Record<string, Answer>;
-/** Shape of `Pass.extra` / `Visit.extra`. */
-export type ExtraJson = { answers?: Answers };
+/** One registered personal device. `id` is the IMEI or serial, normalised (upper case, no spaces or dashes). */
+export type Device = { kind: DeviceKind; id: string; model: string; color: string };
+/** Shape of `Pass.extra` / `Visit.extra`. `devicesNone`: the visitor declared they bring no device. */
+export type ExtraJson = { answers?: Answers; devices?: Device[]; devicesNone?: boolean };
+
+/** Normalises an IMEI / serial for storage and lookup: upper case, letters and digits only. */
+export function normalizeDeviceId(raw: string): string {
+  return raw.toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+export function readDevices(extra: unknown): Device[] {
+  if (!extra || typeof extra !== "object" || Array.isArray(extra)) return [];
+  const list = (extra as ExtraJson).devices;
+  if (!Array.isArray(list)) return [];
+  const out: Device[] = [];
+  for (const d of list) {
+    if (!d || typeof d !== "object") continue;
+    const x = d as Partial<Device>;
+    if (!(DEVICE_KINDS as readonly string[]).includes(String(x.kind)) || typeof x.id !== "string") continue;
+    out.push({ kind: x.kind as DeviceKind, id: x.id, model: typeof x.model === "string" ? x.model : "", color: typeof x.color === "string" ? x.color : "" });
+  }
+  return out;
+}
+
+export function readDevicesNone(extra: unknown): boolean {
+  return Boolean(extra && typeof extra === "object" && !Array.isArray(extra) && (extra as ExtraJson).devicesNone === true);
+}
+
+/** Field names of the devices block (repeated once per row) and of the "no devices" declaration. */
+export const DEVICE_FIELDS = { kind: "dev_kind", id: "dev_id", model: "dev_model", color: "dev_color", none: "dev_none" } as const;
+
+export type CollectedDevices = { devices: Device[]; none: boolean; invalid: boolean; present: boolean };
+
+/**
+ * Reads the devices block of one surface from posted values. Rows without an id are skipped; an id shorter than 5 or
+ * longer than 30 characters, or a kind the form does not allow, makes the block invalid. `present` says the surface
+ * had the block at all (so a surface without it never clears what another surface registered).
+ */
+export function collectDevices(elements: FormElement[], surface: FormSurface, values: FormValues): CollectedDevices {
+  const block = elementsFor(elements, surface).find((e): e is DevicesElement => e.type === "devices");
+  if (!block) return { devices: [], none: false, invalid: false, present: false };
+  const all = (name: string): string[] => (values.getAll ? values.getAll(name) : [values.get(name)]).map((v) => (typeof v === "string" ? v : "")).map((v) => v.trim());
+  const kinds = all(DEVICE_FIELDS.kind);
+  const ids = all(DEVICE_FIELDS.id);
+  const models = all(DEVICE_FIELDS.model);
+  const colors = all(DEVICE_FIELDS.color);
+  const devices: Device[] = [];
+  let invalid = false;
+  for (let i = 0; i < Math.max(kinds.length, ids.length); i++) {
+    const id = normalizeDeviceId(ids[i] ?? "");
+    const kind = kinds[i] ?? "";
+    if (!id && !(models[i] ?? "") && !(colors[i] ?? "")) continue; // empty row
+    if (id.length < 5 || id.length > 30 || !block.kinds.includes(kind as DeviceKind)) {
+      invalid = true;
+      continue;
+    }
+    if (devices.some((d) => d.id === id)) continue;
+    devices.push({ kind: kind as DeviceKind, id, model: (models[i] ?? "").slice(0, 60), color: (colors[i] ?? "").slice(0, 30) });
+  }
+  if (devices.length > MAX_DEVICES) invalid = true;
+  const noneRaw = values.get(DEVICE_FIELDS.none);
+  const none = devices.length === 0 && (noneRaw === "on" || noneRaw === "true" || noneRaw === "1");
+  return { devices, none, invalid, present: true };
+}
+
+/** Required devices block satisfied: at least one device, or the explicit "none" declaration. */
+export function devicesSatisfied(devices: Device[] | undefined, none: boolean | undefined): boolean {
+  return Boolean((devices && devices.length > 0) || none);
+}
 
 /** Field name of a custom question in an HTML form. */
 export function fieldName(e: FormElement): string {
@@ -275,7 +349,7 @@ export function hasAnswer(value: AnswerValue | undefined): boolean {
 }
 
 /** Minimal FormData-like reader so the collector can run in tests without the DOM. */
-export type FormValues = { get(name: string): unknown };
+export type FormValues = { get(name: string): unknown; getAll?(name: string): unknown[] };
 
 export type CollectedAnswers = { answers: Answers; invalid: string[] };
 

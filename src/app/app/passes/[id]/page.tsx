@@ -19,7 +19,7 @@ import { evaluatePolicy } from "@/lib/policies/evaluate";
 import { parseSchedule } from "@/lib/passes/validate";
 import { readPinFlash } from "@/lib/server/invites";
 import { emailPassAction, renamePassAction, revokePassAction } from "../actions";
-import { formatAnswer, listAnswers, readAnswers } from "@/lib/forms/schema";
+import { formatAnswer, listAnswers, readAnswers, readDevices, readDevicesNone } from "@/lib/forms/schema";
 
 type Search = { ok?: string; error?: string };
 
@@ -66,6 +66,9 @@ export default async function PassDetailPage({ params, searchParams }: { params:
   const canEmail = (pass.status === "active" || pass.status === "pending_approval") && pass.validUntil > new Date();
   const tf = await getTranslations("forms.answers");
   const answers = listAnswers(readAnswers(pass.extra));
+  const devices = readDevices(pass.extra);
+  const devicesNone = readDevicesNone(pass.extra);
+  const tfd = await getTranslations("forms.render.devices");
 
   return (
     <AppShell user={tenant.user} subtitle={tenant.site?.name ?? ts("allSites")} title={t("title", { name: pass.visitorName })}>
@@ -130,6 +133,19 @@ export default async function PassDetailPage({ params, searchParams }: { params:
                   </div>
                 ))}
               </dl>
+            </div>
+          ) : null}
+
+          {devices.length || devicesNone ? (
+            <div data-testid="pass-devices">
+              <h2 className="mb-1 font-medium">{tfd("registered")}</h2>
+              {devices.length ? (
+                <ul className="space-y-0.5 text-sm">
+                  {devices.map((d) => <li key={d.id} data-device-id={d.id}><span className="font-medium">{tfd(`kinds.${d.kind}`)}</span> · {d.model || "—"} · {d.color || "—"} · <span className="font-mono text-xs">{d.id}</span></li>)}
+                </ul>
+              ) : (
+                <p className="muted text-sm">{tfd("none")}</p>
+              )}
             </div>
           ) : null}
 

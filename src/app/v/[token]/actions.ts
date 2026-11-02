@@ -14,7 +14,7 @@ import { docHash, docLast4, normalizePlate } from "@/lib/crypto/docHash";
 import { upsertCompanyByName } from "@/lib/server/passes";
 import { loadPolicyAndForm } from "@/lib/server/forms";
 import { evaluatePolicy } from "@/lib/policies/evaluate";
-import { collectAnswers, elementsFor, mergeAnswers, readAnswers } from "@/lib/forms/schema";
+import { collectAnswers, collectDevices, elementsFor, mergeAnswers, readAnswers, readDevices, readDevicesNone, type ExtraJson } from "@/lib/forms/schema";
 import { mediaConfigured, mediaKey, putFile, sniffImage } from "@/lib/media/putFile";
 import { canEditFromLink, isOpenForVisitor, registrationPending, TOKEN_RE } from "@/lib/passes/visitor";
 import { log } from "@/lib/log";
@@ -75,7 +75,13 @@ export async function preregisterAction(formData: FormData): Promise<void> {
   const collected = collectAnswers(form.elements, "visitor", formData);
   if (collected.invalid.length) redirect(`/v/${pass.token}?error=invalid`);
   const answers = mergeAnswers(readAnswers(pass.extra), collected.answers);
-  if (Object.keys(collected.answers).length) data.extra = { ...((pass.extra as Prisma.JsonObject | null) ?? {}), answers } as Prisma.InputJsonObject;
+  // Devices: what the visitor lists replaces the host's list (they know what they carry); "none" clears it.
+  const dev = collectDevices(form.elements, "visitor", formData);
+  if (dev.invalid) redirect(`/v/${pass.token}?error=devices`);
+  const devices = dev.present && (dev.devices.length || dev.none) ? dev.devices : readDevices(pass.extra);
+  const devicesNone = dev.present && (dev.devices.length || dev.none) ? dev.none : readDevicesNone(pass.extra);
+  const nextExtra: ExtraJson = { ...((pass.extra as ExtraJson | null) ?? {}), answers, devices, devicesNone };
+  if (Object.keys(collected.answers).length || (dev.present && (dev.devices.length || dev.none))) data.extra = nextExtra as unknown as Prisma.InputJsonObject;
   const evaluation = evaluatePolicy(policy, {
     kind: pass.kind,
     visitorDocHash: data.visitorDocHash ?? pass.visitorDocHash,
@@ -83,6 +89,8 @@ export async function preregisterAction(formData: FormData): Promise<void> {
     form: form.elements,
     surface: "visitor",
     answers,
+    devices,
+    devicesNone,
     visitorPhone: data.visitorPhone ?? pass.visitorPhone,
     visitorEmail: data.visitorEmail ?? pass.visitorEmail,
     company: data.companyId ?? pass.companyId,

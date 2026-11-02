@@ -495,7 +495,9 @@
       "visit_closed": "Este gafete ya registró la salida.",
       "not_inside": "No ha registrado entrada en recepción. Debe pasar primero por el kiosco de la entrada.",
       "area_not_allowed": "Su pase no incluye las áreas de este punto. Verifica con el anfitrión o con Seguridad.",
-      "not_registered": "El visitante no ha completado su registro desde el enlace de invitación."
+      "not_registered": "El visitante no ha completado su registro desde el enlace de invitación.",
+      "device_not_found": "Ese IMEI o serial no está registrado en ningún pase de hoy. El visitante debe registrarlo antes de entrar.",
+      "devices_required": "Debe registrar sus dispositivos personales (o declarar que no trae) desde su enlace antes de entrar."
     },
     "warnings": {
       "escort": "Debe ir acompañado",
@@ -551,7 +553,13 @@
       "checkpointAreas": "Áreas de este punto de control",
       "checkpointAnyArea": "Cualquier visitante dentro del sitio",
       "enteredAt": "Entró a las {time}",
-      "badgeNo": "Gafete {badgeNo}"
+      "badgeNo": "Gafete {badgeNo}",
+      "device": "Dispositivo",
+      "devices": "Dispositivos personales",
+      "devicesNone": "Declaró que no trae dispositivos.",
+      "deviceFound": "Dispositivo registrado",
+      "deviceOwnerInside": "Su dueño está dentro del sitio.",
+      "deviceOwnerNotInside": "Su dueño no está dentro ahora (pase vigente o visita cerrada)."
     },
     "unannounced": {
       "title": "Visita no anunciada",
@@ -610,6 +618,13 @@
       "host": "Anfitrión",
       "since": "desde {time}",
       "visitor": "Visitante"
+    },
+    "devices": {
+      "phone": "Teléfono",
+      "laptop": "Laptop",
+      "tablet": "Tablet",
+      "watch": "Reloj inteligente",
+      "other": "Otro"
     }
   },
   "host": {
@@ -687,7 +702,8 @@
         "schedule": "Elige al menos un día y un horario válido.",
         "site": "Elige un sitio.",
         "missing_field": "Faltan campos obligatorios del formulario de registro.",
-        "pin_group": "El PIN solo aplica a pases individuales. Para un grupo, comparte el enlace de cada integrante."
+        "pin_group": "El PIN solo aplica a pases individuales. Para un grupo, comparte el enlace de cada integrante.",
+        "devices": "Revisa los dispositivos: IMEI o serial de 5 a 30 caracteres y un tipo permitido."
       },
       "customFields": "Datos adicionales",
       "hostEmployee": "Anfitrión de la visita",
@@ -857,7 +873,8 @@
       "invalid": "Revisa los datos e inténtalo otra vez.",
       "rateLimited": "Demasiados intentos. Espera un momento.",
       "closed": "Este pase ya no admite cambios.",
-      "missing": "Faltan respuestas obligatorias. Revisa el formulario."
+      "missing": "Faltan respuestas obligatorias. Revisa el formulario.",
+      "devices": "Revisa los dispositivos: el IMEI o serial debe tener de 5 a 30 caracteres y el tipo debe ser uno de los permitidos."
     },
     "status": {
       "active": "Vigente",
@@ -1920,7 +1937,9 @@
       "englishHint": "Se muestran cuando el visitante o el usuario tiene la interfaz en inglés. Si quedan vacíos se usa el texto en español.",
       "labelEn": "Etiqueta (inglés)",
       "helpEn": "Texto de ayuda (inglés)",
-      "textBodyEn": "Texto de las instrucciones (inglés)"
+      "textBodyEn": "Texto de las instrucciones (inglés)",
+      "devicesRequired": "Obligatorio: debe registrar sus dispositivos o declarar que no trae",
+      "deviceKinds": "Tipos de dispositivo que se pueden registrar"
     },
     "types": {
       "photo": "Foto",
@@ -1936,7 +1955,8 @@
       "text": "Texto / instrucciones",
       "question": "Pregunta",
       "media": "Documento o imagen",
-      "signature": "Firma"
+      "signature": "Firma",
+      "devices": "Dispositivos personales"
     },
     "render": {
       "required": "obligatorio",
@@ -1950,7 +1970,25 @@
         "typedNameHelp": "Si no puedes dibujar, tu nombre completo vale como firma.",
         "drawn": "Firma registrada."
       },
-      "listPlaceholder": "Una por línea"
+      "listPlaceholder": "Una por línea",
+      "devices": {
+        "kinds": {
+          "phone": "Teléfono",
+          "laptop": "Laptop",
+          "tablet": "Tablet",
+          "watch": "Reloj inteligente",
+          "other": "Otro"
+        },
+        "kind": "Tipo",
+        "id": "IMEI o número de serie",
+        "idHelp": "IMEI (15 dígitos) o serial",
+        "model": "Marca y modelo",
+        "color": "Color",
+        "add": "Agregar otro dispositivo",
+        "remove": "Quitar",
+        "none": "No traigo dispositivos",
+        "registered": "Dispositivos personales"
+      }
     },
     "answers": {
       "title": "Respuestas del formulario",
@@ -2070,6 +2108,10 @@
           "checkpoint": {
             "title": "Verificar en un punto de control",
             "body": "En las tablets configuradas como punto de control, \"Verificar acceso\" muestra en verde que el visitante está dentro, su anfitrión, las áreas permitidas y la hora de entrada. En rojo: no pasó por recepción, su pase no incluye las áreas de ese punto, o la visita ya cerró. Avisa a Seguridad y mándalo a recepción.\nEste kiosco necesita conexión; no hay PIN ni impresión de gafete."
+          },
+          "devices": {
+            "title": "Dispositivos personales (teléfono, laptop, reloj)",
+            "body": "Si el formulario del tipo de visita pide \"Dispositivos personales\", el resultado del escaneo muestra qué trae el visitante: tipo, marca y modelo, color e IMEI o serial. Si el formulario lo marca obligatorio y el visitante no registró nada ni declaró que no trae, el kiosco no lo deja entrar hasta que lo complete desde su enlace.\nPara rastrear un equipo, escribe o escanea su IMEI o serial en \"Código manual\": el kiosco dice de quién es, qué pase lo registró y si su dueño está dentro. Un IMEI que no esté registrado en ningún pase del día sale en rojo."
           }
         }
       },
@@ -2219,7 +2261,7 @@
           },
           "contractor": {
             "title": "Formulario de contratistas: herramientas, normas y firma",
-            "body": "Para contratistas agrega una pregunta de tipo \"Lista (una por línea)\" llamada por ejemplo \"Herramientas y equipos que trae\" y márcala obligatoria: el visitante escribe escalera, taladro, bultos… y Seguridad lo ve al escanear y al salir.\nAgrega bloques de \"Texto / instrucciones\" con lo permitido y lo prohibido en planta, el Wi-Fi de visitantes y la ruta de evacuación como \"Documento o imagen\" (mapa). Cada elemento tiene campos opcionales en inglés para visitantes extranjeros. Cierra con \"Firma\" obligatoria junto a la política de visitantes para dejar constancia de que leyó las instrucciones."
+            "body": "Para contratistas agrega una pregunta de tipo \"Lista (una por línea)\" llamada por ejemplo \"Herramientas y equipos que trae\" y márcala obligatoria: el visitante escribe escalera, taladro, bultos… y Seguridad lo ve al escanear y al salir.\nAgrega bloques de \"Texto / instrucciones\" con lo permitido y lo prohibido en planta, el Wi-Fi de visitantes y la ruta de evacuación como \"Documento o imagen\" (mapa). Cada elemento tiene campos opcionales en inglés para visitantes extranjeros. Cierra con \"Firma\" obligatoria junto a la política de visitantes para dejar constancia de que leyó las instrucciones.\nAgrega también \"Dispositivos personales\" y márcalo obligatorio: el visitante registra teléfono, laptop, tablet o reloj con IMEI o serial, marca y modelo y color, o declara que no trae nada; Seguridad lo ve al escanear y puede buscar cualquier IMEI desde el kiosco."
           }
         }
       },

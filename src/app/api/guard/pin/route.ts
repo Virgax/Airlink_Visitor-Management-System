@@ -14,6 +14,7 @@ import { enterWithPass, findBlacklistHit, findOpenVisit, loadPass, passInfo, rep
 import { checkoutVisit, visitJson } from "@/lib/server/visits";
 import { log } from "@/lib/log";
 import { registrationPending } from "@/lib/passes/visitor";
+import { devicesRequiredMissing } from "@/lib/server/devices";
 
 export const dynamic = "force-dynamic";
 
@@ -77,6 +78,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const pass = await loadPass(match.passId);
     if (!pass || pass.siteId !== site.id) return Response.json({ ok: false, reason: "not_found" } satisfies ScanResponse);
     if (registrationPending(pass)) return Response.json({ ok: false, reason: "not_registered", pass: await passInfo(pass, site.id) } satisfies ScanResponse);
+    if (await devicesRequiredMissing(pass)) return Response.json({ ok: false, reason: "devices_required", pass: await passInfo(pass, site.id) } satisfies ScanResponse);
     const info = await passInfo(pass, site.id);
     const scanId = `pin-${randomToken(12)}`;
 

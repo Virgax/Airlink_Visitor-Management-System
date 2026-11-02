@@ -15,7 +15,7 @@ import { createUnannouncedVisit, securityRecipientIds } from "@/lib/server/visit
 import { isKindEnabled } from "@/lib/server/policies";
 import { loadPolicyAndForm } from "@/lib/server/forms";
 import { evaluatePolicy } from "@/lib/policies/evaluate";
-import { collectAnswers } from "@/lib/forms/schema";
+import { collectAnswers, collectDevices, type ExtraJson } from "@/lib/forms/schema";
 import type { Prisma } from "@prisma/client";
 
 /** Host lookup for the kiosk form (called from the HostPicker client component). */
@@ -67,6 +67,8 @@ export async function createUnannouncedAction(formData: FormData): Promise<void>
   const { policy, form } = await loadPolicyAndForm(site.id, data.kind);
   const collected = collectAnswers(form.elements, "kiosk", formData);
   if (collected.invalid.length) redirect("/guard/unannounced?error=invalid");
+  const dev = collectDevices(form.elements, "kiosk", formData);
+  if (dev.invalid) redirect("/guard/unannounced?error=invalid");
   const evaluation = evaluatePolicy(policy, {
     kind: data.kind,
     visitorDocHash: hash,
@@ -74,12 +76,15 @@ export async function createUnannouncedAction(formData: FormData): Promise<void>
     form: form.elements,
     surface: "kiosk",
     answers: collected.answers,
+    devices: dev.devices,
+    devicesNone: dev.none,
     visitorName: data.visitorName,
     company: companyName ?? null,
     hostEmployeeId: host.id,
   });
   if (evaluation.missing.length > 0) redirect("/guard/unannounced?error=missing");
-  const extra = Object.keys(collected.answers).length ? ({ answers: collected.answers } as unknown as Prisma.InputJsonObject) : null;
+  const extraJson: ExtraJson = { ...(Object.keys(collected.answers).length ? { answers: collected.answers } : {}), ...(dev.devices.length ? { devices: dev.devices } : {}), ...(dev.none ? { devicesNone: true } : {}) };
+  const extra = Object.keys(extraJson).length ? (extraJson as unknown as Prisma.InputJsonObject) : null;
 
   if (hash || plate) {
     const rows = await db.blacklist.findMany({

@@ -13,6 +13,7 @@ import { enterWithPass, findBlacklistHit, findOpenVisit, loadPass, passInfo, pas
 import { checkoutVisit, visitJson, visitSummarySelect } from "@/lib/server/visits";
 import { verifyAtCheckpoint } from "@/lib/server/checkpoint";
 import { registrationPending } from "@/lib/passes/visitor";
+import { lookupDevice, devicesRequiredMissing } from "@/lib/server/devices";
 import { log } from "@/lib/log";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,14 @@ export async function POST(request: NextRequest): Promise<Response> {
     const offline = parsed.data.offline === true;
     const now = new Date();
     const at = validationInstant(parsed.data.at ? new Date(parsed.data.at) : null, offline, now);
+
+    // An IMEI / serial typed or scanned from the device: find whose pass registered it (any gate, nothing is entered).
+    if (!parseVisitQr(payload) && !passIdFromPayload(payload) && /^[A-Za-z0-9 -]{5,40}$/.test(payload)) {
+      const found = await lookupDevice(site.id, payload, now);
+      if (!found) return Response.json({ ok: false, reason: "device_not_found" } satisfies ScanResponse);
+      await audit({ action: "visit.checkpoint", siteId: site.id, actorId: user.id, targetType: "Pass", targetId: found.pass.id, meta: { gateId: gate.id, scanId, result: "device", deviceId: found.device.id } });
+      return Response.json({ ok: true, action: "device", device: found.device, pass: await passInfo(found.pass, site.id), visit: found.visit ? visitJson(found.visit) : null } satisfies ScanResponse);
+    }
 
     // Verification-only post: show the visit and whether it may be here; never enter, consume or close anything.
     if (gate.kind === "checkpoint") return Response.json(await verifyAtCheckpoint({ payload, scanId, kiosk, now }));
@@ -110,6 +119,11 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
 
     if (!pass || !info) return Response.json({ ok: false, reason: "not_found" } satisfies ScanResponse);
+    // The form of this kind demands the personal devices (or an explicit "none"): nobody enters without registering them.
+    if (await devicesRequiredMissing(pass)) {
+      await audit({ action: "visit.denied", siteId: site.id, actorId: user.id, targetType: "Pass", targetId: pass.id, meta: { reason: "devices_required", gateId: gate.id, scanId } });
+      return Response.json({ ok: false, reason: "devices_required", pass: info } satisfies ScanResponse);
+    }
 
     const result = await enterWithPass({ pass, info, kiosk, scanId, at, now, conflict: decision.action === "enter" && decision.conflict, offline, via: "qr" });
     return Response.json(result satisfies ScanResponse);

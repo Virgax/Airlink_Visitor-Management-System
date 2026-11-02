@@ -7,7 +7,7 @@ import { Icon } from "@/components/Icon";
 import { BadgePanel } from "@/components/guard/BadgePanel";
 import type { KioskBadgeConfig } from "@/lib/badges/config";
 import { fmtDate } from "@/lib/format";
-import type { BadgeInfo, CheckpointInfo, ScanPassInfo, ScanReason, ScanResponse } from "@/lib/guard/types";
+import type { BadgeInfo, CheckpointInfo, ScanDevice, ScanPassInfo, ScanReason, ScanResponse } from "@/lib/guard/types";
 import { cacheIsFresh, provisionalCheck, type PassCache } from "@/lib/offline/provisional";
 import { countQueuedScans, enqueueScan, flushQueue, loadPassCache, outcomeForStatus, savePassCache, type QueuedScan } from "@/lib/offline/queue";
 
@@ -25,6 +25,9 @@ type ResultView = {
   at: string;
   badge?: BadgeInfo;
   checkpoint?: CheckpointInfo;
+  /** IMEI / serial lookup: the matched device and whether its owner is inside right now. */
+  device?: ScanDevice;
+  deviceInside?: boolean;
 };
 
 /** Minimal typing of the Shape Detection API (not in lib.dom yet). */
@@ -132,6 +135,10 @@ export function Scanner({ locale, timeZone, badgeConfig, checkpoint = false }: {
     }
     if (!data.ok) {
       setResult({ tone: "deny", reason: data.reason, pass: data.pass, at });
+      return;
+    }
+    if (data.action === "device") {
+      setResult({ tone: "verified", pass: data.pass, device: data.device, deviceInside: Boolean(data.visit && (data.visit.status === "inside" || data.visit.status === "at_dock")), at });
       return;
     }
     if (data.action === "verified") {
@@ -302,7 +309,7 @@ export function Scanner({ locale, timeZone, badgeConfig, checkpoint = false }: {
   };
   const toneIcon: Record<Tone, typeof CheckCircle2> = { ok: CheckCircle2, verified: ShieldCheck, provisional: CloudOff, left: LogOut, deny: XCircle };
   const toneTitle = (r: ResultView) =>
-    r.tone === "deny" ? (r.checkpoint ? t("scan.checkpointDenied") : t("scan.denied")) : r.tone === "verified" ? t("scan.verified") : r.tone === "left" ? t("scan.left") : r.tone === "provisional" ? t("scan.provisional") : r.atDock ? t("scan.atDock") : t("scan.entered");
+    r.tone === "deny" ? (r.checkpoint ? t("scan.checkpointDenied") : t("scan.denied")) : r.device ? t("scan.deviceFound") : r.tone === "verified" ? t("scan.verified") : r.tone === "left" ? t("scan.left") : r.tone === "provisional" ? t("scan.provisional") : r.atDock ? t("scan.atDock") : t("scan.entered");
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
@@ -406,6 +413,29 @@ export function Scanner({ locale, timeZone, badgeConfig, checkpoint = false }: {
                   <dt className="muted">{t("scan.kind")}</dt>
                   <dd>{result.pass.kind ? t(`kinds.${result.pass.kind as "visit"}`) : "—"}{result.pass.docLast4 ? ` · ${t("scan.document")} ****${result.pass.docLast4}` : ""}{result.pass.plate ? ` · ${t("scan.plate")} ${result.pass.plate}` : ""}</dd>
                 </div>
+                {result.device ? (
+                  <div className="sm:col-span-2 rounded-lg bg-surface-2 p-2" data-testid="result-device" data-inside={result.deviceInside ? "1" : "0"}>
+                    <dt className="muted">{t("scan.device")}</dt>
+                    <dd className="font-medium">{t(`devices.${result.device.kind as "phone"}`)} · {result.device.model || "—"} · {result.device.color || "—"} · <span className="font-mono">{result.device.id}</span></dd>
+                    <dd className={result.deviceInside ? "text-success" : "text-warning"}>{result.deviceInside ? t("scan.deviceOwnerInside") : t("scan.deviceOwnerNotInside")}</dd>
+                  </div>
+                ) : null}
+                {result.pass.devices?.length || result.pass.devicesNone ? (
+                  <div className="sm:col-span-2" data-testid="result-devices">
+                    <dt className="muted">{t("scan.devices")}</dt>
+                    <dd>
+                      {result.pass.devices?.length ? (
+                        <ul className="space-y-0.5">
+                          {result.pass.devices.map((d) => (
+                            <li key={d.id} data-device-id={d.id}><span className="font-medium">{t(`devices.${d.kind as "phone"}`)}</span> · {d.model || "—"} · {d.color || "—"} · <span className="font-mono text-xs">{d.id}</span></li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <span className="muted">{t("scan.devicesNone")}</span>
+                      )}
+                    </dd>
+                  </div>
+                ) : null}
                 {result.checkpoint ? (
                   <div className="sm:col-span-2" data-testid="result-checkpoint" data-allowed={result.checkpoint.allowed ? "1" : "0"}>
                     <dt className="muted">{t("scan.checkpointAreas")}</dt>

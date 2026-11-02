@@ -139,7 +139,8 @@ async function main() {
     if (!existing) await admin.getByRole("button", { name: "Agregar persona" }).click();
     await admin.goto("/admin/people");
     await shot(admin, "admin-people");
-    await admin.getByTestId("person-row").filter({ hasText: "demo-ramon@airlink.test" }).getByTestId("edit-person").click();
+    await admin.goto(`/admin/people?q=${encodeURIComponent("demo-ramon")}`);
+    await admin.getByTestId("edit-person").first().click();
     await admin.getByTestId("person-edit").waitFor();
     await shot(admin, "admin-person-edit", { fullPage: true });
   });
@@ -401,6 +402,8 @@ async function main() {
       await admin.getByText("Textos en inglés (opcional)").click();
       await admin.getByLabel("Etiqueta (inglés)").fill("Plant rules");
       await admin.getByLabel("Texto de las instrucciones (inglés)").fill("- Vest and closed shoes required\n- No photos of the production lines\n- Visitor Wi-Fi: Airlink-Guest\n- Follow the marked evacuation route to the assembly point");
+      await admin.getByTestId("add-devices").click();
+      await admin.getByLabel("Etiqueta", { exact: true }).fill("Dispositivos personales que trae");
       await admin.getByTestId("add-signature").click();
       await admin.getByLabel("Etiqueta", { exact: true }).fill("Firma: leí las normas e instrucciones");
       await shot(admin, "admin-form-contractor", { fullPage: true });

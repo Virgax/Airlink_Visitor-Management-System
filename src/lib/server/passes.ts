@@ -8,7 +8,7 @@ import { randomToken } from "@/lib/crypto/tokens";
 import { hashPassword } from "@/lib/auth/password";
 import { docHash, docLast4, normalizePlate } from "@/lib/crypto/docHash";
 import { evaluatePolicy, missingDoc, type PolicyInput } from "@/lib/policies/evaluate";
-import { readAnswers, type Answers, type FormElement } from "@/lib/forms/schema";
+import { readAnswers, type Answers, type FormElement, type Device, type ExtraJson } from "@/lib/forms/schema";
 import { loadPolicyAndForm } from "@/lib/server/forms";
 import type { Schedule } from "@/lib/passes/validate";
 import { groupVisitorNames, RECURRING_MAX_USES } from "@/lib/passes/form";
@@ -106,6 +106,9 @@ export type CreatePassInput = {
   auditMeta?: Prisma.InputJsonObject;
   /** Custom answers of the host surface (collected with `collectAnswers`), stored in `Pass.extra`. */
   answers?: Answers;
+  /** Personal devices registered by the host (`collectDevices`) and the "brings none" declaration. */
+  devices?: Device[];
+  devicesNone?: boolean;
   /** Resolved form; loaded from the policy when not given. */
   form?: FormElement[];
   /**
@@ -147,6 +150,8 @@ export async function createPass(input: CreatePassInput): Promise<CreatePassResu
     form,
     surface: "host",
     answers: input.answers ?? {},
+    devices: input.devices ?? [],
+    devicesNone: selfRegistration ? true : input.devicesNone, // the visitor registers them from the link
     visitorName: leadName,
     visitorPhone: selfRegistration ? (input.visitorPhone ?? "pending") : input.visitorPhone,
     visitorEmail: selfRegistration ? (input.visitorEmail ?? "pending") : input.visitorEmail,
@@ -160,7 +165,12 @@ export async function createPass(input: CreatePassInput): Promise<CreatePassResu
   if (evaluation.missing.includes("gate")) return { ok: false, error: "gate_not_allowed", missing: evaluation.missing };
   if (evaluation.missing.length > 0) return { ok: false, error: "missing_field", missing: evaluation.missing };
   const answers = readAnswers({ answers: input.answers ?? {} });
-  const extra = Object.keys(answers).length ? ({ answers } as unknown as Prisma.InputJsonObject) : undefined;
+  const extraJson: ExtraJson = {
+    ...(Object.keys(answers).length ? { answers } : {}),
+    ...(input.devices?.length ? { devices: input.devices } : {}),
+    ...(input.devicesNone ? { devicesNone: true } : {}),
+  };
+  const extra = Object.keys(extraJson).length ? (extraJson as unknown as Prisma.InputJsonObject) : undefined;
 
   let companyId: string | null = null;
   if (input.companyName?.trim()) {

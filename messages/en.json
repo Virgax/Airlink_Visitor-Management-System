@@ -495,7 +495,9 @@
       "visit_closed": "This badge already recorded the exit.",
       "not_inside": "No entry recorded at reception. They must go through the entrance kiosk first.",
       "area_not_allowed": "Their pass does not include the areas of this post. Check with the host or Security.",
-      "not_registered": "The visitor has not completed their registration from the invitation link."
+      "not_registered": "The visitor has not completed their registration from the invitation link.",
+      "device_not_found": "That IMEI or serial is not registered on any pass today. The visitor must register it before entering.",
+      "devices_required": "They must register their personal devices (or declare they bring none) from their link before entering."
     },
     "warnings": {
       "escort": "Escort required",
@@ -551,7 +553,13 @@
       "checkpointAreas": "Areas of this checkpoint",
       "checkpointAnyArea": "Any visitor inside the site",
       "enteredAt": "Entered at {time}",
-      "badgeNo": "Badge {badgeNo}"
+      "badgeNo": "Badge {badgeNo}",
+      "device": "Device",
+      "devices": "Personal devices",
+      "devicesNone": "Declared bringing no devices.",
+      "deviceFound": "Registered device",
+      "deviceOwnerInside": "Its owner is inside the site.",
+      "deviceOwnerNotInside": "Its owner is not inside right now (valid pass or closed visit)."
     },
     "unannounced": {
       "title": "Unannounced visit",
@@ -610,6 +618,13 @@
       "host": "Host",
       "since": "since {time}",
       "visitor": "Visitor"
+    },
+    "devices": {
+      "phone": "Phone",
+      "laptop": "Laptop",
+      "tablet": "Tablet",
+      "watch": "Smartwatch",
+      "other": "Other"
     }
   },
   "host": {
@@ -687,7 +702,8 @@
         "schedule": "Pick at least one day and a valid time range.",
         "site": "Choose a site.",
         "missing_field": "Required sign-in form fields are missing.",
-        "pin_group": "A PIN only applies to single passes. For a group, share each member’s link."
+        "pin_group": "A PIN only applies to single passes. For a group, share each member’s link.",
+        "devices": "Check the devices: IMEI or serial of 5 to 30 characters and an allowed kind."
       },
       "customFields": "Additional details",
       "hostEmployee": "Host of the visit",
@@ -857,7 +873,8 @@
       "invalid": "Check the data and try again.",
       "rateLimited": "Too many attempts. Wait a moment.",
       "closed": "This pass no longer accepts changes.",
-      "missing": "Required answers are missing. Check the form."
+      "missing": "Required answers are missing. Check the form.",
+      "devices": "Check the devices: the IMEI or serial must have 5 to 30 characters and the kind must be one of the allowed ones."
     },
     "status": {
       "active": "Valid",
@@ -1920,7 +1937,9 @@
       "englishHint": "Shown when the visitor or user has the interface in English. When empty, the Spanish text is used.",
       "labelEn": "Label (English)",
       "helpEn": "Help text (English)",
-      "textBodyEn": "Instructions text (English)"
+      "textBodyEn": "Instructions text (English)",
+      "devicesRequired": "Required: must register their devices or declare they bring none",
+      "deviceKinds": "Device kinds that can be registered"
     },
     "types": {
       "photo": "Photo",
@@ -1936,7 +1955,8 @@
       "text": "Text / instructions",
       "question": "Question",
       "media": "Document or image",
-      "signature": "Signature"
+      "signature": "Signature",
+      "devices": "Personal devices"
     },
     "render": {
       "required": "required",
@@ -1950,7 +1970,25 @@
         "typedNameHelp": "If you cannot draw, your full name counts as your signature.",
         "drawn": "Signature captured."
       },
-      "listPlaceholder": "One per line"
+      "listPlaceholder": "One per line",
+      "devices": {
+        "kinds": {
+          "phone": "Phone",
+          "laptop": "Laptop",
+          "tablet": "Tablet",
+          "watch": "Smartwatch",
+          "other": "Other"
+        },
+        "kind": "Kind",
+        "id": "IMEI or serial number",
+        "idHelp": "IMEI (15 digits) or serial",
+        "model": "Make and model",
+        "color": "Colour",
+        "add": "Add another device",
+        "remove": "Remove",
+        "none": "I bring no devices",
+        "registered": "Personal devices"
+      }
     },
     "answers": {
       "title": "Form answers",
@@ -2070,6 +2108,10 @@
           "checkpoint": {
             "title": "Verify at a checkpoint",
             "body": "On tablets configured as a checkpoint, \"Verify access\" shows in green that the visitor is inside, their host, the allowed areas and the entry time. In red: they did not go through reception, their pass does not include this post's areas, or the visit is already closed. Alert Security and send them to reception.\nThis kiosk needs a connection; there is no PIN entry or badge printing."
+          },
+          "devices": {
+            "title": "Personal devices (phone, laptop, watch)",
+            "body": "If the visit type's form asks for \"Personal devices\", the scan result shows what the visitor carries: kind, make and model, colour and IMEI or serial. If the form marks it required and the visitor registered nothing nor declared bringing none, the kiosk refuses entry until they complete it from their link.\nTo trace a device, type or scan its IMEI or serial under \"Manual code\": the kiosk says whose it is, which pass registered it and whether its owner is inside. An IMEI not registered on any pass of the day shows in red."
           }
         }
       },
@@ -2219,7 +2261,7 @@
           },
           "contractor": {
             "title": "Contractor form: tools, rules and signature",
-            "body": "For contractors add a question of type \"List (one per line)\" named for example \"Tools and equipment brought\" and make it required: the visitor types ladder, drill, bags… and Security sees it at the scan and on the way out.\nAdd \"Text / instructions\" blocks with what is allowed and forbidden on the floor, the visitor Wi-Fi and the evacuation route as a \"Document or image\" (map). Each element has optional English texts for foreign visitors. Close with a required \"Signature\" next to the visitor policy to record that they read the instructions."
+            "body": "For contractors add a question of type \"List (one per line)\" named for example \"Tools and equipment brought\" and make it required: the visitor types ladder, drill, bags… and Security sees it at the scan and on the way out.\nAdd \"Text / instructions\" blocks with what is allowed and forbidden on the floor, the visitor Wi-Fi and the evacuation route as a \"Document or image\" (map). Each element has optional English texts for foreign visitors. Close with a required \"Signature\" next to the visitor policy to record that they read the instructions.\nAlso add \"Personal devices\" and make it required: the visitor registers phone, laptop, tablet or watch with IMEI or serial, make and model and colour, or declares bringing none; Security sees it at the scan and can look up any IMEI from the kiosk."
           }
         }
       },
