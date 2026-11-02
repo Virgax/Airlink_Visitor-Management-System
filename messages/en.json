@@ -178,7 +178,7 @@
       "intro": "Each plant is a site with its gates, areas and policies. Single-site admins only see their own.",
       "name": "Site name",
       "slug": "Identifier (URL)",
-      "slugHelp": "Lowercase letters, digits and dashes. Cannot be changed later.",
+      "slugHelp": "Short unique name of the site in web format: lowercase, digits and hyphens (e.g. airlink-2). It identifies the site permanently in the audit log and integrations even if you rename it; it cannot be changed later.",
       "address": "Address",
       "timezone": "Time zone",
       "active": "Site active",
@@ -2088,7 +2088,7 @@
           },
           "sites": {
             "title": "Sites, gates and areas",
-            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry."
+            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry.\nThe \"Identifier (URL)\" when creating a site is its short unique web-style name (lowercase, digits and hyphens, e.g. airlink-2): it identifies the site permanently in the audit log and integrations even if you later rename it, and cannot be edited afterwards."
           },
           "policies": {
             "title": "Policies per visit type",

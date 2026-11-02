@@ -178,7 +178,7 @@
       "intro": "Cada planta es un sitio con sus puertas, áreas y políticas. Los administradores de un solo sitio ven únicamente el suyo.",
       "name": "Nombre del sitio",
       "slug": "Identificador (URL)",
-      "slugHelp": "Minúsculas, números y guiones. No se puede cambiar después.",
+      "slugHelp": "Nombre corto y único del sitio en formato web: minúsculas, números y guiones (ej. airlink-2). Identifica el sitio de forma fija en auditoría e integraciones aunque cambies su nombre visible; no se puede cambiar después.",
       "address": "Dirección",
       "timezone": "Zona horaria",
       "active": "Sitio activo",
@@ -2088,7 +2088,7 @@
           },
           "sites": {
             "title": "Sitios, puertas y áreas",
-            "body": "Cada planta es un sitio con su zona horaria, retención de fotos y minutos de espera para escalar visitas no anunciadas. Dentro del sitio defines las puertas (peatonal, vehicular, muelle), la impresora de gafete de cada puerta y el QR de auto-registro para imprimir en recepción.\nLas áreas pueden marcarse como restringidas o con acompañante obligatorio; el kiosco lo muestra como aviso al entrar."
+            "body": "Cada planta es un sitio con su zona horaria, retención de fotos y minutos de espera para escalar visitas no anunciadas. Dentro del sitio defines las puertas (peatonal, vehicular, muelle), la impresora de gafete de cada puerta y el QR de auto-registro para imprimir en recepción.\nLas áreas pueden marcarse como restringidas o con acompañante obligatorio; el kiosco lo muestra como aviso al entrar.\nEl \"Identificador (URL)\" al crear un sitio es su nombre corto y único en formato web (minúsculas, números y guiones, ej. airlink-2): identifica el sitio de forma fija en la auditoría y las integraciones aunque luego cambies el nombre visible, y no se puede editar después."
           },
           "policies": {
             "title": "Políticas por tipo de visita",
