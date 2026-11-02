@@ -1939,7 +1939,9 @@
       "helpEn": "Help text (English)",
       "textBodyEn": "Instructions text (English)",
       "devicesRequired": "Required: must register their devices or declare they bring none",
-      "deviceKinds": "Device kinds that can be registered"
+      "deviceKinds": "Device kinds that can be registered",
+      "implicitHelp": "Standard fields this form does not mention: still asked, with each visit type's default mode (the plate is required only for carriers), and placed before your elements. Click one to bring it into the list and decide its mode (Hidden, Optional, Required) and position.",
+      "implicitAdopt": "Bring into the list to change mode and order"
     },
     "types": {
       "photo": "Photo",
@@ -2249,7 +2251,7 @@
           },
           "editor": {
             "title": "Build the form",
-            "body": "The palette on the left adds standard fields (photo, ID, name, phone, e-mail, company, plate, areas, host, escort) and custom elements: question (text, number, date, yes/no, choice), instruction text, a document or image for the visitor to read, and signature.\nUnder \"Properties\" you set the label, help text, whether it is required, where it shows (host invitation, visitor link, kiosk) and whether it prints on the badge. \"Up\"/\"Down\" reorder and the preview shows the result. Save when done."
+            "body": "The palette on the left adds standard fields (photo, ID, name, phone, e-mail, company, plate, areas, host, escort) and custom elements: question (text, number, date, yes/no, choice), instruction text, a document or image for the visitor to read, and signature.\nUnder \"Properties\" you set the label, help text, whether it is required, where it shows (host invitation, visitor link, kiosk) and whether it prints on the badge. \"Up\"/\"Down\" reorder and the preview shows the result. Save when done.\nStandard fields you do not add appear greyed under \"Standard fields\": they are still asked with their default (the plate, required only for carriers) and come first. Click one to bring it into the list and set it Hidden, Optional or Required and in the order you want."
           },
           "assign": {
             "title": "Assign it to a visit type",

@@ -212,3 +212,24 @@ test("a signature element replaces the typed-name NDA acceptance with a drawn si
 
   await Promise.all([hostCtx.close(), visitorCtx.close()]);
 });
+
+test("the editor lists the implicit standard fields and lets HR adopt one to change its mode", async ({ page }) => {
+  const stamp = Date.now();
+  const site = await db.site.findUniqueOrThrow({ where: { slug: "airlink-2" } });
+  await loginAsAdmin(page);
+  await page.goto("/admin/forms");
+  await page.getByLabel("Nombre del formulario").fill(`Implícitos ${stamp}`);
+  await page.getByLabel("Sitio").selectOption(site.id);
+  await page.getByRole("button", { name: "Crear formulario" }).click();
+  await page.waitForURL(/\/admin\/forms\/[a-z0-9]+/);
+  const implicit = page.getByTestId("implicit-list");
+  await expect(implicit.getByTestId("adopt-plate")).toBeVisible();
+  await implicit.getByTestId("adopt-plate").click();
+  await expect(implicit.getByTestId("adopt-plate")).toHaveCount(0);
+  await expect(page.getByTestId("element-list").locator("[data-element-id=plate]")).toBeVisible();
+  await page.locator("#prop-mode").selectOption("off");
+  await page.getByRole("button", { name: "Guardar formulario" }).click();
+  await expect(page).toHaveURL(/ok=saved/);
+  const tpl = await db.formTemplate.findFirstOrThrow({ where: { name: `Implícitos ${stamp}` } });
+  expect((tpl.elements as { id: string; mode: string }[]).find((e) => e.id === "plate")?.mode).toBe("off");
+});

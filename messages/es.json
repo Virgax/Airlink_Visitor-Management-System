@@ -1939,7 +1939,9 @@
       "helpEn": "Texto de ayuda (inglés)",
       "textBodyEn": "Texto de las instrucciones (inglés)",
       "devicesRequired": "Obligatorio: debe registrar sus dispositivos o declarar que no trae",
-      "deviceKinds": "Tipos de dispositivo que se pueden registrar"
+      "deviceKinds": "Tipos de dispositivo que se pueden registrar",
+      "implicitHelp": "Campos estándar que este formulario no menciona: se piden igual, con el modo por defecto de cada tipo de visita (la placa es obligatoria solo para transportistas), y van antes que tus elementos. Pulsa uno para traerlo a la lista y decidir su modo (Oculto, Opcional, Obligatorio) y su posición.",
+      "implicitAdopt": "Traer a la lista para cambiar modo y orden"
     },
     "types": {
       "photo": "Foto",
@@ -2249,7 +2251,7 @@
           },
           "editor": {
             "title": "Arma el formulario",
-            "body": "La paleta de la izquierda agrega campos estándar (foto, cédula, nombre, teléfono, correo, empresa, placa, áreas, anfitrión, acompañante) y elementos propios: pregunta (texto, número, fecha, sí/no, selección), texto de instrucciones, documento o imagen para que el visitante lea, y firma.\nEn \"Propiedades\" defines la etiqueta, la ayuda, si es obligatorio, dónde se muestra (invitación del anfitrión, enlace del visitante, kiosco) y si se imprime en el gafete. \"Subir\"/\"Bajar\" ordenan y la vista previa muestra el resultado. Guarda al terminar."
+            "body": "La paleta de la izquierda agrega campos estándar (foto, cédula, nombre, teléfono, correo, empresa, placa, áreas, anfitrión, acompañante) y elementos propios: pregunta (texto, número, fecha, sí/no, selección), texto de instrucciones, documento o imagen para que el visitante lea, y firma.\nEn \"Propiedades\" defines la etiqueta, la ayuda, si es obligatorio, dónde se muestra (invitación del anfitrión, enlace del visitante, kiosco) y si se imprime en el gafete. \"Subir\"/\"Bajar\" ordenan y la vista previa muestra el resultado. Guarda al terminar.\nLos campos estándar que no agregues aparecen en gris en \"Campos estándar\": se piden igual con su valor por defecto (la placa, obligatoria solo para transportistas) y van primero. Pulsa uno para traerlo a la lista y ponerlo Oculto, Opcional u Obligatorio y en el orden que quieras."
           },
           "assign": {
             "title": "Asígnalo a un tipo de visita",

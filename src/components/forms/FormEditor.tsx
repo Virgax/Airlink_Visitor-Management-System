@@ -104,6 +104,12 @@ export function FormEditor({ template, readOnly, save, upload }: Props) {
   };
 
   const typeLabel = (e: FormElement) => tt(e.type);
+  // Standard fields the template does not mention: still asked (with the kind's default mode) and placed first.
+  const implicit = withDefaultBuiltins(elements, "visit").filter((d): d is BuiltinElement => isBuiltin(d) && !elements.some((e) => e.id === d.id));
+  const adopt = (d: BuiltinElement) => {
+    setElements((list) => [...list, { ...d, mode: d.mode === "off" ? "optional" : d.mode }]);
+    setSelectedId(d.id);
+  };
   const summary = (e: FormElement) => e.label || (isBuiltin(e) ? tt(e.type) : e.id);
 
   const previewBuiltin = (e: BuiltinElement) => (
@@ -140,6 +146,20 @@ export function FormEditor({ template, readOnly, save, upload }: Props) {
 
         <div>
           <h2 className="mb-2 font-medium">{t("elements", { count: elements.length })}</h2>
+          {implicit.length ? (
+            <div className="mb-2 rounded-lg border border-dashed border-border p-2" data-testid="implicit-list">
+              <p className="muted mb-1 text-xs">{t("implicitHelp")}</p>
+              <ul className="flex flex-wrap gap-1">
+                {implicit.map((d) => (
+                  <li key={d.id}>
+                    <button type="button" className="btn-secondary px-2 py-0.5 text-xs" disabled={readOnly} onClick={() => adopt(d)} title={t("implicitAdopt")} data-testid={`adopt-${d.type}`}>
+                      <Icon icon={Plus} size={12} /> {tt(d.type)} <span className="muted">· {t(`modes.${d.mode}`)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           {elements.length === 0 ? <p className="muted">{t("emptyList")}</p> : null}
           <ol className="space-y-1" data-testid="element-list">
             {elements.map((e, i) => (
