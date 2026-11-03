@@ -96,13 +96,27 @@ export function assertSiteAllowed(tenant: Tenant, siteId: string): void {
 export type PanelOption = { href: string; role: MembershipRole; siteId: string | null; siteName: string | null };
 
 /** All panels a user can open, used by the panel switcher and the post-login redirect. */
+/**
+ * Every active employee with an account is a host: the membership that opens the host panel is created on demand
+ * (JIT provisioning creates it for Entra users; people added by hand in /admin/people get it here). Idempotent.
+ */
+export async function ensureHostMembership(user: Pick<SessionUser, "id" | "employeeId">): Promise<void> {
+  if (!user.employeeId) return;
+  const existing = await db.membership.findFirst({ where: { userId: user.id, role: "host" }, select: { id: true } });
+  if (existing) return;
+  const employee = await db.employee.findUnique({ where: { id: user.employeeId }, select: { active: true, siteId: true } });
+  if (!employee?.active) return;
+  await db.membership.create({ data: { userId: user.id, role: "host", siteId: employee.siteId } });
+}
+
 export async function listPanels(user: SessionUser): Promise<PanelOption[]> {
+  await ensureHostMembership(user);
   const memberships = await db.membership.findMany({
     where: { userId: user.id, status: "active" },
     include: { site: { select: { id: true, name: true, active: true } } },
     orderBy: [{ role: "asc" }, { createdAt: "asc" }],
   });
-  return memberships
+  const panels: PanelOption[] = memberships
     .filter((m) => m.site === null || m.site.active)
     .map((m) => ({
       href: PANEL_PATHS[m.role],
@@ -110,4 +124,10 @@ export async function listPanels(user: SessionUser): Promise<PanelOption[]> {
       siteId: m.site?.id ?? null,
       siteName: m.site?.name ?? null,
     }));
+  // Admins and security issue invitation links on behalf of hosts (`requireHostTenant`), so they get the host panel too.
+  if (!panels.some((p) => p.role === "host")) {
+    const staff = panels.find((p) => p.role === "admin") ?? panels.find((p) => p.role === "security");
+    if (staff) panels.push({ href: PANEL_PATHS.host, role: "host", siteId: staff.siteId, siteName: staff.siteName });
+  }
+  return panels;
 }

@@ -9,6 +9,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const t = await getTranslations("admin");
   const adminItems = [
     { href: "/admin", label: t("overview") },
+    { href: "/app/passes/new", label: t("invite") },
     { href: "/admin/sites", label: t("sites") },
     { href: "/admin/policies", label: t("policies") },
     { href: "/admin/nda", label: t("nda") },
@@ -21,7 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/reports", label: t("reports") },
     { href: "/help", label: t("help") },
   ];
-  const items = tenant.role === "admin" ? adminItems : [{ href: "/admin/reports", label: t("reports") }, { href: "/admin/frequent", label: t("frequent") }, { href: "/help", label: t("help") }];
+  const items = tenant.role === "admin" ? adminItems : [{ href: "/app/passes/new", label: t("invite") }, { href: "/admin/reports", label: t("reports") }, { href: "/admin/frequent", label: t("frequent") }, { href: "/help", label: t("help") }];
   return (
     <AppShell user={tenant.user} subtitle={t("title")}>
       <nav aria-label={t("title")} className="mb-6 flex flex-wrap gap-2 print:hidden">

@@ -2,7 +2,8 @@ import "server-only";
 import { redirect } from "next/navigation";
 import type { MembershipRole } from "@prisma/client";
 import { db } from "@/lib/db";
-import { AuthError, getMembershipOrThrow, requireUser, type Tenant } from "@/lib/auth/guards";
+import { AuthError, ensureHostMembership, getMembershipOrThrow, requireUser, type Tenant } from "@/lib/auth/guards";
+import { getSessionUser } from "@/lib/auth/session";
 
 const INVITE_ROLES: MembershipRole[] = ["host", "admin", "security"];
 
@@ -27,6 +28,8 @@ export async function getHostTenantOrThrow(): Promise<HostTenant> {
 }
 
 async function getHostTenantOrNull(): Promise<HostTenant | null> {
+  const user = await getSessionUser();
+  if (user && !user.guardDeviceId) await ensureHostMembership(user);
   for (const role of INVITE_ROLES) {
     try {
       const tenant = await getMembershipOrThrow(role);

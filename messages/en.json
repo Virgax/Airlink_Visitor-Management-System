@@ -393,7 +393,8 @@
         "tooBig": "The PDF exceeds 5 MB.",
         "notPdf": "The file is not a PDF."
       }
-    }
+    },
+    "invite": "Invite visitor"
   },
   "guard": {
     "title": "Security",
