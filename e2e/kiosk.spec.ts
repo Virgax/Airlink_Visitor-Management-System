@@ -76,3 +76,32 @@ test("admin creates a guard with PIN, enrolls a kiosk, guard signs in with PIN; 
   await expect(k2.getByRole("heading", { name: "Entrar con PIN" })).toBeVisible();
   await kioskA2.close();
 });
+
+test("a kiosk can drop its enrollment from the PIN screen and take a new code", async ({ page }) => {
+  const stamp = Date.now();
+  await loginAsAdmin(page);
+  await page.goto("/admin/devices");
+  await page.getByLabel("Nombre del dispositivo").fill(`Tablet Movil ${stamp}`);
+  await page.getByLabel("Sitio").selectOption({ label: "Airlink 2" });
+  await page.getByLabel("Puerta").selectOption({ label: "Airlink 2 · Recepción" });
+  await page.getByRole("button", { name: "Crear dispositivo" }).click();
+  const code = (await page.getByTestId("enroll-code").textContent())!.trim();
+  const k = await (await page.context().browser()!.newContext({ locale: "es-DO" })).newPage();
+  await k.goto("/guard");
+  await k.getByLabel("Código").fill(code);
+  await k.getByRole("button", { name: "Enrolar" }).click();
+  await expect(k.getByRole("heading", { name: "Entrar con PIN" })).toBeVisible();
+  await k.getByTestId("unenroll").click();
+  await expect(k.getByRole("heading", { name: "Enrolar este dispositivo" })).toBeVisible();
+  await expect(k.locator("[role=status]")).toContainText("ya no está enrolado");
+  // The old code is spent; a new one from the admin page works.
+  await k.getByLabel("Código").fill(code);
+  await k.getByRole("button", { name: "Enrolar" }).click();
+  await expect(k.locator("p[role=alert]")).toBeVisible();
+  await page.goto("/admin/devices");
+  await page.locator("li", { hasText: `Tablet Movil ${stamp}` }).getByRole("button", { name: "Generar código" }).click();
+  const code2 = (await page.getByTestId("enroll-code").textContent())!.trim();
+  await k.getByLabel("Código").fill(code2);
+  await k.getByRole("button", { name: "Enrolar" }).click();
+  await expect(k.getByRole("heading", { name: "Entrar con PIN" })).toBeVisible();
+});

@@ -403,7 +403,8 @@
       "intro": "Ask IT for an enrollment code and type it here.",
       "code": "Code",
       "submit": "Enroll",
-      "error": "Invalid or expired code."
+      "error": "Invalid or expired code.",
+      "unenrolled": "This device is no longer enrolled. Ask for a new code under Kiosk devices for the site and gate where it will be used."
     },
     "pin": {
       "title": "Sign in with PIN",
@@ -413,7 +414,9 @@
       "submit": "Sign in",
       "error": "Wrong PIN.",
       "noGuards": "No security staff with a PIN at this site. Ask IT to set one up.",
-      "rateLimited": "Too many attempts. Wait a minute."
+      "rateLimited": "Too many attempts. Wait a minute.",
+      "wrongDevice": "Change device",
+      "wrongDeviceHelp": "Is this device for another site or gate? Drop the enrollment and enroll it again with a new code."
     },
     "kiosk": {
       "title": "Kiosk mode",
@@ -2040,7 +2043,7 @@
           },
           "enroll": {
             "title": "Enroll the reception tablet or PC",
-            "body": "On the reception computer open the Visitas address followed by /guard. No sign-in is needed.\nType the code and press \"Enroll\". The browser is now permanently linked to that gate: always use the same browser and never clear its browsing data."
+            "body": "On the reception computer open the Visitas address followed by /guard. No sign-in is needed.\nType the code and press \"Enroll\". The browser is now permanently linked to that gate: always use the same browser and never clear its browsing data.\nIf a device was enrolled at the wrong site or gate, press \"Change device\" on the PIN screen: it drops the enrollment and asks for a new code."
           },
           "pin": {
             "title": "Sign in with the guard's PIN",

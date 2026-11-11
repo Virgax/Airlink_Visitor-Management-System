@@ -6,9 +6,9 @@ import { Icon } from "@/components/Icon";
 import { db } from "@/lib/db";
 import { getDevice } from "@/lib/auth/kiosk";
 import { getSessionUser } from "@/lib/auth/session";
-import { enrollAction, lockAction, pinLoginAction } from "./actions";
+import { enrollAction, lockAction, pinLoginAction, unenrollAction } from "./actions";
 
-export default async function GuardPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+export default async function GuardPage({ searchParams }: { searchParams: Promise<{ error?: string; ok?: string }> }) {
   const sp = await searchParams;
   const t = await getTranslations("guard");
   const device = await getDevice();
@@ -20,6 +20,7 @@ export default async function GuardPage({ searchParams }: { searchParams: Promis
           <form action={enrollAction} className="card space-y-4">
             <h1 className="text-2xl font-semibold">{t("enroll.title")}</h1>
             <p className="muted">{t("enroll.intro")}</p>
+            {sp.ok === "unenrolled" ? <p className="alert-ok" role="status">{t("enroll.unenrolled")}</p> : null}
             {sp.error === "enroll" ? <p className="alert-error" role="alert">{t("enroll.error")}</p> : null}
             <div>
               <label className="label" htmlFor="code">{t("enroll.code")}</label>
@@ -66,6 +67,10 @@ export default async function GuardPage({ searchParams }: { searchParams: Promis
                 <button type="submit" className="btn-primary w-full">{t("pin.submit")}</button>
               </>
             )}
+          </form>
+          <form action={unenrollAction} className="mt-3 text-center">
+            <p className="muted mb-1 text-xs">{t("pin.wrongDeviceHelp")}</p>
+            <button type="submit" className="btn-secondary text-sm" data-testid="unenroll">{t("pin.wrongDevice")}</button>
           </form>
         </div>
       </AppShell>

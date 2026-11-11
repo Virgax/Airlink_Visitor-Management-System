@@ -41,6 +41,18 @@ export async function enrollDevice(code: string): Promise<GuardDevice | null> {
   return updated;
 }
 
+/**
+ * Kiosk side: forgets the enrollment of this browser (the device record stays; it needs a new code to be used again).
+ * Lets security move a tablet to another gate or site, or recover a browser enrolled by mistake.
+ */
+export async function unenrollDevice(): Promise<GuardDevice | null> {
+  const device = await getDevice();
+  if (device) await db.guardDevice.update({ where: { id: device.id }, data: { deviceTokenHash: null } });
+  const jar = await cookies();
+  jar.set(DEVICE_COOKIE, "", { httpOnly: true, secure: isProd(), sameSite: "lax", path: "/", maxAge: 0 });
+  return device;
+}
+
 export type KioskSite = { id: string; name: string; timezone: string; settings: Prisma.JsonValue };
 export type KioskGate = { id: string; name: string; kind: GateKind; settings: Prisma.JsonValue };
 export type EnrolledDevice = GuardDevice & { site: KioskSite; gate: KioskGate };

@@ -403,7 +403,8 @@
       "intro": "Pide a IT un código de enrolamiento y escríbelo aquí.",
       "code": "Código",
       "submit": "Enrolar",
-      "error": "Código inválido o vencido."
+      "error": "Código inválido o vencido.",
+      "unenrolled": "Este equipo ya no está enrolado. Pide un código nuevo en Dispositivos de kiosco para el sitio y la puerta donde lo vas a usar."
     },
     "pin": {
       "title": "Entrar con PIN",
@@ -413,7 +414,9 @@
       "submit": "Entrar",
       "error": "PIN incorrecto.",
       "noGuards": "No hay personal de seguridad con PIN en este sitio. Pide a IT que lo configure.",
-      "rateLimited": "Demasiados intentos. Espera un minuto."
+      "rateLimited": "Demasiados intentos. Espera un minuto.",
+      "wrongDevice": "Cambiar de dispositivo",
+      "wrongDeviceHelp": "¿Este equipo es de otro sitio o puerta? Suelta el enrolamiento y vuelve a enrolarlo con un código nuevo."
     },
     "kiosk": {
       "title": "Modo kiosco",
@@ -2040,7 +2043,7 @@
           },
           "enroll": {
             "title": "Enrola la tablet o PC de recepción",
-            "body": "En el equipo de recepción abre la dirección de Visitas seguida de /guard. No hace falta iniciar sesión.\nEscribe el código y pulsa \"Enrolar\". El navegador queda vinculado a esa puerta de forma permanente: usa siempre el mismo navegador y no borres sus datos de navegación."
+            "body": "En el equipo de recepción abre la dirección de Visitas seguida de /guard. No hace falta iniciar sesión.\nEscribe el código y pulsa \"Enrolar\". El navegador queda vinculado a esa puerta de forma permanente: usa siempre el mismo navegador y no borres sus datos de navegación.\nSi un equipo quedó enrolado en el sitio o la puerta equivocada, en la pantalla del PIN pulsa \"Cambiar de dispositivo\": suelta el enrolamiento y vuelve a pedir un código nuevo."
           },
           "pin": {
             "title": "Entra con el PIN del guardia",

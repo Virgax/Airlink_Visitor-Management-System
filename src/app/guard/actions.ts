@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { enrollDevice, getDevice, touchDevice } from "@/lib/auth/kiosk";
+import { enrollDevice, getDevice, touchDevice, unenrollDevice } from "@/lib/auth/kiosk";
 import { verifyPassword } from "@/lib/auth/password";
 import { cookies } from "next/headers";
 import { PRINT_COOKIE } from "@/lib/auth/cookies";
@@ -21,6 +21,14 @@ export async function enrollAction(formData: FormData): Promise<void> {
   if (!device) redirect("/guard?error=enroll");
   await audit({ action: "device.enrolled", siteId: device.siteId, targetType: "GuardDevice", targetId: device.id });
   redirect("/guard");
+}
+
+/** "Cambiar de dispositivo" on the PIN screen: drops this browser's enrollment so it can take a new code. */
+export async function unenrollAction(): Promise<void> {
+  await destroySession();
+  const device = await unenrollDevice();
+  if (device) await audit({ action: "device.enrolled", siteId: device.siteId, targetType: "GuardDevice", targetId: device.id, meta: { op: "unenrolled" } });
+  redirect("/guard?ok=unenrolled");
 }
 
 const pinSchema = z.object({ userId: z.string().min(1), pin: z.string().regex(/^\d{4,8}$/) });
