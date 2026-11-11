@@ -15,6 +15,7 @@ import { checkoutVisit, visitJson } from "@/lib/server/visits";
 import { log } from "@/lib/log";
 import { registrationPending } from "@/lib/passes/visitor";
 import { devicesRequiredMissing } from "@/lib/server/devices";
+import { readSiteSettings } from "@/lib/server/sites";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +57,8 @@ export async function POST(request: NextRequest): Promise<Response> {
       ...passes.map((p) => ({ passId: p.id, pinHash: p.pinHash!, siteId: p.siteId, status: p.status, validFrom: p.validFrom, validUntil: p.validUntil, schedule: p.schedule ?? undefined, visitorName: p.visitorName, source: "pass" as const })),
       ...frequent.filter((f) => f.pass).map((f) => ({ passId: f.pass!.id, pinHash: f.pinHash!, siteId: f.pass!.siteId, status: f.pass!.status, validFrom: f.pass!.validFrom, validUntil: f.pass!.validUntil, schedule: f.pass!.schedule ?? undefined, visitorName: f.pass!.visitorName, source: "frequent" as const })),
     ];
-    const candidates = pinCandidates(rows, { siteId: site.id, timeZone: site.timezone, now, name: parsed.data.name });
+    const earlyArrivalMin = readSiteSettings(site).earlyArrivalMin;
+    const candidates = pinCandidates(rows, { siteId: site.id, timeZone: site.timezone, now, name: parsed.data.name, earlyArrivalMin });
     // Several passes can verify the same PIN (e.g. a frequent visitor's pass and a host pass): prefer the one
     // without an open visit so a second person never checks the first one out.
     const matches = await matchPins(pin, candidates, verifyPassword);
@@ -92,7 +94,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const policy = policyFlags(pass.kind, await db.visitPolicy.findUnique({ where: { siteId_kind: { siteId: site.id, kind: pass.kind } } }));
     const state = validatePassState(
       { ...pass, schedule: pass.schedule ?? undefined },
-      { siteId: site.id, gateId: gate.id, timeZone: site.timezone, now, blacklisted: Boolean(hit), companyBlocked: Boolean(pass.company?.blocked), policy },
+      { siteId: site.id, gateId: gate.id, timeZone: site.timezone, now, earlyArrivalMin, blacklisted: Boolean(hit), companyBlocked: Boolean(pass.company?.blocked), policy },
     );
     if (!state.ok) {
       if (state.reason === "blacklisted" && hit) await reportBlacklistHit(pass, hit, kiosk, { scanId, via: "pin" });

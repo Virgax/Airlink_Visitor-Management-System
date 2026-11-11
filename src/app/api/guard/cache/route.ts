@@ -3,6 +3,7 @@ import { kioskRoute } from "@/lib/guard/route";
 import { touchDevice } from "@/lib/auth/kiosk";
 import { passWarnings, policyFlags } from "@/lib/guard/decide";
 import type { PassCache } from "@/lib/offline/provisional";
+import { readSiteSettings } from "@/lib/server/sites";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,7 @@ export async function GET(): Promise<Response> {
     const body: PassCache = {
       generatedAt: now.toISOString(),
       blacklistCount,
+      earlyArrivalMin: readSiteSettings(site).earlyArrivalMin,
       passes: passes.map((p) => {
         const passAreas = p.areaIds.map((id) => areaById.get(id)).filter((a): a is NonNullable<typeof a> => Boolean(a));
         const policy = policyFlags(p.kind, policies.find((row) => row.kind === p.kind));

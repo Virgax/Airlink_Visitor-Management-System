@@ -20,7 +20,7 @@ export type CachedPass = {
   areas: string[];
 };
 
-export type PassCache = { generatedAt: string; passes: CachedPass[]; blacklistCount: number };
+export type PassCache = { generatedAt: string; passes: CachedPass[]; blacklistCount: number; earlyArrivalMin?: number };
 
 export type ProvisionalReason = "malformed" | "not_found" | "qr_expired" | "not_yet_valid" | "expired" | "no_uses_left";
 
@@ -33,7 +33,7 @@ export function provisionalCheck(cache: PassCache | null, payload: string, now =
   if (!pass) return { ok: false, reason: "not_found" };
   const nowSec = Math.floor(now.getTime() / 1000);
   if (shape.kind === "static" && shape.exp < nowSec) return { ok: false, reason: "qr_expired", pass };
-  if (now < new Date(pass.validFrom)) return { ok: false, reason: "not_yet_valid", pass };
+  if (now.getTime() < new Date(pass.validFrom).getTime() - Math.max(0, cache?.earlyArrivalMin ?? 0) * 60_000) return { ok: false, reason: "not_yet_valid", pass };
   if (now >= new Date(pass.validUntil)) return { ok: false, reason: "expired", pass };
   if (pass.uses >= pass.maxUses) return { ok: false, reason: "no_uses_left", pass };
   return { ok: true, pass };

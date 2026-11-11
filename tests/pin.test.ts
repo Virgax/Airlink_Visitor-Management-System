@@ -62,7 +62,7 @@ describe("pinCandidates", () => {
       row({ passId: "other-site", siteId: "site_b" }),
       row({ passId: "pending", status: "pending_approval" }),
       row({ passId: "expired", validUntil: new Date(now.getTime() - 60_000) }),
-      row({ passId: "future", validFrom: new Date(now.getTime() + 60_000) }),
+      row({ passId: "future", validFrom: new Date(now.getTime() + 2 * 3_600_000) }), // beyond the one-hour early-arrival grace
       row({ passId: "no-pin", pinHash: "" }),
     ];
     expect(pinCandidates(rows, ctx).map((r) => r.passId)).toEqual(["p1"]);

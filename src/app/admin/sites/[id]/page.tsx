@@ -95,6 +95,11 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
             <input id="unannouncedTimeoutMin" name="unannouncedTimeoutMin" type="number" min={1} max={240} required defaultValue={settings.unannouncedTimeoutMin} className="input" />
           </div>
           <div>
+            <label className="label" htmlFor="earlyArrivalMin">{t("earlyArrivalMin")}</label>
+            <input id="earlyArrivalMin" name="earlyArrivalMin" type="number" min={0} max={720} required defaultValue={settings.earlyArrivalMin} className="input" />
+            <p className="muted mt-1 text-xs">{t("earlyArrivalHelp")}</p>
+          </div>
+          <div>
             <label className="label" htmlFor="badgeTemplate">{tb("admin.template")}</label>
             <select id="badgeTemplate" name="badgeTemplate" className="input" defaultValue={settings.badgeTemplate}>
               {BADGE_TEMPLATES.map((tpl) => <option key={tpl} value={tpl}>{tb(`templates.${tpl}`)}</option>)}

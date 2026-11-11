@@ -90,8 +90,12 @@ export function parseSchedule(raw: unknown): Schedule | null {
  * Recurring schedule check in the site's time zone. A window crossing midnight (from > to) belongs to the day
  * it starts on: Mon 22:00–06:00 is valid on Tuesday 03:00 because the shift started Monday.
  */
-export function isWithinSchedule(schedule: Schedule, at: Date, timeZone: string): boolean {
-  const from = parseHHmm(schedule.from)!;
+/** Minutes a visitor may arrive before the pass's start time (site setting `earlyArrivalMin`; default one hour). */
+export const DEFAULT_EARLY_ARRIVAL_MIN = 60;
+
+export function isWithinSchedule(schedule: Schedule, at: Date, timeZone: string, earlyArrivalMin = 0): boolean {
+  // The grace opens the daily start earlier (never past midnight: the window itself still bounds the pass).
+  const from = Math.max(0, parseHHmm(schedule.from)! - Math.max(0, earlyArrivalMin));
   const to = parseHHmm(schedule.to)!;
   const { weekday, minutes } = localParts(at, timeZone);
   if (from === to) return schedule.days.includes(weekday); // whole day
@@ -104,16 +108,29 @@ export function isWithinSchedule(schedule: Schedule, at: Date, timeZone: string)
 
 export type WindowResult = "ok" | "not_yet_valid" | "expired" | "outside_schedule";
 
+/**
+ * Validity window with the site's early-arrival grace: a visitor invited for 10:00 may enter from 09:00 (default).
+ * The grace never reaches into the previous day (the pass's own date stays the reference), and the end is unchanged.
+ */
 export function checkWindow(
   pass: { validFrom: Date; validUntil: Date; schedule?: unknown },
   at: Date,
   timeZone: string,
+  earlyArrivalMin: number = DEFAULT_EARLY_ARRIVAL_MIN,
 ): WindowResult {
-  if (at < pass.validFrom) return "not_yet_valid";
+  const grace = Math.max(0, earlyArrivalMin) * 60_000;
+  const opensAt = new Date(Math.max(pass.validFrom.getTime() - grace, startOfLocalDay(pass.validFrom, timeZone).getTime()));
+  if (at < opensAt) return "not_yet_valid";
   if (at >= pass.validUntil) return "expired";
   const schedule = parseSchedule(pass.schedule);
-  if (schedule && !isWithinSchedule(schedule, at, timeZone)) return "outside_schedule";
+  if (schedule && !isWithinSchedule(schedule, at, timeZone, earlyArrivalMin)) return "outside_schedule";
   return "ok";
+}
+
+/** Midnight of the given instant's local day (in the site's time zone), as a UTC instant. */
+function startOfLocalDay(at: Date, timeZone: string): Date {
+  const { minutes } = localParts(at, timeZone);
+  return new Date(at.getTime() - minutes * 60_000 - (at.getTime() % 60_000));
 }
 
 export type PassForValidation = {
@@ -140,6 +157,8 @@ export type ValidationContext = {
   blacklisted?: boolean;
   companyBlocked?: boolean;
   policy?: { requiresNda?: boolean; allowedGateIds?: string[] } | null;
+  /** Site setting: minutes before the pass's start the kiosk already lets the visitor in. */
+  earlyArrivalMin?: number;
 };
 
 export type QrDenyReason = "malformed" | "bad_signature" | "qr_expired" | "qr_stale";
@@ -200,7 +219,7 @@ export function validatePassState(pass: PassForValidation, ctx: Omit<ValidationC
   if (pass.status === "expired") return { ok: false, reason: "expired" };
   if (pass.uses >= pass.maxUses) return { ok: false, reason: "no_uses_left" };
 
-  const window = checkWindow(pass, now, ctx.timeZone);
+  const window = checkWindow(pass, now, ctx.timeZone, ctx.earlyArrivalMin);
   if (window !== "ok") return { ok: false, reason: window };
 
   const allowedGates = pass.gateIds.length > 0 ? pass.gateIds : (ctx.policy?.allowedGateIds ?? []);

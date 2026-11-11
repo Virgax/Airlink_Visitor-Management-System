@@ -14,6 +14,7 @@ import { checkoutVisit, visitJson, visitSummarySelect } from "@/lib/server/visit
 import { verifyAtCheckpoint } from "@/lib/server/checkpoint";
 import { registrationPending } from "@/lib/passes/visitor";
 import { lookupDevice, devicesRequiredMissing } from "@/lib/server/devices";
+import { readSiteSettings } from "@/lib/server/sites";
 import { log } from "@/lib/log";
 
 export const dynamic = "force-dynamic";
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         siteId: site.id,
         gateId: gate.id,
         timeZone: site.timezone,
+        earlyArrivalMin: readSiteSettings(site).earlyArrivalMin,
         key: await getSecret("PASS_SIGNING_KEY"),
         now: at,
         blacklisted: Boolean(hit),

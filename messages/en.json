@@ -221,7 +221,9 @@
       "deleteSiteConfirm": "Type the site name ({name}) to confirm",
       "deleteSiteDialog": "You are about to delete \"{name}\" and all its history. Are you sure?",
       "deleteSiteButton": "Delete site permanently",
-      "siteDeleted": "Site deleted."
+      "siteDeleted": "Site deleted.",
+      "earlyArrivalMin": "Early-arrival minutes",
+      "earlyArrivalHelp": "The kiosk lets visitors in this long before the pass's start time (never into the previous day). 60 = one hour early. Also applies to the start time of recurring passes."
     },
     "policiesPage": {
       "title": "Visit policies",
@@ -2187,7 +2189,7 @@
           },
           "sites": {
             "title": "Sites, gates and areas",
-            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry.\nThe \"Identifier (URL)\" when creating a site is its short unique web-style name (lowercase, digits and hyphens, e.g. airlink-2): it identifies the site permanently in the audit log and integrations even if you later rename it, and cannot be edited afterwards."
+            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry.\nThe \"Identifier (URL)\" when creating a site is its short unique web-style name (lowercase, digits and hyphens, e.g. airlink-2): it identifies the site permanently in the audit log and integrations even if you later rename it, and cannot be edited afterwards.\nThe kiosk lets visitors in before the pass time according to the site's \"Early-arrival minutes\" (60 by default): a 10:00 visit may enter from 9:00, never the day before."
           },
           "policies": {
             "title": "Policies per visit type",

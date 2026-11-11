@@ -60,12 +60,12 @@ export const MAX_PIN_CANDIDATES = 50;
  * window and (for recurring passes) the schedule at `now`, optionally matching a name fragment typed by the guard.
  * One candidate per pass: a pass's own hash wins over the frequent visitor's. Result is capped at MAX_PIN_CANDIDATES.
  */
-export function pinCandidates(rows: PinCandidate[], ctx: { siteId: string; timeZone: string; now: Date; name?: string | null }): PinCandidate[] {
+export function pinCandidates(rows: PinCandidate[], ctx: { siteId: string; timeZone: string; now: Date; name?: string | null; earlyArrivalMin?: number }): PinCandidate[] {
   const name = (ctx.name ?? "").trim().toLowerCase();
   const byPass = new Map<string, PinCandidate>();
   for (const row of rows) {
     if (row.siteId !== ctx.siteId || row.status !== "active" || !row.pinHash) continue;
-    if (checkWindow(row, ctx.now, ctx.timeZone) !== "ok") continue;
+    if (checkWindow(row, ctx.now, ctx.timeZone, ctx.earlyArrivalMin) !== "ok") continue;
     if (name && !row.visitorName.toLowerCase().includes(name)) continue;
     const existing = byPass.get(row.passId);
     if (!existing || (existing.source === "frequent" && row.source === "pass")) byPass.set(row.passId, row);

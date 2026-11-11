@@ -1,3 +1,4 @@
+import { DEFAULT_EARLY_ARRIVAL_MIN } from "@/lib/passes/validate";
 import "server-only";
 import type { Site } from "@prisma/client";
 import { db } from "@/lib/db";
@@ -18,9 +19,9 @@ export async function getManagedSite(tenant: Tenant, siteId: string): Promise<Si
   return db.site.findUnique({ where: { id: siteId } });
 }
 
-export type SiteSettings = { retentionDays: number; unannouncedTimeoutMin: number; badgeTemplate: BadgeTemplate };
+export type SiteSettings = { retentionDays: number; unannouncedTimeoutMin: number; earlyArrivalMin: number; badgeTemplate: BadgeTemplate };
 
-export const DEFAULT_SITE_SETTINGS: SiteSettings = { retentionDays: 90, unannouncedTimeoutMin: 5, badgeTemplate: "landscape_photo" };
+export const DEFAULT_SITE_SETTINGS: SiteSettings = { retentionDays: 90, unannouncedTimeoutMin: 5, earlyArrivalMin: DEFAULT_EARLY_ARRIVAL_MIN, badgeTemplate: "landscape_photo" };
 
 export function readSiteSettings(site: Pick<Site, "settings">): SiteSettings & Record<string, unknown> {
   const raw = site.settings && typeof site.settings === "object" && !Array.isArray(site.settings) ? (site.settings as Record<string, unknown>) : {};
@@ -29,6 +30,7 @@ export function readSiteSettings(site: Pick<Site, "settings">): SiteSettings & R
     ...raw,
     retentionDays: num(raw.retentionDays, DEFAULT_SITE_SETTINGS.retentionDays),
     unannouncedTimeoutMin: num(raw.unannouncedTimeoutMin, DEFAULT_SITE_SETTINGS.unannouncedTimeoutMin),
+    earlyArrivalMin: num(raw.earlyArrivalMin, DEFAULT_SITE_SETTINGS.earlyArrivalMin),
     badgeTemplate: readBadgeTemplate(site.settings),
   };
 }

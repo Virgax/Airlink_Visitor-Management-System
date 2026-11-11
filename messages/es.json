@@ -221,7 +221,9 @@
       "deleteSiteConfirm": "Escribe el nombre del sitio ({name}) para confirmar",
       "deleteSiteDialog": "Vas a eliminar \"{name}\" y todo su historial. ¿Seguro?",
       "deleteSiteButton": "Eliminar sitio definitivamente",
-      "siteDeleted": "Sitio eliminado."
+      "siteDeleted": "Sitio eliminado.",
+      "earlyArrivalMin": "Minutos de llegada anticipada",
+      "earlyArrivalHelp": "El kiosco deja entrar este tiempo antes de la hora del pase (sin pasar al día anterior). 60 = una hora antes. También aplica a la hora de entrada de los pases recurrentes."
     },
     "policiesPage": {
       "title": "Políticas de visita",
@@ -2187,7 +2189,7 @@
           },
           "sites": {
             "title": "Sitios, puertas y áreas",
-            "body": "Cada planta es un sitio con su zona horaria, retención de fotos y minutos de espera para escalar visitas no anunciadas. Dentro del sitio defines las puertas (peatonal, vehicular, muelle), la impresora de gafete de cada puerta y el QR de auto-registro para imprimir en recepción.\nLas áreas pueden marcarse como restringidas o con acompañante obligatorio; el kiosco lo muestra como aviso al entrar.\nEl \"Identificador (URL)\" al crear un sitio es su nombre corto y único en formato web (minúsculas, números y guiones, ej. airlink-2): identifica el sitio de forma fija en la auditoría y las integraciones aunque luego cambies el nombre visible, y no se puede editar después."
+            "body": "Cada planta es un sitio con su zona horaria, retención de fotos y minutos de espera para escalar visitas no anunciadas. Dentro del sitio defines las puertas (peatonal, vehicular, muelle), la impresora de gafete de cada puerta y el QR de auto-registro para imprimir en recepción.\nLas áreas pueden marcarse como restringidas o con acompañante obligatorio; el kiosco lo muestra como aviso al entrar.\nEl \"Identificador (URL)\" al crear un sitio es su nombre corto y único en formato web (minúsculas, números y guiones, ej. airlink-2): identifica el sitio de forma fija en la auditoría y las integraciones aunque luego cambies el nombre visible, y no se puede editar después.\nEl kiosco deja entrar antes de la hora del pase según los \"Minutos de llegada anticipada\" del sitio (60 por defecto): si la visita es a las 10:00, puede entrar desde las 9:00, nunca el día anterior."
           },
           "policies": {
             "title": "Políticas por tipo de visita",

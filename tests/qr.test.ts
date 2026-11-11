@@ -63,7 +63,9 @@ describe("validatePass", () => {
     expect(validatePass(payload, { ...base, status: "pending_approval" }, ctx)).toMatchObject({ ok: false, reason: "pending_approval" });
     expect(validatePass(payload, { ...base, status: "used" }, ctx)).toMatchObject({ ok: false, reason: "used" });
     expect(validatePass(payload, { ...base, uses: 1 }, ctx)).toMatchObject({ ok: false, reason: "no_uses_left" });
-    expect(validatePass(payload, { ...base, validFrom: new Date(now + 60_000) }, ctx)).toMatchObject({ ok: false, reason: "not_yet_valid" });
+    // Starts in two hours: beyond the one-hour early-arrival grace (a pass starting in a minute would already be open).
+    expect(validatePass(payload, { ...base, validFrom: new Date(now + 2 * 3_600_000) }, ctx)).toMatchObject({ ok: false, reason: "not_yet_valid" });
+    expect(validatePass(payload, { ...base, validFrom: new Date(now + 60_000) }, ctx).ok).toBe(true);
     expect(validatePass(payload, { ...base, validUntil: new Date(now - 60_000) }, ctx)).toMatchObject({ ok: false, reason: "expired" });
   });
   it("checks gates from the pass or the policy", () => {
