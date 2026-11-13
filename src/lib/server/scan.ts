@@ -45,6 +45,8 @@ export async function passInfo(pass: LoadedPass, siteId: string): Promise<ScanPa
     devices: readDevices(pass.extra),
     devicesNone: readDevicesNone(pass.extra),
     photoKey: pass.photoKey,
+    idFrontKey: pass.idFrontKey,
+    idBackKey: pass.idBackKey,
   };
 }
 

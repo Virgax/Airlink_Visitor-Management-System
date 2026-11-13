@@ -29,9 +29,11 @@ export type SiteSettings = {
   allowUnannounced: boolean;
   /** Guest Wi-Fi shown on the visitor link when the host ticks "share Wi-Fi" on the invitation. */
   guestWifi: GuestWifi;
+  /** Every visitor, whatever the kind, must attach a face photo and both sides of their ID before entering. */
+  requirePhotos: boolean;
 };
 
-export const DEFAULT_SITE_SETTINGS: SiteSettings = { retentionDays: 90, unannouncedTimeoutMin: 5, earlyArrivalMin: DEFAULT_EARLY_ARRIVAL_MIN, badgeTemplate: "landscape_photo", allowUnannounced: true, guestWifi: { ssid: "", password: "" } };
+export const DEFAULT_SITE_SETTINGS: SiteSettings = { retentionDays: 90, unannouncedTimeoutMin: 5, earlyArrivalMin: DEFAULT_EARLY_ARRIVAL_MIN, badgeTemplate: "landscape_photo", allowUnannounced: true, guestWifi: { ssid: "", password: "" }, requirePhotos: true };
 
 export function readSiteSettings(site: Pick<Site, "settings">): SiteSettings & Record<string, unknown> {
   const raw = site.settings && typeof site.settings === "object" && !Array.isArray(site.settings) ? (site.settings as Record<string, unknown>) : {};
@@ -43,6 +45,7 @@ export function readSiteSettings(site: Pick<Site, "settings">): SiteSettings & R
     earlyArrivalMin: num(raw.earlyArrivalMin, DEFAULT_SITE_SETTINGS.earlyArrivalMin),
     badgeTemplate: readBadgeTemplate(site.settings),
     allowUnannounced: typeof raw.allowUnannounced === "boolean" ? raw.allowUnannounced : true,
+    requirePhotos: typeof raw.requirePhotos === "boolean" ? raw.requirePhotos : true,
     guestWifi: readGuestWifi(raw.guestWifi),
   };
 }

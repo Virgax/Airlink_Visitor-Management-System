@@ -78,12 +78,14 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const needsNda = evaluation.warnings.includes("nda") && !pass.ndaAcceptedAt;
   const visitorElements = elementsFor(form.elements, "visitor");
   const mode = (type: BuiltinElement["type"]) => builtinMode(form.elements, type, "visitor");
-  const photoPending = mediaConfigured() && mode("photo") === "required" && !pass.photoKey;
+  const requirePhotos = mediaConfigured() && siteSettings.requirePhotos;
+  const photoSlots = requirePhotos ? (["face", "idFront", "idBack"] as const).filter((s) => !(s === "face" ? pass.photoKey : s === "idFront" ? pass.idFrontKey : pass.idBackKey)) : [];
+  const photoPending = mediaConfigured() && ((mode("photo") === "required" && !pass.photoKey) || photoSlots.length > 0);
   const signatureElement = visitorElements.find((e) => e.type === "signature") ?? null;
   const questions = visitorElements.filter((e) => e.type === "question");
   const unansweredQuestions = questions.some((e) => !hasAnswer(answers[e.id]?.value));
   const hasVisitorBlocks = visitorElements.some((e) => e.type === "text" || e.type === "media");
-  const showPrereg = editable && (registering || needsDoc || photoPending || (mode("photo") !== "off" && mediaConfigured() && !pass.photoKey) || (mode("document") !== "off" && !pass.visitorDocHash) || (mode("phone") !== "off" && !pass.visitorPhone) || unansweredQuestions || hasVisitorBlocks || devicesPending || Boolean(devicesBlock));
+  const showPrereg = editable && (registering || needsDoc || photoPending || requirePhotos || (mode("photo") !== "off" && mediaConfigured() && !pass.photoKey) || (mode("document") !== "off" && !pass.visitorDocHash) || (mode("phone") !== "off" && !pass.visitorPhone) || unansweredQuestions || hasVisitorBlocks || devicesPending || Boolean(devicesBlock));
   const nda = open && needsNda ? await activeNda(pass.siteId, now) : null;
   const ndaCopy = nda ? ndaText(nda, locale) : null;
   const labels = await formLabels();
@@ -94,7 +96,7 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const dataUrl = qr ? await QRCode.toDataURL(qr.payload, { margin: 1, width: 288, errorCorrectionLevel: "M" }) : null;
   const instructions = typeof pass.site.settings === "object" && pass.site.settings && "arrivalInstructions" in pass.site.settings ? String((pass.site.settings as Record<string, unknown>).arrivalInstructions ?? "") : "";
   const okKey = sp.ok === "prereg" ? "prereg" : sp.ok === "nda" ? "nda" : sp.ok === "registered" ? "register" : null;
-  const errorKey = sp.error && ["invalid", "rateLimited", "closed", "missing", "devices", "photo_media", "photo_tooBig", "photo_invalid", "photo_failed"].includes(sp.error) ? sp.error : null;
+  const errorKey = sp.error && ["invalid", "rateLimited", "closed", "missing", "devices", "photo_media", "photo_tooBig", "photo_invalid", "photo_failed", "photos_missing"].includes(sp.error) ? sp.error : null;
   const statusClass = pass.status === "active" ? "bg-success-bg text-success" : pass.status === "pending_approval" ? "bg-warning-bg text-warning" : "bg-danger-bg text-danger";
 
   return (
@@ -165,6 +167,29 @@ export default async function VisitorPassPage({ params, searchParams }: { params
                 <input id="name" name="name" required minLength={2} maxLength={120} className="input" autoComplete="name" />
               </div>
             ) : null}
+            {requirePhotos ? (
+              <fieldset className="space-y-3 rounded-lg border border-border p-3" data-testid="identity-photos">
+                <legend className="px-1 text-sm font-medium">{t("photos.title")}</legend>
+                <p className="muted">{t("photos.intro")}</p>
+                {(
+                  [
+                    { slot: "face", key: pass.photoKey, capture: "user" },
+                    { slot: "idFront", key: pass.idFrontKey, capture: "environment" },
+                    { slot: "idBack", key: pass.idBackKey, capture: "environment" },
+                  ] as const
+                ).map((p) => (
+                  <div key={p.slot} data-testid={`photo-${p.slot}`} data-done={p.key ? "1" : "0"}>
+                    <label className="label" htmlFor={`photo-${p.slot}`}>{t(`photos.${p.slot}`)}{p.key ? ` · ${t("photos.done")}` : ""}</label>
+                    {p.key ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- private media of this pass
+                      <img src={mediaHref(p.key)} alt="" className={`mb-2 rounded-lg border border-border object-cover ${p.slot === "face" ? "h-32 w-24" : "h-24 w-36"}`} />
+                    ) : null}
+                    <input id={`photo-${p.slot}`} name={p.slot === "face" ? "photo" : p.slot} type="file" accept="image/*" capture={p.capture} className="input" required={!p.key} />
+                  </div>
+                ))}
+                <p className="muted text-xs">{t("photos.help")}</p>
+              </fieldset>
+            ) : null}
             <FormFields
               elements={form.elements}
               surface="visitor"
@@ -180,7 +205,7 @@ export default async function VisitorPassPage({ params, searchParams }: { params
                 const text = elementText(e, locale);
                 switch (e.type) {
                   case "photo":
-                    return !mediaConfigured() ? null : (
+                    return !mediaConfigured() || requirePhotos ? null : (
                       <div data-testid="photo-field">
                         <label className="label" htmlFor="photo">{text.label || t("prereg.photo")}</label>
                         {pass.photoKey ? (

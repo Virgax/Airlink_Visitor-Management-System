@@ -64,11 +64,11 @@ export async function updateSiteAction(formData: FormData): Promise<void> {
   const { siteId, name, address, timezone, retentionDays, unannouncedTimeoutMin, earlyArrivalMin, badgeTemplate } = parsed.data;
   const site = await getManagedSite(tenant, siteId);
   if (!site) redirect("/admin/sites?error=invalid");
-  const settings = { ...readSiteSettings(site), retentionDays, unannouncedTimeoutMin, earlyArrivalMin, badgeTemplate, allowUnannounced: on(formData, "allowUnannounced"), guestWifi: { ssid: parsed.data.wifiSsid, password: parsed.data.wifiPassword } };
+  const settings = { ...readSiteSettings(site), retentionDays, unannouncedTimeoutMin, earlyArrivalMin, badgeTemplate, allowUnannounced: on(formData, "allowUnannounced"), requirePhotos: on(formData, "requirePhotos"), guestWifi: { ssid: parsed.data.wifiSsid, password: parsed.data.wifiPassword } };
   // Only all-sites admins can deactivate a site (a site-bound admin would lock themselves out).
   const active = tenant.membership.siteId === null ? on(formData, "active") : site.active;
   await db.site.update({ where: { id: site.id }, data: { name, address: address || null, timezone, active, settings } });
-  await audit({ action: "site.settings_changed", siteId: site.id, actorId: tenant.user.id, targetType: "Site", targetId: site.id, meta: { name, timezone, active, retentionDays, unannouncedTimeoutMin, earlyArrivalMin, badgeTemplate, allowUnannounced: settings.allowUnannounced, guestWifi: Boolean(settings.guestWifi.ssid) } });
+  await audit({ action: "site.settings_changed", siteId: site.id, actorId: tenant.user.id, targetType: "Site", targetId: site.id, meta: { name, timezone, active, retentionDays, unannouncedTimeoutMin, earlyArrivalMin, badgeTemplate, allowUnannounced: settings.allowUnannounced, requirePhotos: settings.requirePhotos, guestWifi: Boolean(settings.guestWifi.ssid) } });
   redirect(`/admin/sites/${site.id}?ok=saved`);
 }
 

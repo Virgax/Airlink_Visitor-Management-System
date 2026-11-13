@@ -34,9 +34,11 @@ Full brief: `docs/PLAN.md`.
   rotating TOTP QR of recurring passes; validation only in `src/lib/passes/validate.ts` (pure, unit-tested) +
   atomic `uses` increment in `src/lib/server/passes.ts` (`consumePassUse`). Policies (`VisitPolicy`) are data,
   evaluated by `src/lib/policies/evaluate.ts`; `DEFAULT_POLICIES` only seeds them.
-- Face photo: `VisitPolicy.requiresPhoto` makes the `photo` built-in required on the visitor link and kiosk;
-  `storePassPhoto` keeps it under `s/<siteId>/visits/pass-<id>.*` as `Pass.photoKey`, copied to `Visit.photoKey` on
-  entry and used by the badge when the kiosk took none; the kiosk refuses `photo_required`. Moot without a bucket.
+- Visitor photos: site setting `requirePhotos` (default on) demands face + ID front + ID back of every visitor
+  (`Pass.photoKey/idFrontKey/idBackKey`, `storePassPhoto(slot)`, `missingPhotos`); `VisitPolicy.requiresPhoto` asks
+  the face alone per kind. The link hides the QR and the kiosk refuses `photo_required` until they are there; the
+  face photo is copied to `Visit.photoKey` and printed on the badge when the kiosk took none. Moot without a bucket.
+  `purgeExpiredMedia` (cron) deletes pass/visit photos older than `retentionDays`.
 - Site settings (`readSiteSettings`): `earlyArrivalMin` (kiosk grace before the pass start), `allowUnannounced`
   (walk-ins at the kiosk), `guestWifi` (shown on the link when `Pass.extra.wifi`). Hosts renew windows with
   `updateWindowAction` (same link and QR).

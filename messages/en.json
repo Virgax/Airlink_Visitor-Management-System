@@ -227,7 +227,9 @@
       "wifiSsid": "Guest Wi-Fi network",
       "wifiPassword": "Guest Wi-Fi password",
       "wifiHelp": "Only visitors whose host ticked \"share Wi-Fi\" on the invitation see it.",
-      "allowUnannounced": "Allow unannounced visits at the kiosk"
+      "allowUnannounced": "Allow unannounced visits at the kiosk",
+      "requirePhotos": "Photos required of every visitor",
+      "requirePhotosHelp": "Whatever the visit type: a face photo and both sides of the ID, from their link. Without them the QR does not appear and the kiosk refuses entry. Deleted when the photo retention expires."
     },
     "policiesPage": {
       "title": "Visit policies",
@@ -509,7 +511,7 @@
       "not_registered": "The visitor has not completed their registration from the invitation link.",
       "device_not_found": "That IMEI or serial is not registered on any pass today. The visitor must register it before entering.",
       "devices_required": "They must register their personal devices (or declare they bring none) from their link before entering.",
-      "photo_required": "The visitor's face photo is missing. They must upload it from their link before entering."
+      "photo_required": "The visitor's required photos (face or ID) are missing. They must upload them from their link before entering."
     },
     "warnings": {
       "escort": "Escort required",
@@ -571,7 +573,8 @@
       "devicesNone": "Declared bringing no devices.",
       "deviceFound": "Registered device",
       "deviceOwnerInside": "Its owner is inside the site.",
-      "deviceOwnerNotInside": "Its owner is not inside right now (valid pass or closed visit)."
+      "deviceOwnerNotInside": "Its owner is not inside right now (valid pass or closed visit).",
+      "idPhotos": "ID document"
     },
     "unannounced": {
       "title": "Unannounced visit",
@@ -911,7 +914,8 @@
       "photo_media": "The photo could not be stored right now. Try again later.",
       "photo_tooBig": "The photo is too large (8 MB max).",
       "photo_invalid": "The file is not a JPG or PNG image.",
-      "photo_failed": "The photo could not be stored. Try again."
+      "photo_failed": "The photo could not be stored. Try again.",
+      "photos_missing": "Required photos are missing. The ones you already uploaded were kept; complete the rest."
     },
     "status": {
       "active": "Valid",
@@ -935,6 +939,15 @@
       "network": "Network",
       "password": "Password",
       "help": "Courtesy of your host during your visit."
+    },
+    "photos": {
+      "title": "Required photos",
+      "intro": "To activate your pass we need three photos taken with your phone.",
+      "face": "Your face, front view",
+      "idFront": "ID or passport, front",
+      "idBack": "ID or passport, back",
+      "done": "done",
+      "help": "Good light, no glare. Only Security sees them and they are deleted automatically after the retention period."
     }
   },
   "passes": {
@@ -2116,7 +2129,7 @@
           },
           "result": {
             "title": "Read the result",
-            "body": "Green: entry recorded, with the name, company, host, allowed areas and warnings (escort required, NDA, reception only). The host gets an automatic notification.\nRed: cannot enter, with the reason (expired pass, other site, pending approval, blacklist, blocked company, NDA not accepted…). On a blacklist hit, Security has already been alerted.\nIf the pass carries a face photo, it shows next to the name: compare it with the person before printing the badge."
+            "body": "Green: entry recorded, with the name, company, host, allowed areas and warnings (escort required, NDA, reception only). The host gets an automatic notification.\nRed: cannot enter, with the reason (expired pass, other site, pending approval, blacklist, blocked company, NDA not accepted…). On a blacklist hit, Security has already been alerted.\nIf the pass carries a face photo, it shows next to the name: compare it with the person before printing the badge.\nThe ID photos appear below to compare with the physical document."
           },
           "badge": {
             "title": "Print the badge",
@@ -2178,7 +2191,7 @@
           },
           "visitor": {
             "title": "What the visitor sees",
-            "body": "Their link shows the QR, site, host and validity. Before arriving they can complete ID, phone, plate and company under \"Complete your details\" for a faster entry.\nIf the visit type requires it, they must accept the visitor policy (NDA) by signing with their name; without it the kiosk will not let them in. Recurring passes show a QR that changes every 30 seconds.\nIf the visit type's policy \"requires a face photo\", the visitor takes it from their phone on the link and their QR appears once uploaded: Security sees it at the scan and it is printed on the badge. If you ticked \"Share the guest Wi-Fi\", the link shows the network and password."
+            "body": "Their link shows the QR, site, host and validity. Before arriving they can complete ID, phone, plate and company under \"Complete your details\" for a faster entry.\nIf the visit type requires it, they must accept the visitor policy (NDA) by signing with their name; without it the kiosk will not let them in. Recurring passes show a QR that changes every 30 seconds.\nIf the visit type's policy \"requires a face photo\", the visitor takes it from their phone on the link and their QR appears once uploaded: Security sees it at the scan and it is printed on the badge. If you ticked \"Share the guest Wi-Fi\", the link shows the network and password.\nWith \"Photos required\" on for the site, the link asks for three phone photos: their face and both sides of the ID. The ones already uploaded are kept even if one is still missing."
           },
           "pending": {
             "title": "Passes that need approval",
@@ -2226,7 +2239,7 @@
           },
           "sites": {
             "title": "Sites, gates and areas",
-            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry.\nThe \"Identifier (URL)\" when creating a site is its short unique web-style name (lowercase, digits and hyphens, e.g. airlink-2): it identifies the site permanently in the audit log and integrations even if you later rename it, and cannot be edited afterwards.\nThe kiosk lets visitors in before the pass time according to the site's \"Early-arrival minutes\" (60 by default): a 10:00 visit may enter from 9:00, never the day before.\nThe site settings also hold the guest Wi-Fi (each invitation decides whether to share it) and whether the kiosk accepts \"Unannounced visit\"; turn it off if Security should only scan."
+            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry.\nThe \"Identifier (URL)\" when creating a site is its short unique web-style name (lowercase, digits and hyphens, e.g. airlink-2): it identifies the site permanently in the audit log and integrations even if you later rename it, and cannot be edited afterwards.\nThe kiosk lets visitors in before the pass time according to the site's \"Early-arrival minutes\" (60 by default): a 10:00 visit may enter from 9:00, never the day before.\nThe site settings also hold the guest Wi-Fi (each invitation decides whether to share it) and whether the kiosk accepts \"Unannounced visit\"; turn it off if Security should only scan.\n\"Photos required of every visitor\" (on by default) demands from any visitor, whatever the type, a face photo and both sides of their ID from their link; without them their QR does not appear and the kiosk refuses entry. They are deleted automatically when the site's photo retention expires."
           },
           "policies": {
             "title": "Policies per visit type",

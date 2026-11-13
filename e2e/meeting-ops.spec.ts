@@ -47,11 +47,13 @@ test("guest Wi-Fi on invitations, validity renewal, 'requires photo' policy and 
   await page.getByLabel("Red Wi-Fi de invitados").fill("ARL Guest");
   await page.getByLabel("Clave del Wi-Fi de invitados").fill(`clave-${stamp}`);
   await page.getByTestId("allow-unannounced").uncheck();
+  await expect(page.getByTestId("require-photos")).toBeChecked(); // on by default for every visitor
   await page.getByRole("button", { name: "Guardar", exact: true }).first().click();
   await expect(page).toHaveURL(/ok=saved/);
-  const settings = (await db.site.findUniqueOrThrow({ where: { id: site.id } })).settings as { guestWifi: { ssid: string }; allowUnannounced: boolean };
+  const settings = (await db.site.findUniqueOrThrow({ where: { id: site.id } })).settings as { guestWifi: { ssid: string }; allowUnannounced: boolean; requirePhotos: boolean };
   expect(settings.guestWifi.ssid).toBe("ARL Guest");
   expect(settings.allowUnannounced).toBe(false);
+  expect(settings.requirePhotos).toBe(true);
   await page.goto(`/admin/policies?site=${site.id}`);
   const visitPolicy = page.getByTestId("policy-visit");
   await visitPolicy.getByLabel("Pide foto de la cara").check();
@@ -68,7 +70,7 @@ test("guest Wi-Fi on invitations, validity renewal, 'requires photo' policy and 
   await h.getByLabel("Nombre del visitante").fill(`Visita Wifi ${stamp}`);
   await h.getByLabel("Cédula o pasaporte").fill("001-1234567-8");
   await h.getByLabel("Válido desde").fill(localDate(0, "08:00"));
-  await h.getByLabel("Válido hasta").fill(localDate(0, "09:00"));
+  await h.getByLabel("Válido hasta").fill(localDate(1, "09:00"));
   await h.getByTestId("share-wifi").check();
   await h.getByRole("button", { name: "Crear pase" }).click();
   await expect(h).toHaveURL(/\?ok=created$/);

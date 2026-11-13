@@ -352,6 +352,9 @@ model Pass {
   pinHash          String?
   /// Face photo attached by the host or the visitor (private bucket `s/<siteId>/visits/pass-<id>.*`); copied to the visit and the badge
   photoKey         String?
+  /// Photos of the identity document (front / back), required of every visitor when the site says so; purged with the retention
+  idFrontKey       String?
+  idBackKey        String?
   /// Invitation link: the visitor fills in their own name and details from /v/<token>; the QR and the kiosk wait for it
   selfRegistration Boolean    @default(false)
   /// When the visitor completed the self-registration (the link no longer accepts changes)

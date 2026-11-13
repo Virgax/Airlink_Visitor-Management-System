@@ -259,3 +259,13 @@ describe("face photo policy flag", () => {
     expect(builtinMode(strict, "photo", "kiosk")).toBe("required");
   });
 });
+
+describe("site photo rule", () => {
+  it("defaults to requiring photos of every visitor and reads an explicit opt-out", async () => {
+    const { readSiteSettings } = await import("@/lib/server/sites");
+    expect(readSiteSettings({ settings: {} }).requirePhotos).toBe(true);
+    expect(readSiteSettings({ settings: { requirePhotos: false } }).requirePhotos).toBe(false);
+    expect(readSiteSettings({ settings: { allowUnannounced: false } }).allowUnannounced).toBe(false);
+    expect(readSiteSettings({ settings: { guestWifi: { ssid: "ARL Guest", password: "x" } } }).guestWifi).toEqual({ ssid: "ARL Guest", password: "x" });
+  });
+});

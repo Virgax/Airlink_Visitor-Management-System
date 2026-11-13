@@ -18,7 +18,7 @@ import { collectAnswers, collectDevices, elementsFor, mergeAnswers, readAnswers,
 import { mediaConfigured, mediaKey, putFile, sniffImage } from "@/lib/media/putFile";
 import { canEditFromLink, isOpenForVisitor, registrationPending, TOKEN_RE } from "@/lib/passes/visitor";
 import { log } from "@/lib/log";
-import { photoFile, storePassPhoto } from "@/lib/server/passPhoto";
+import { missingPhotos, PHOTO_FIELDS, PHOTO_SLOTS, photoFile, storePassPhoto } from "@/lib/server/passPhoto";
 
 async function loadOpenPass(tokenRaw: unknown, scope: string, mode: "edit" | "nda" = "edit") {
   const token = typeof tokenRaw === "string" ? tokenRaw : "";
@@ -83,14 +83,20 @@ export async function preregisterAction(formData: FormData): Promise<void> {
   const devicesNone = dev.present && (dev.devices.length || dev.none) ? dev.none : readDevicesNone(pass.extra);
   const nextExtra: ExtraJson = { ...((pass.extra as ExtraJson | null) ?? {}), answers, devices, devicesNone };
   if (Object.keys(collected.answers).length || (dev.present && (dev.devices.length || dev.none))) data.extra = nextExtra as unknown as Prisma.InputJsonObject;
-  // Face photo from the phone: stored first so the evaluation below sees it (a required photo blocks the submit).
-  let photoKey = pass.photoKey;
-  const photo = photoFile(formData);
-  if (photo) {
-    const stored = await storePassPhoto(pass, photo);
+  // Photos from the phone (face, ID front, ID back): stored first so the rules below see them. What was stored stays
+  // even when a later check fails, so the visitor never re-takes a photo.
+  const keys = { photoKey: pass.photoKey, idFrontKey: pass.idFrontKey, idBackKey: pass.idBackKey };
+  for (const slot of PHOTO_SLOTS) {
+    const file = photoFile(formData, PHOTO_FIELDS[slot]);
+    if (!file) continue;
+    const stored = await storePassPhoto(pass, file, slot);
     if (!stored.ok) redirect(`/v/${pass.token}?error=photo_${stored.error}`);
-    photoKey = stored.key;
+    if (slot === "face") keys.photoKey = stored.key;
+    else if (slot === "idFront") keys.idFrontKey = stored.key;
+    else keys.idBackKey = stored.key;
   }
+  const photoKey = keys.photoKey;
+  const stillMissing = await missingPhotos({ siteId: pass.siteId, kind: pass.kind, ...keys });
   const evaluation = evaluatePolicy(policy, {
     kind: pass.kind,
     photoKey: photoKey ?? (mediaConfigured() ? null : "unavailable"),
@@ -108,6 +114,7 @@ export async function preregisterAction(formData: FormData): Promise<void> {
   });
   if (evaluation.missing.length > 0) redirect(`/v/${pass.token}?error=missing`);
   if (Object.keys(data).length > 0) await db.pass.update({ where: { id: pass.id }, data });
+  if (stillMissing.length > 0) redirect(`/v/${pass.token}?error=photos_missing`);
   if (registering) {
     await audit({ action: "pass.updated", siteId: pass.siteId, targetType: "Pass", targetId: pass.id, meta: { field: "selfRegistered", groupId: pass.groupId } });
     redirect(`/v/${pass.token}?ok=registered`);

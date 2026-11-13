@@ -426,6 +426,17 @@ export function Scanner({ locale, timeZone, badgeConfig, checkpoint = false }: {
                     <dd className={result.deviceInside ? "text-success" : "text-warning"}>{result.deviceInside ? t("scan.deviceOwnerInside") : t("scan.deviceOwnerNotInside")}</dd>
                   </div>
                 ) : null}
+                {result.pass.idFrontKey || result.pass.idBackKey ? (
+                  <div className="sm:col-span-2" data-testid="result-id-photos">
+                    <dt className="muted">{t("scan.idPhotos")}</dt>
+                    <dd className="flex gap-2">
+                      {[result.pass.idFrontKey, result.pass.idBackKey].filter((k): k is string => Boolean(k)).map((k) => (
+                        // eslint-disable-next-line @next/next/no-img-element -- private media served by /api/media
+                        <img key={k} src={`/api/media/${k}`} alt="" className="h-20 w-32 rounded border border-border object-cover" />
+                      ))}
+                    </dd>
+                  </div>
+                ) : null}
                 {result.pass.devices?.length || result.pass.devicesNone ? (
                   <div className="sm:col-span-2" data-testid="result-devices">
                     <dt className="muted">{t("scan.devices")}</dt>

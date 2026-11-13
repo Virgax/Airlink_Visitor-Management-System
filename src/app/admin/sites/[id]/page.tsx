@@ -113,6 +113,11 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
               <input type="checkbox" name="allowUnannounced" defaultChecked={settings.allowUnannounced} data-testid="allow-unannounced" /> {t("allowUnannounced")}
             </label>
           </div>
+          <div className="flex items-end">
+            <label className="flex items-start gap-2 py-2">
+              <input type="checkbox" name="requirePhotos" defaultChecked={settings.requirePhotos} className="mt-1" data-testid="require-photos" /> <span>{t("requirePhotos")}<span className="muted block text-xs">{t("requirePhotosHelp")}</span></span>
+            </label>
+          </div>
           <div>
             <label className="label" htmlFor="badgeTemplate">{tb("admin.template")}</label>
             <select id="badgeTemplate" name="badgeTemplate" className="input" defaultValue={settings.badgeTemplate}>

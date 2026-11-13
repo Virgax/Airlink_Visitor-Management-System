@@ -22,6 +22,9 @@ export type ScanPassInfo = {
   devicesNone?: boolean;
   /** Face photo attached to the pass (private media key; the kiosk session may open it). */
   photoKey?: string | null;
+  /** Photos of the identity document, when the site requires them. */
+  idFrontKey?: string | null;
+  idBackKey?: string | null;
 };
 
 export type ScanDevice = { kind: string; id: string; model: string; color: string };
