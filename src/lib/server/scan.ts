@@ -44,11 +44,12 @@ export async function passInfo(pass: LoadedPass, siteId: string): Promise<ScanPa
     answers: listAnswers(readAnswers(pass.extra)).map((a) => ({ id: a.id, label: a.label, value: a.value })),
     devices: readDevices(pass.extra),
     devicesNone: readDevicesNone(pass.extra),
+    photoKey: pass.photoKey,
   };
 }
 
 export function passInfoFromVisit(v: Prisma.VisitGetPayload<{ select: typeof visitSummarySelect }>): ScanPassInfo {
-  return { id: v.passId ?? "", kind: v.kind, visitorName: v.visitorName, company: v.company?.name ?? null, host: v.host?.name ?? null, hostDepartment: v.host?.department ?? null, areas: [], warnings: [], docLast4: v.docLast4, plate: v.plate, answers: listAnswers(readAnswers(v.extra)).map((a) => ({ id: a.id, label: a.label, value: a.value })), devices: readDevices(v.extra), devicesNone: readDevicesNone(v.extra) };
+  return { id: v.passId ?? "", kind: v.kind, visitorName: v.visitorName, company: v.company?.name ?? null, host: v.host?.name ?? null, hostDepartment: v.host?.department ?? null, areas: [], warnings: [], docLast4: v.docLast4, plate: v.plate, answers: listAnswers(readAnswers(v.extra)).map((a) => ({ id: a.id, label: a.label, value: a.value })), devices: readDevices(v.extra), devicesNone: readDevicesNone(v.extra), photoKey: v.photoKey };
 }
 
 /** First blacklist row (site or global) matching the pass's document or plate, or null. */
@@ -137,6 +138,7 @@ export async function enterWithPass(input: EnterInput): Promise<ScanResponse> {
         scanId,
         conflict,
         extra: pass.extra ?? undefined,
+        photoKey: pass.photoKey,
       },
       select: visitSummarySelect,
     });

@@ -223,7 +223,11 @@
       "deleteSiteButton": "Eliminar sitio definitivamente",
       "siteDeleted": "Sitio eliminado.",
       "earlyArrivalMin": "Minutos de llegada anticipada",
-      "earlyArrivalHelp": "El kiosco deja entrar este tiempo antes de la hora del pase (sin pasar al día anterior). 60 = una hora antes. También aplica a la hora de entrada de los pases recurrentes."
+      "earlyArrivalHelp": "El kiosco deja entrar este tiempo antes de la hora del pase (sin pasar al día anterior). 60 = una hora antes. También aplica a la hora de entrada de los pases recurrentes.",
+      "wifiSsid": "Red Wi-Fi de invitados",
+      "wifiPassword": "Clave del Wi-Fi de invitados",
+      "wifiHelp": "Solo la ven los visitantes cuyo anfitrión marcó \"compartir Wi-Fi\" en la invitación.",
+      "allowUnannounced": "Permitir visitas no anunciadas en el kiosco"
     },
     "policiesPage": {
       "title": "Políticas de visita",
@@ -265,7 +269,8 @@
       "sharedTemplate": "todos los sitios",
       "editForm": "Editar formulario",
       "formTemplateHelp": "Define qué datos se piden al anfitrión, al visitante y en el kiosco.",
-      "manageForms": "Administrar formularios"
+      "manageForms": "Administrar formularios",
+      "requiresPhoto": "Pide foto de la cara"
     },
     "companiesPage": {
       "title": "Empresas",
@@ -503,7 +508,8 @@
       "area_not_allowed": "Su pase no incluye las áreas de este punto. Verifica con el anfitrión o con Seguridad.",
       "not_registered": "El visitante no ha completado su registro desde el enlace de invitación.",
       "device_not_found": "Ese IMEI o serial no está registrado en ningún pase de hoy. El visitante debe registrarlo antes de entrar.",
-      "devices_required": "Debe registrar sus dispositivos personales (o declarar que no trae) desde su enlace antes de entrar."
+      "devices_required": "Debe registrar sus dispositivos personales (o declarar que no trae) desde su enlace antes de entrar.",
+      "photo_required": "Falta la foto de la cara del visitante. Debe subirla desde su enlace antes de entrar."
     },
     "warnings": {
       "escort": "Debe ir acompañado",
@@ -717,7 +723,11 @@
       "hostEmployeeHelp": "Como Seguridad o Administración puedes generar el enlace para otro anfitrión: él recibe los avisos y aprueba la visita.",
       "selfRegistration": "El visitante completa sus datos desde el enlace",
       "selfRegistrationHelp": "Tú indicas tipo, áreas, fechas y cuántas personas vienen; cada persona recibe su propio enlace y llena nombre, cédula, teléfono y lo que pida el formulario. El QR aparece cuando termina su registro y el enlace queda ligado a esa persona.",
-      "visitorNameHelp": "Opcional si el visitante completa sus datos desde el enlace."
+      "visitorNameHelp": "Opcional si el visitante completa sus datos desde el enlace.",
+      "photo": "Foto de la cara del visitante",
+      "photoHelp": "Opcional aquí: el visitante puede tomársela desde su enlace. Se imprime en el gafete y Seguridad la ve al escanear.",
+      "shareWifi": "Compartir el Wi-Fi de invitados ({ssid})",
+      "shareWifiHelp": "El visitante ve la red y la clave en su enlace. Déjalo sin marcar si no lo necesita."
     },
     "detail": {
       "title": "Pase de {name}",
@@ -765,16 +775,30 @@
         "createdGroup": "Se crearon {count} pases. Comparte cada enlace con su visitante.",
         "revoked": "Pase cancelado.",
         "renamed": "Nombre actualizado.",
-        "emailed": "Invitación enviada."
+        "emailed": "Invitación enviada.",
+        "window": "Vigencia actualizada."
       },
       "errors": {
-        "invalid": "No se pudo guardar. Revisa los datos."
+        "invalid": "No se pudo guardar. Revisa los datos.",
+        "window_invalid": "Revisa las fechas.",
+        "window_closed": "Este pase ya no admite cambios de vigencia; duplícalo.",
+        "window_order": "La fecha de fin debe ser posterior a la de inicio.",
+        "window_too_long": "La vigencia no puede superar un año.",
+        "window_past": "La fecha de fin ya pasó."
       },
       "registrationPending": "Registro pendiente: el visitante todavía no ha completado sus datos desde el enlace. El QR aparecerá cuando lo haga.",
       "registeredAt": "Registro completado por el visitante el {date}.",
       "groupPending": "pendiente de registro",
       "groupLinksHelp": "Un enlace por persona. Cópialos todos y envía a cada uno el suyo; cada enlace se consume al registrarse.",
-      "copyAll": "Copiar todos los enlaces"
+      "copyAll": "Copiar todos los enlaces",
+      "photoWarn": "El pase se creó, pero la foto no se pudo guardar. El visitante puede subirla desde su enlace.",
+      "wifi": "Wi-Fi",
+      "wifiShared": "Compartido en el enlace",
+      "windowTitle": "Cambiar vigencia",
+      "windowHelp": "Si el visitante llega después de la hora o la visita se movió de día, amplía o corre la vigencia aquí: el enlace y el QR siguen siendo los mismos.",
+      "windowFrom": "Válido desde",
+      "windowUntil": "Válido hasta",
+      "windowSave": "Guardar vigencia"
     },
     "approvalsPage": {
       "title": "Aprobaciones pendientes",
@@ -851,7 +875,8 @@
       "offline": "Sin conexión. Recarga la página para obtener un código nuevo.",
       "pending": "El QR aparecerá cuando el pase sea aprobado.",
       "unavailable": "Este pase ya no está vigente.",
-      "register": "El QR aparecerá cuando completes tu registro."
+      "register": "El QR aparecerá cuando completes tu registro.",
+      "photo": "El QR aparecerá cuando subas tu foto."
     },
     "prereg": {
       "title": "Completa tus datos",
@@ -863,7 +888,9 @@
       "submit": "Guardar",
       "ok": "Datos guardados. Gracias.",
       "docSaved": "Documento registrado (termina en {last4})",
-      "email": "Correo electrónico"
+      "email": "Correo electrónico",
+      "photo": "Foto de tu cara",
+      "photoHelp": "Tómate una foto de frente, con buena luz y sin lentes oscuros. Se imprime en tu gafete."
     },
     "nda": {
       "title": "Política de visitantes",
@@ -880,7 +907,11 @@
       "rateLimited": "Demasiados intentos. Espera un momento.",
       "closed": "Este pase ya no admite cambios.",
       "missing": "Faltan respuestas obligatorias. Revisa el formulario.",
-      "devices": "Revisa los dispositivos: el IMEI o serial debe tener de 5 a 30 caracteres y el tipo debe ser uno de los permitidos."
+      "devices": "Revisa los dispositivos: el IMEI o serial debe tener de 5 a 30 caracteres y el tipo debe ser uno de los permitidos.",
+      "photo_media": "No se pudo guardar la foto en este momento. Inténtalo de nuevo más tarde.",
+      "photo_tooBig": "La foto es muy pesada (máximo 8 MB).",
+      "photo_invalid": "El archivo no es una imagen JPG o PNG.",
+      "photo_failed": "No se pudo guardar la foto. Inténtalo de nuevo."
     },
     "status": {
       "active": "Vigente",
@@ -898,6 +929,12 @@
       "submit": "Completar registro",
       "ok": "Registro completado. Tu pase está listo.",
       "locked": "Este enlace ya fue registrado y no admite cambios. Si no eres {name}, pide a tu anfitrión un enlace nuevo."
+    },
+    "wifi": {
+      "title": "Wi-Fi de invitados",
+      "network": "Red",
+      "password": "Clave",
+      "help": "Cortesía de tu anfitrión durante tu visita."
     }
   },
   "passes": {
@@ -2079,7 +2116,7 @@
           },
           "result": {
             "title": "Lee el resultado",
-            "body": "En verde: entrada registrada, con el nombre, la empresa, el anfitrión, las áreas permitidas y los avisos (acompañante obligatorio, NDA, solo recepción). El anfitrión recibe una notificación automática.\nEn rojo: no puede entrar y el motivo (pase vencido, de otro sitio, pendiente de aprobación, lista negra, empresa bloqueada, NDA sin aceptar…). Si es lista negra, Seguridad ya fue avisada."
+            "body": "En verde: entrada registrada, con el nombre, la empresa, el anfitrión, las áreas permitidas y los avisos (acompañante obligatorio, NDA, solo recepción). El anfitrión recibe una notificación automática.\nEn rojo: no puede entrar y el motivo (pase vencido, de otro sitio, pendiente de aprobación, lista negra, empresa bloqueada, NDA sin aceptar…). Si es lista negra, Seguridad ya fue avisada.\nSi el pase trae foto de la cara, aparece junto al nombre: compárala con la persona antes de imprimir el gafete."
           },
           "badge": {
             "title": "Imprime el gafete",
@@ -2137,11 +2174,11 @@
           },
           "detail": {
             "title": "Comparte el enlace",
-            "body": "Al crear el pase ves su detalle con el enlace para el visitante. Cópialo y envíalo por WhatsApp o usa \"Enviar por correo\": el visitante recibe el QR, la dirección y las indicaciones.\nSi el visitante no tiene celular, marca \"Generar PIN de 6 dígitos\": se muestra una sola vez y le sirve para entrar en el kiosco. Desde aquí también puedes cancelar, duplicar o cambiar el nombre del pase."
+            "body": "Al crear el pase ves su detalle con el enlace para el visitante. Cópialo y envíalo por WhatsApp o usa \"Enviar por correo\": el visitante recibe el QR, la dirección y las indicaciones.\nSi el visitante no tiene celular, marca \"Generar PIN de 6 dígitos\": se muestra una sola vez y le sirve para entrar en el kiosco. Desde aquí también puedes cancelar, duplicar o cambiar el nombre del pase.\nSi el visitante llega después de la hora o la visita se mueve de día, en \"Cambiar vigencia\" amplías o corres las fechas: el enlace y el QR siguen siendo los mismos."
           },
           "visitor": {
             "title": "Lo que ve el visitante",
-            "body": "Su enlace muestra el QR, el sitio, el anfitrión y la vigencia. Antes de llegar puede completar su cédula, teléfono, placa y empresa en \"Completa tus datos\" para que la entrada sea más rápida.\nSi el tipo de visita lo exige, debe aceptar la política de visitantes (NDA) firmando con su nombre; sin eso el kiosco no le deja entrar. Los pases recurrentes muestran un QR que cambia cada 30 segundos."
+            "body": "Su enlace muestra el QR, el sitio, el anfitrión y la vigencia. Antes de llegar puede completar su cédula, teléfono, placa y empresa en \"Completa tus datos\" para que la entrada sea más rápida.\nSi el tipo de visita lo exige, debe aceptar la política de visitantes (NDA) firmando con su nombre; sin eso el kiosco no le deja entrar. Los pases recurrentes muestran un QR que cambia cada 30 segundos.\nSi la política del tipo de visita \"pide foto de la cara\", el visitante se la toma desde su celular en el enlace y su QR aparece al subirla: Seguridad la ve al escanear y se imprime en el gafete. Si marcaste \"Compartir el Wi-Fi de invitados\", en el enlace ve la red y la clave."
           },
           "pending": {
             "title": "Pases que requieren aprobación",
@@ -2189,11 +2226,11 @@
           },
           "sites": {
             "title": "Sitios, puertas y áreas",
-            "body": "Cada planta es un sitio con su zona horaria, retención de fotos y minutos de espera para escalar visitas no anunciadas. Dentro del sitio defines las puertas (peatonal, vehicular, muelle), la impresora de gafete de cada puerta y el QR de auto-registro para imprimir en recepción.\nLas áreas pueden marcarse como restringidas o con acompañante obligatorio; el kiosco lo muestra como aviso al entrar.\nEl \"Identificador (URL)\" al crear un sitio es su nombre corto y único en formato web (minúsculas, números y guiones, ej. airlink-2): identifica el sitio de forma fija en la auditoría y las integraciones aunque luego cambies el nombre visible, y no se puede editar después.\nEl kiosco deja entrar antes de la hora del pase según los \"Minutos de llegada anticipada\" del sitio (60 por defecto): si la visita es a las 10:00, puede entrar desde las 9:00, nunca el día anterior."
+            "body": "Cada planta es un sitio con su zona horaria, retención de fotos y minutos de espera para escalar visitas no anunciadas. Dentro del sitio defines las puertas (peatonal, vehicular, muelle), la impresora de gafete de cada puerta y el QR de auto-registro para imprimir en recepción.\nLas áreas pueden marcarse como restringidas o con acompañante obligatorio; el kiosco lo muestra como aviso al entrar.\nEl \"Identificador (URL)\" al crear un sitio es su nombre corto y único en formato web (minúsculas, números y guiones, ej. airlink-2): identifica el sitio de forma fija en la auditoría y las integraciones aunque luego cambies el nombre visible, y no se puede editar después.\nEl kiosco deja entrar antes de la hora del pase según los \"Minutos de llegada anticipada\" del sitio (60 por defecto): si la visita es a las 10:00, puede entrar desde las 9:00, nunca el día anterior.\nEn la configuración del sitio también defines el Wi-Fi de invitados (el anfitrión decide en cada invitación si lo comparte) y si el kiosco admite \"Visita no anunciada\"; desactívalo si Seguridad solo debe escanear."
           },
           "policies": {
             "title": "Políticas por tipo de visita",
-            "body": "Para cada sitio y tipo (visita, candidato, contratista, proveedor, auditor, transportista, entrega, recurrente) decides si requiere aprobación y de quién, si pide cédula, NDA, acompañante y gafete, las puertas permitidas, la duración máxima y si es solo recepción.\nTambién puedes deshabilitar un tipo, fijar una hora de salida automática, avisar por correo a direcciones fijas al entrar, imprimir el gafete automáticamente y asignar el formulario de registro. \"Valores por defecto\" restaura la política original."
+            "body": "Para cada sitio y tipo (visita, candidato, contratista, proveedor, auditor, transportista, entrega, recurrente) decides si requiere aprobación y de quién, si pide cédula, NDA, acompañante y gafete, las puertas permitidas, la duración máxima y si es solo recepción.\nTambién puedes deshabilitar un tipo, fijar una hora de salida automática, avisar por correo a direcciones fijas al entrar, imprimir el gafete automáticamente y asignar el formulario de registro. \"Valores por defecto\" restaura la política original.\n\"Pide foto de la cara\" exige una foto del visitante (desde su enlace o la cámara del kiosco) antes de entrar; se imprime en el gafete."
           },
           "companies": {
             "title": "Empresas y lista negra",

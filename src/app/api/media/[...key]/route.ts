@@ -25,9 +25,11 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ key: string
   const passToken = req.nextUrl.searchParams.get("pass");
   if (user) {
     if (!(await canReadSite(user, siteId, kind))) return new Response("Forbidden", { status: 403 });
-  } else if ((kind === "forms" || kind === "nda") && passToken && TOKEN_RE.test(passToken)) {
-    const pass = await db.pass.findUnique({ where: { token: passToken }, select: { siteId: true } });
+  } else if ((kind === "forms" || kind === "nda" || kind === "visits") && passToken && TOKEN_RE.test(passToken)) {
+    const pass = await db.pass.findUnique({ where: { token: passToken }, select: { siteId: true, photoKey: true } });
     if (!pass || (siteId !== "all" && pass.siteId !== siteId)) return new Response("Forbidden", { status: 403 });
+    // Of the visit media, the pass token only opens the pass's own face photo.
+    if (kind === "visits" && pass.photoKey !== key) return new Response("Forbidden", { status: 403 });
   } else {
     return new Response("Unauthorized", { status: 401 });
   }

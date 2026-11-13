@@ -81,6 +81,7 @@ export default async function PoliciesPage({ searchParams }: { searchParams: Pro
               <div className="grid gap-2 sm:grid-cols-2">
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="requiresApproval" defaultChecked={p.requiresApproval} /> {t("requiresApproval")}</label>
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="requiresDoc" defaultChecked={p.requiresDoc} /> {t("requiresDoc")}</label>
+                <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="requiresPhoto" defaultChecked={p.requiresPhoto ?? false} /> {t("requiresPhoto")}</label>
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="requiresNda" defaultChecked={p.requiresNda} /> {t("requiresNda")}</label>
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="escortRequired" defaultChecked={p.escortRequired} /> {t("escortRequired")}</label>
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="badge" defaultChecked={p.badge} /> {t("badge")}</label>

@@ -7,6 +7,8 @@ export type PolicyInput = {
   approverRole: MembershipRole | null;
   requiresDoc: boolean;
   requiresNda: boolean;
+  /** The visitor must attach a face photo before entering (link or kiosk); printed on the badge. */
+  requiresPhoto?: boolean;
   escortRequired: boolean;
   badge: boolean;
   allowedGateIds: string[];

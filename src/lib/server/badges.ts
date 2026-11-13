@@ -27,6 +27,7 @@ const badgeVisitSelect = {
   createdAt: true,
   badgeNo: true,
   badgePhotoKey: true,
+  photoKey: true,
   areaIds: true,
   company: { select: { name: true } },
   host: { select: { name: true, department: true } },
@@ -105,7 +106,8 @@ export async function loadBadge(visitId: string, siteId: string, locale: string,
     .filter((w) => w !== "noBadge")
     .map((w) => tw(w));
   const template = readBadgeTemplate(visit.site.settings);
-  const photo = opts.withPhoto && template === "landscape_photo" ? await loadBadgePhoto(visit.badgePhotoKey) : null;
+  // The kiosk snapshot wins; otherwise the face photo the visitor attached from their link.
+  const photo = opts.withPhoto && template === "landscape_photo" ? await loadBadgePhoto(visit.badgePhotoKey ?? visit.photoKey) : null;
 
   const data: BadgeData = {
     visitorName: visit.visitorName,
@@ -150,8 +152,8 @@ export function badgeJson(badge: LoadedBadge) {
     visitId: badge.visit.id,
     status: badge.visit.status,
     template: badge.template,
-    hasPhoto: Boolean(badge.visit.badgePhotoKey),
-    photoKey: badge.visit.badgePhotoKey,
+    hasPhoto: Boolean(badge.visit.badgePhotoKey ?? badge.visit.photoKey),
+    photoKey: badge.visit.badgePhotoKey ?? badge.visit.photoKey,
     data,
   };
 }

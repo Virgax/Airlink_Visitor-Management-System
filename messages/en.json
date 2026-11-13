@@ -223,7 +223,11 @@
       "deleteSiteButton": "Delete site permanently",
       "siteDeleted": "Site deleted.",
       "earlyArrivalMin": "Early-arrival minutes",
-      "earlyArrivalHelp": "The kiosk lets visitors in this long before the pass's start time (never into the previous day). 60 = one hour early. Also applies to the start time of recurring passes."
+      "earlyArrivalHelp": "The kiosk lets visitors in this long before the pass's start time (never into the previous day). 60 = one hour early. Also applies to the start time of recurring passes.",
+      "wifiSsid": "Guest Wi-Fi network",
+      "wifiPassword": "Guest Wi-Fi password",
+      "wifiHelp": "Only visitors whose host ticked \"share Wi-Fi\" on the invitation see it.",
+      "allowUnannounced": "Allow unannounced visits at the kiosk"
     },
     "policiesPage": {
       "title": "Visit policies",
@@ -265,7 +269,8 @@
       "sharedTemplate": "all sites",
       "editForm": "Edit form",
       "formTemplateHelp": "Defines what is asked of the host, the visitor and at the kiosk.",
-      "manageForms": "Manage forms"
+      "manageForms": "Manage forms",
+      "requiresPhoto": "Requires a face photo"
     },
     "companiesPage": {
       "title": "Companies",
@@ -503,7 +508,8 @@
       "area_not_allowed": "Their pass does not include the areas of this post. Check with the host or Security.",
       "not_registered": "The visitor has not completed their registration from the invitation link.",
       "device_not_found": "That IMEI or serial is not registered on any pass today. The visitor must register it before entering.",
-      "devices_required": "They must register their personal devices (or declare they bring none) from their link before entering."
+      "devices_required": "They must register their personal devices (or declare they bring none) from their link before entering.",
+      "photo_required": "The visitor's face photo is missing. They must upload it from their link before entering."
     },
     "warnings": {
       "escort": "Escort required",
@@ -717,7 +723,11 @@
       "hostEmployeeHelp": "As Security or Administration you can generate the link for another host: they get the notifications and approve the visit.",
       "selfRegistration": "The visitor fills in their own details from the link",
       "selfRegistrationHelp": "You set the type, areas, dates and how many people are coming; each person gets their own link and fills in name, ID, phone and whatever the form asks. The QR appears once they finish and the link is tied to that person.",
-      "visitorNameHelp": "Optional when the visitor fills in their details from the link."
+      "visitorNameHelp": "Optional when the visitor fills in their details from the link.",
+      "photo": "Visitor's face photo",
+      "photoHelp": "Optional here: the visitor can take it from their link. It is printed on the badge and Security sees it at the scan.",
+      "shareWifi": "Share the guest Wi-Fi ({ssid})",
+      "shareWifiHelp": "The visitor sees the network and password on their link. Leave it unticked if they do not need it."
     },
     "detail": {
       "title": "Pass for {name}",
@@ -765,16 +775,30 @@
         "createdGroup": "{count} passes created. Share each link with its visitor.",
         "revoked": "Pass cancelled.",
         "renamed": "Name updated.",
-        "emailed": "Invitation sent."
+        "emailed": "Invitation sent.",
+        "window": "Validity updated."
       },
       "errors": {
-        "invalid": "Could not save. Check the data."
+        "invalid": "Could not save. Check the data.",
+        "window_invalid": "Check the dates.",
+        "window_closed": "This pass no longer accepts validity changes; duplicate it.",
+        "window_order": "The end must be after the start.",
+        "window_too_long": "The validity cannot exceed one year.",
+        "window_past": "The end date has already passed."
       },
       "registrationPending": "Registration pending: the visitor has not completed their details from the link yet. The QR will appear once they do.",
       "registeredAt": "Registration completed by the visitor on {date}.",
       "groupPending": "registration pending",
       "groupLinksHelp": "One link per person. Copy them all and send each person theirs; each link is consumed on registration.",
-      "copyAll": "Copy all links"
+      "copyAll": "Copy all links",
+      "photoWarn": "The pass was created, but the photo could not be stored. The visitor can upload it from their link.",
+      "wifi": "Wi-Fi",
+      "wifiShared": "Shared on the link",
+      "windowTitle": "Change validity",
+      "windowHelp": "If the visitor arrives after the end or the visit moved to another day, extend or shift the validity here: the link and the QR stay the same.",
+      "windowFrom": "Valid from",
+      "windowUntil": "Valid until",
+      "windowSave": "Save validity"
     },
     "approvalsPage": {
       "title": "Pending approvals",
@@ -851,7 +875,8 @@
       "offline": "Offline. Reload the page to get a fresh code.",
       "pending": "The QR will appear once the pass is approved.",
       "unavailable": "This pass is no longer valid.",
-      "register": "The QR will appear once you complete your registration."
+      "register": "The QR will appear once you complete your registration.",
+      "photo": "The QR will appear once you upload your photo."
     },
     "prereg": {
       "title": "Complete your details",
@@ -863,7 +888,9 @@
       "submit": "Save",
       "ok": "Details saved. Thank you.",
       "docSaved": "Document registered (ending in {last4})",
-      "email": "E-mail"
+      "email": "E-mail",
+      "photo": "Photo of your face",
+      "photoHelp": "Take a front-facing photo in good light, without sunglasses. It is printed on your badge."
     },
     "nda": {
       "title": "Visitor policy",
@@ -880,7 +907,11 @@
       "rateLimited": "Too many attempts. Wait a moment.",
       "closed": "This pass no longer accepts changes.",
       "missing": "Required answers are missing. Check the form.",
-      "devices": "Check the devices: the IMEI or serial must have 5 to 30 characters and the kind must be one of the allowed ones."
+      "devices": "Check the devices: the IMEI or serial must have 5 to 30 characters and the kind must be one of the allowed ones.",
+      "photo_media": "The photo could not be stored right now. Try again later.",
+      "photo_tooBig": "The photo is too large (8 MB max).",
+      "photo_invalid": "The file is not a JPG or PNG image.",
+      "photo_failed": "The photo could not be stored. Try again."
     },
     "status": {
       "active": "Valid",
@@ -898,6 +929,12 @@
       "submit": "Complete registration",
       "ok": "Registration completed. Your pass is ready.",
       "locked": "This link has already been registered and accepts no changes. If you are not {name}, ask your host for a new link."
+    },
+    "wifi": {
+      "title": "Guest Wi-Fi",
+      "network": "Network",
+      "password": "Password",
+      "help": "Courtesy of your host during your visit."
     }
   },
   "passes": {
@@ -2079,7 +2116,7 @@
           },
           "result": {
             "title": "Read the result",
-            "body": "Green: entry recorded, with the name, company, host, allowed areas and warnings (escort required, NDA, reception only). The host gets an automatic notification.\nRed: cannot enter, with the reason (expired pass, other site, pending approval, blacklist, blocked company, NDA not accepted…). On a blacklist hit, Security has already been alerted."
+            "body": "Green: entry recorded, with the name, company, host, allowed areas and warnings (escort required, NDA, reception only). The host gets an automatic notification.\nRed: cannot enter, with the reason (expired pass, other site, pending approval, blacklist, blocked company, NDA not accepted…). On a blacklist hit, Security has already been alerted.\nIf the pass carries a face photo, it shows next to the name: compare it with the person before printing the badge."
           },
           "badge": {
             "title": "Print the badge",
@@ -2137,11 +2174,11 @@
           },
           "detail": {
             "title": "Share the link",
-            "body": "After creating the pass you see its detail with the visitor link. Copy it and send it by WhatsApp or use \"Send by e-mail\": the visitor receives the QR, the address and the instructions.\nIf the visitor has no phone, tick \"Generate 6-digit PIN\": it is shown once and lets them enter at the kiosk. From here you can also cancel, duplicate or rename the pass."
+            "body": "After creating the pass you see its detail with the visitor link. Copy it and send it by WhatsApp or use \"Send by e-mail\": the visitor receives the QR, the address and the instructions.\nIf the visitor has no phone, tick \"Generate 6-digit PIN\": it is shown once and lets them enter at the kiosk. From here you can also cancel, duplicate or rename the pass.\nIf the visitor arrives after the end or the visit moves to another day, use \"Change validity\" to extend or shift the dates: the link and the QR stay the same."
           },
           "visitor": {
             "title": "What the visitor sees",
-            "body": "Their link shows the QR, site, host and validity. Before arriving they can complete ID, phone, plate and company under \"Complete your details\" for a faster entry.\nIf the visit type requires it, they must accept the visitor policy (NDA) by signing with their name; without it the kiosk will not let them in. Recurring passes show a QR that changes every 30 seconds."
+            "body": "Their link shows the QR, site, host and validity. Before arriving they can complete ID, phone, plate and company under \"Complete your details\" for a faster entry.\nIf the visit type requires it, they must accept the visitor policy (NDA) by signing with their name; without it the kiosk will not let them in. Recurring passes show a QR that changes every 30 seconds.\nIf the visit type's policy \"requires a face photo\", the visitor takes it from their phone on the link and their QR appears once uploaded: Security sees it at the scan and it is printed on the badge. If you ticked \"Share the guest Wi-Fi\", the link shows the network and password."
           },
           "pending": {
             "title": "Passes that need approval",
@@ -2189,11 +2226,11 @@
           },
           "sites": {
             "title": "Sites, gates and areas",
-            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry.\nThe \"Identifier (URL)\" when creating a site is its short unique web-style name (lowercase, digits and hyphens, e.g. airlink-2): it identifies the site permanently in the audit log and integrations even if you later rename it, and cannot be edited afterwards.\nThe kiosk lets visitors in before the pass time according to the site's \"Early-arrival minutes\" (60 by default): a 10:00 visit may enter from 9:00, never the day before."
+            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry.\nThe \"Identifier (URL)\" when creating a site is its short unique web-style name (lowercase, digits and hyphens, e.g. airlink-2): it identifies the site permanently in the audit log and integrations even if you later rename it, and cannot be edited afterwards.\nThe kiosk lets visitors in before the pass time according to the site's \"Early-arrival minutes\" (60 by default): a 10:00 visit may enter from 9:00, never the day before.\nThe site settings also hold the guest Wi-Fi (each invitation decides whether to share it) and whether the kiosk accepts \"Unannounced visit\"; turn it off if Security should only scan."
           },
           "policies": {
             "title": "Policies per visit type",
-            "body": "For each site and type (visit, candidate, contractor, vendor, auditor, carrier, delivery, recurring) you decide whether it needs approval and from whom, whether it asks for ID, NDA, escort and badge, the allowed gates, the maximum duration and whether it is reception only.\nYou can also disable a type, set an automatic sign-out time, e-mail fixed addresses on entry, print the badge automatically and assign the sign-in form. \"Defaults\" restores the original policy."
+            "body": "For each site and type (visit, candidate, contractor, vendor, auditor, carrier, delivery, recurring) you decide whether it needs approval and from whom, whether it asks for ID, NDA, escort and badge, the allowed gates, the maximum duration and whether it is reception only.\nYou can also disable a type, set an automatic sign-out time, e-mail fixed addresses on entry, print the badge automatically and assign the sign-in form. \"Defaults\" restores the original policy.\n\"Requires a face photo\" demands a photo of the visitor (from their link or the kiosk camera) before entering; it is printed on the badge."
           },
           "companies": {
             "title": "Companies and blacklist",

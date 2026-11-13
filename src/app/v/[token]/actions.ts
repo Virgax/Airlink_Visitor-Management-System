@@ -18,6 +18,7 @@ import { collectAnswers, collectDevices, elementsFor, mergeAnswers, readAnswers,
 import { mediaConfigured, mediaKey, putFile, sniffImage } from "@/lib/media/putFile";
 import { canEditFromLink, isOpenForVisitor, registrationPending, TOKEN_RE } from "@/lib/passes/visitor";
 import { log } from "@/lib/log";
+import { photoFile, storePassPhoto } from "@/lib/server/passPhoto";
 
 async function loadOpenPass(tokenRaw: unknown, scope: string, mode: "edit" | "nda" = "edit") {
   const token = typeof tokenRaw === "string" ? tokenRaw : "";
@@ -82,8 +83,17 @@ export async function preregisterAction(formData: FormData): Promise<void> {
   const devicesNone = dev.present && (dev.devices.length || dev.none) ? dev.none : readDevicesNone(pass.extra);
   const nextExtra: ExtraJson = { ...((pass.extra as ExtraJson | null) ?? {}), answers, devices, devicesNone };
   if (Object.keys(collected.answers).length || (dev.present && (dev.devices.length || dev.none))) data.extra = nextExtra as unknown as Prisma.InputJsonObject;
+  // Face photo from the phone: stored first so the evaluation below sees it (a required photo blocks the submit).
+  let photoKey = pass.photoKey;
+  const photo = photoFile(formData);
+  if (photo) {
+    const stored = await storePassPhoto(pass, photo);
+    if (!stored.ok) redirect(`/v/${pass.token}?error=photo_${stored.error}`);
+    photoKey = stored.key;
+  }
   const evaluation = evaluatePolicy(policy, {
     kind: pass.kind,
+    photoKey: photoKey ?? (mediaConfigured() ? null : "unavailable"),
     visitorDocHash: data.visitorDocHash ?? pass.visitorDocHash,
     plate: data.plate ?? pass.plate,
     form: form.elements,

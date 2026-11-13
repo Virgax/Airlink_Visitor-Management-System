@@ -109,6 +109,10 @@ export type CreatePassInput = {
   /** Personal devices registered by the host (`collectDevices`) and the "brings none" declaration. */
   devices?: Device[];
   devicesNone?: boolean;
+  /** The host attached a face photo (stored right after creation). */
+  hasPhoto?: boolean;
+  /** Show the site's guest Wi-Fi (name + password) on the visitor link. */
+  shareWifi?: boolean;
   /** Resolved form; loaded from the policy when not given. */
   form?: FormElement[];
   /**
@@ -152,6 +156,7 @@ export async function createPass(input: CreatePassInput): Promise<CreatePassResu
     answers: input.answers ?? {},
     devices: input.devices ?? [],
     devicesNone: selfRegistration ? true : input.devicesNone, // the visitor registers them from the link
+    photoKey: selfRegistration || input.hasPhoto ? "pending" : null, // uploaded after the row exists, or by the visitor
     visitorName: leadName,
     visitorPhone: selfRegistration ? (input.visitorPhone ?? "pending") : input.visitorPhone,
     visitorEmail: selfRegistration ? (input.visitorEmail ?? "pending") : input.visitorEmail,
@@ -169,6 +174,7 @@ export async function createPass(input: CreatePassInput): Promise<CreatePassResu
     ...(Object.keys(answers).length ? { answers } : {}),
     ...(input.devices?.length ? { devices: input.devices } : {}),
     ...(input.devicesNone ? { devicesNone: true } : {}),
+    ...(input.shareWifi ? { wifi: true } : {}),
   };
   const extra = Object.keys(extraJson).length ? (extraJson as unknown as Prisma.InputJsonObject) : undefined;
 

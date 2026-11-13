@@ -31,6 +31,7 @@ export const visitSummarySelect = {
   areaIds: true,
   conflict: true,
   extra: true,
+  photoKey: true,
   company: { select: { id: true, name: true } },
   host: { select: { id: true, name: true, department: true } },
   gate: { select: { id: true, name: true, kind: true } },

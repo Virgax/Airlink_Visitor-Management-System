@@ -6,6 +6,7 @@ import { Icon } from "@/components/Icon";
 import { db } from "@/lib/db";
 import { getDevice } from "@/lib/auth/kiosk";
 import { getSessionUser } from "@/lib/auth/session";
+import { readSiteSettings } from "@/lib/server/sites";
 import { enrollAction, lockAction, pinLoginAction, unenrollAction } from "./actions";
 
 export default async function GuardPage({ searchParams }: { searchParams: Promise<{ error?: string; ok?: string }> }) {
@@ -83,10 +84,11 @@ export default async function GuardPage({ searchParams }: { searchParams: Promis
   ]);
 
   const checkpoint = device.gate.kind === "checkpoint";
+  const walkIns = readSiteSettings(device.site).allowUnannounced;
   const tiles = [
     { icon: ScanLine, label: checkpoint ? t("kiosk.verify") : t("kiosk.scan"), href: "/guard/scan", badge: null as number | null },
     // A checkpoint verifies people who already entered at reception; it registers nobody.
-    ...(checkpoint ? [] : [{ icon: UserPlus, label: t("kiosk.unannounced"), href: "/guard/unannounced", badge: waiting || null }]),
+    ...(checkpoint || !walkIns ? [] : [{ icon: UserPlus, label: t("kiosk.unannounced"), href: "/guard/unannounced", badge: waiting || null }]),
     { icon: QrCode, label: t("kiosk.inside"), href: "/guard/inside", badge: inside || null },
     { icon: Siren, label: t("kiosk.evacuation"), href: "/guard/evacuation", badge: null },
     { icon: ClipboardList, label: t("kiosk.log"), href: "/guard/log", badge: null },

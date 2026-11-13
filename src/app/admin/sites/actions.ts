@@ -48,6 +48,8 @@ const updateSchema = z.object({
   timezone: timezoneSchema,
   retentionDays: z.coerce.number().int().min(1).max(3650),
   earlyArrivalMin: z.coerce.number().int().min(0).max(720).default(60),
+  wifiSsid: z.string().trim().max(64).optional().default(""),
+  wifiPassword: z.string().trim().max(128).optional().default(""),
   unannouncedTimeoutMin: z.coerce.number().int().min(1).max(240),
   badgeTemplate: z.enum(BADGE_TEMPLATES).default("landscape_photo"),
 });
@@ -62,11 +64,11 @@ export async function updateSiteAction(formData: FormData): Promise<void> {
   const { siteId, name, address, timezone, retentionDays, unannouncedTimeoutMin, earlyArrivalMin, badgeTemplate } = parsed.data;
   const site = await getManagedSite(tenant, siteId);
   if (!site) redirect("/admin/sites?error=invalid");
-  const settings = { ...readSiteSettings(site), retentionDays, unannouncedTimeoutMin, earlyArrivalMin, badgeTemplate };
+  const settings = { ...readSiteSettings(site), retentionDays, unannouncedTimeoutMin, earlyArrivalMin, badgeTemplate, allowUnannounced: on(formData, "allowUnannounced"), guestWifi: { ssid: parsed.data.wifiSsid, password: parsed.data.wifiPassword } };
   // Only all-sites admins can deactivate a site (a site-bound admin would lock themselves out).
   const active = tenant.membership.siteId === null ? on(formData, "active") : site.active;
   await db.site.update({ where: { id: site.id }, data: { name, address: address || null, timezone, active, settings } });
-  await audit({ action: "site.settings_changed", siteId: site.id, actorId: tenant.user.id, targetType: "Site", targetId: site.id, meta: { name, timezone, active, retentionDays, unannouncedTimeoutMin, earlyArrivalMin, badgeTemplate } });
+  await audit({ action: "site.settings_changed", siteId: site.id, actorId: tenant.user.id, targetType: "Site", targetId: site.id, meta: { name, timezone, active, retentionDays, unannouncedTimeoutMin, earlyArrivalMin, badgeTemplate, allowUnannounced: settings.allowUnannounced, guestWifi: Boolean(settings.guestWifi.ssid) } });
   redirect(`/admin/sites/${site.id}?ok=saved`);
 }
 

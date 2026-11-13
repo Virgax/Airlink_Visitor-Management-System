@@ -20,13 +20,15 @@ export type ScanPassInfo = {
   /** Personal devices registered on the pass (kind, IMEI/serial, model, colour); `devicesNone` = declared none. */
   devices?: ScanDevice[];
   devicesNone?: boolean;
+  /** Face photo attached to the pass (private media key; the kiosk session may open it). */
+  photoKey?: string | null;
 };
 
 export type ScanDevice = { kind: string; id: string; model: string; color: string };
 
 export type ScanAnswer = { id: string; label: string; value: string | number | boolean };
 
-export type ScanReason = DenyReason | "invalid_body" | "rate_limited" | "network" | "visit_closed" | "not_inside" | "area_not_allowed" | "device_not_found" | "devices_required";
+export type ScanReason = DenyReason | "invalid_body" | "rate_limited" | "network" | "visit_closed" | "not_inside" | "area_not_allowed" | "device_not_found" | "devices_required" | "photo_required";
 
 /** Result of a scan at a verification-only post (`Gate.kind = checkpoint`): nothing is entered or closed. */
 export type CheckpointInfo = {

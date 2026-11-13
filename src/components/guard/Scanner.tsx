@@ -393,9 +393,15 @@ export function Scanner({ locale, timeZone, badgeConfig, checkpoint = false }: {
             </div>
             {result.pass ? (
               <dl className="mt-4 grid gap-x-4 gap-y-1 text-text sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <dt className="muted">{t("scan.visitor")}</dt>
-                  <dd className="text-xl font-semibold" data-testid="result-name">{result.pass.visitorName}</dd>
+                <div className="sm:col-span-2 flex items-center gap-3">
+                  {result.pass.photoKey ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- private media served by /api/media
+                    <img src={`/api/media/${result.pass.photoKey}`} alt="" className="h-24 w-20 rounded-lg border border-border object-cover" data-testid="result-photo" />
+                  ) : null}
+                  <div>
+                    <dt className="muted">{t("scan.visitor")}</dt>
+                    <dd className="text-xl font-semibold" data-testid="result-name">{result.pass.visitorName}</dd>
+                  </div>
                 </div>
                 <div>
                   <dt className="muted">{t("scan.company")}</dt>

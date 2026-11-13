@@ -100,6 +100,20 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
             <p className="muted mt-1 text-xs">{t("earlyArrivalHelp")}</p>
           </div>
           <div>
+            <label className="label" htmlFor="wifiSsid">{t("wifiSsid")}</label>
+            <input id="wifiSsid" name="wifiSsid" maxLength={64} defaultValue={settings.guestWifi.ssid} className="input" placeholder="ARL Guest" />
+          </div>
+          <div>
+            <label className="label" htmlFor="wifiPassword">{t("wifiPassword")}</label>
+            <input id="wifiPassword" name="wifiPassword" maxLength={128} defaultValue={settings.guestWifi.password} className="input" autoComplete="off" />
+            <p className="muted mt-1 text-xs">{t("wifiHelp")}</p>
+          </div>
+          <div className="flex items-end">
+            <label className="flex items-center gap-2 py-2">
+              <input type="checkbox" name="allowUnannounced" defaultChecked={settings.allowUnannounced} data-testid="allow-unannounced" /> {t("allowUnannounced")}
+            </label>
+          </div>
+          <div>
             <label className="label" htmlFor="badgeTemplate">{tb("admin.template")}</label>
             <select id="badgeTemplate" name="badgeTemplate" className="input" defaultValue={settings.badgeTemplate}>
               {BADGE_TEMPLATES.map((tpl) => <option key={tpl} value={tpl}>{tb(`templates.${tpl}`)}</option>)}

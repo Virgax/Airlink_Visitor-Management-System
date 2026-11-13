@@ -19,9 +19,19 @@ export async function getManagedSite(tenant: Tenant, siteId: string): Promise<Si
   return db.site.findUnique({ where: { id: siteId } });
 }
 
-export type SiteSettings = { retentionDays: number; unannouncedTimeoutMin: number; earlyArrivalMin: number; badgeTemplate: BadgeTemplate };
+export type GuestWifi = { ssid: string; password: string };
+export type SiteSettings = {
+  retentionDays: number;
+  unannouncedTimeoutMin: number;
+  earlyArrivalMin: number;
+  badgeTemplate: BadgeTemplate;
+  /** Whether the reception kiosk may register walk-ins ("Visita no anunciada"); off = security only scans. */
+  allowUnannounced: boolean;
+  /** Guest Wi-Fi shown on the visitor link when the host ticks "share Wi-Fi" on the invitation. */
+  guestWifi: GuestWifi;
+};
 
-export const DEFAULT_SITE_SETTINGS: SiteSettings = { retentionDays: 90, unannouncedTimeoutMin: 5, earlyArrivalMin: DEFAULT_EARLY_ARRIVAL_MIN, badgeTemplate: "landscape_photo" };
+export const DEFAULT_SITE_SETTINGS: SiteSettings = { retentionDays: 90, unannouncedTimeoutMin: 5, earlyArrivalMin: DEFAULT_EARLY_ARRIVAL_MIN, badgeTemplate: "landscape_photo", allowUnannounced: true, guestWifi: { ssid: "", password: "" } };
 
 export function readSiteSettings(site: Pick<Site, "settings">): SiteSettings & Record<string, unknown> {
   const raw = site.settings && typeof site.settings === "object" && !Array.isArray(site.settings) ? (site.settings as Record<string, unknown>) : {};
@@ -32,6 +42,8 @@ export function readSiteSettings(site: Pick<Site, "settings">): SiteSettings & R
     unannouncedTimeoutMin: num(raw.unannouncedTimeoutMin, DEFAULT_SITE_SETTINGS.unannouncedTimeoutMin),
     earlyArrivalMin: num(raw.earlyArrivalMin, DEFAULT_SITE_SETTINGS.earlyArrivalMin),
     badgeTemplate: readBadgeTemplate(site.settings),
+    allowUnannounced: typeof raw.allowUnannounced === "boolean" ? raw.allowUnannounced : true,
+    guestWifi: readGuestWifi(raw.guestWifi),
   };
 }
 
@@ -52,4 +64,9 @@ export function timeZoneOptions(current?: string): string[] {
   const list = [...americas, ...rest];
   if (current && !list.includes(current)) list.unshift(current);
   return list;
+}
+
+function readGuestWifi(raw: unknown): GuestWifi {
+  const o = raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
+  return { ssid: typeof o.ssid === "string" ? o.ssid.slice(0, 64) : "", password: typeof o.password === "string" ? o.password.slice(0, 128) : "" };
 }

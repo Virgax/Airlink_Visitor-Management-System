@@ -14,6 +14,7 @@ import { checkoutVisit, visitJson, visitSummarySelect } from "@/lib/server/visit
 import { verifyAtCheckpoint } from "@/lib/server/checkpoint";
 import { registrationPending } from "@/lib/passes/visitor";
 import { lookupDevice, devicesRequiredMissing } from "@/lib/server/devices";
+import { photoRequiredMissing } from "@/lib/server/passPhoto";
 import { readSiteSettings } from "@/lib/server/sites";
 import { log } from "@/lib/log";
 
@@ -125,6 +126,10 @@ export async function POST(request: NextRequest): Promise<Response> {
     if (await devicesRequiredMissing(pass)) {
       await audit({ action: "visit.denied", siteId: site.id, actorId: user.id, targetType: "Pass", targetId: pass.id, meta: { reason: "devices_required", gateId: gate.id, scanId } });
       return Response.json({ ok: false, reason: "devices_required", pass: info } satisfies ScanResponse);
+    }
+    if (await photoRequiredMissing(pass)) {
+      await audit({ action: "visit.denied", siteId: site.id, actorId: user.id, targetType: "Pass", targetId: pass.id, meta: { reason: "photo_required", gateId: gate.id, scanId } });
+      return Response.json({ ok: false, reason: "photo_required", pass: info } satisfies ScanResponse);
     }
 
     const result = await enterWithPass({ pass, info, kiosk, scanId, at, now, conflict: decision.action === "enter" && decision.conflict, offline, via: "qr" });

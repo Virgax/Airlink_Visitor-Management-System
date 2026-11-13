@@ -247,3 +247,15 @@ describe("personal devices block", () => {
     expect(missingFormFields(form, "visitor", { kind: "vendor", form, devices: [{ kind: "phone", id: "351234567890123", model: "", color: "" }] })).toEqual([]);
   });
 });
+
+describe("face photo policy flag", () => {
+  it("makes the photo required on the visitor link and the kiosk when the policy asks for it", async () => {
+    const { builtinMode, defaultFormFor } = await import("@/lib/forms/schema");
+    const plain = defaultFormFor("visit");
+    expect(builtinMode(plain, "photo", "visitor")).toBe("optional");
+    expect(builtinMode(plain, "photo", "host")).toBe("off");
+    const strict = defaultFormFor("visit", { requiresPhoto: true });
+    expect(builtinMode(strict, "photo", "visitor")).toBe("required");
+    expect(builtinMode(strict, "photo", "kiosk")).toBe("required");
+  });
+});

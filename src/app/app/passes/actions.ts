@@ -15,6 +15,7 @@ import { buildSchedule, checkWindowRange, isVisitKind, parseGroupSize, uniqueIds
 import { generatePin } from "@/lib/people/pin";
 import { readPinFlash, sendPassInviteEmail, setPinFlash } from "@/lib/server/invites";
 import { searchFrequentVisitors } from "@/lib/server/frequent";
+import { photoFile, storePassPhoto } from "@/lib/server/passPhoto";
 import { rateLimit } from "@/lib/rateLimit";
 import { collectAnswers, collectDevices } from "@/lib/forms/schema";
 import { loadPolicyAndForm } from "@/lib/server/forms";
@@ -141,9 +142,16 @@ export async function createPassAction(formData: FormData): Promise<void> {
     devicesNone: devices.none,
     form: form.elements,
     selfRegistration,
+    hasPhoto: Boolean(photoFile(formData)),
+    shareWifi: formData.get("shareWifi") === "on",
   });
   if (!result.ok) fail(site.id, result.error);
   const lead = result.passes[0]!;
+  const photo = photoFile(formData);
+  if (photo) {
+    const stored = await storePassPhoto(lead, photo);
+    if (!stored.ok) redirect(`/app/passes/${lead.id}?ok=${result.passes.length > 1 ? "createdGroup" : "created"}&warn=photo_${stored.error}`);
+  }
   if (pin) await setPinFlash(lead.id, pin);
   redirect(`/app/passes/${lead.id}?ok=${result.passes.length > 1 ? "createdGroup" : "created"}`);
 }
@@ -187,6 +195,30 @@ export async function revokePassAction(formData: FormData): Promise<void> {
   const pass = await loadOwnPassId(formData.get("passId"));
   await revokePass(pass.id, tenant.user.id);
   redirect(`/app/passes/${pass.id}?ok=revoked`);
+}
+
+const windowSchema = z.object({ passId: z.string().min(1), validFrom: z.string().min(1), validUntil: z.string().min(1) });
+
+/**
+ * Renews or shifts the validity window of an open pass (the visitor who shows up after the end, or a visit moved
+ * to another day) without creating a new pass: same link, same QR. Used passes are duplicated instead.
+ */
+export async function updateWindowAction(formData: FormData): Promise<void> {
+  const tenant = await getHostTenantOrThrow();
+  const parsed = windowSchema.safeParse(Object.fromEntries(formData));
+  const passId = String(formData.get("passId") ?? "");
+  if (!parsed.success) redirect(`/app/passes/${encodeURIComponent(passId)}?error=window_invalid`);
+  const own = await loadOwnPassId(parsed.data.passId);
+  const pass = await db.pass.findUniqueOrThrow({ where: { id: own.id }, include: { site: { select: { timezone: true } } } });
+  if (pass.status !== "active" && pass.status !== "pending_approval") redirect(`/app/passes/${pass.id}?error=window_closed`);
+  const validFrom = zonedToUtc(parsed.data.validFrom, pass.site.timezone);
+  const validUntil = zonedToUtc(parsed.data.validUntil, pass.site.timezone);
+  if (!validFrom || !validUntil) redirect(`/app/passes/${pass.id}?error=window_invalid`);
+  const windowError = checkWindowRange(validFrom, validUntil, new Date());
+  if (windowError) redirect(`/app/passes/${pass.id}?error=${windowError}`);
+  await db.pass.update({ where: { id: pass.id }, data: { validFrom, validUntil } });
+  await audit({ action: "pass.updated", siteId: pass.siteId, actorId: tenant.user.id, targetType: "Pass", targetId: pass.id, meta: { field: "window", validFrom: validFrom.toISOString(), validUntil: validUntil.toISOString() } });
+  redirect(`/app/passes/${pass.id}?ok=window`);
 }
 
 const renameSchema = z.object({ passId: z.string().min(1), visitorName: z.string().trim().min(2).max(120) });

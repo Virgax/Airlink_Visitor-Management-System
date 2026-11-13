@@ -7,6 +7,7 @@ import { getSecret } from "@/lib/secrets";
 import { audit } from "@/lib/audit";
 import { notify } from "@/lib/notifications/index";
 import { getKioskOrThrow, requireKiosk } from "@/lib/auth/kiosk";
+import { readSiteSettings } from "@/lib/server/sites";
 import { docHash, docLast4, normalizePlate } from "@/lib/crypto/docHash";
 import { matchBlacklist } from "@/lib/guard/decide";
 import type { EmployeeHit } from "@/lib/guard/types";
@@ -21,6 +22,7 @@ import type { Prisma } from "@prisma/client";
 /** Host lookup for the kiosk form (called from the HostPicker client component). */
 export async function searchHostsAction(q: string): Promise<EmployeeHit[]> {
   const { site } = await getKioskOrThrow();
+  if (!readSiteSettings(site).allowUnannounced) redirect("/guard");
   return searchEmployees(typeof q === "string" ? q : "", site.id);
 }
 
@@ -78,6 +80,7 @@ export async function createUnannouncedAction(formData: FormData): Promise<void>
     answers: collected.answers,
     devices: dev.devices,
     devicesNone: dev.none,
+    photoKey: "kiosk-badge-step", // the kiosk camera takes the face photo right after entry (badge panel)
     visitorName: data.visitorName,
     company: companyName ?? null,
     hostEmployeeId: host.id,

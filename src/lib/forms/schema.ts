@@ -62,7 +62,7 @@ export const builtinElementSchema = z
  * never make a form impossible to submit.
  */
 export const BUILTIN_SURFACES: Record<BuiltinType, readonly FormSurface[]> = {
-  photo: ["kiosk"],
+  photo: ["host", "visitor", "kiosk"],
   document: ["host", "visitor", "kiosk"],
   name: ["host", "kiosk"],
   phone: ["host", "visitor"],
@@ -132,7 +132,7 @@ export function parseFormElements(json: unknown): FormElement[] | null {
 }
 
 /** The subset of VisitPolicy the form model needs. */
-export type FormPolicyFlags = { requiresDoc: boolean; escortRequired: boolean; requiresNda: boolean };
+export type FormPolicyFlags = { requiresDoc: boolean; escortRequired: boolean; requiresNda: boolean; requiresPhoto?: boolean };
 
 const DEFAULT_FLAGS: Record<VisitKind, FormPolicyFlags> = {
   visit: { requiresDoc: true, escortRequired: false, requiresNda: false },
@@ -167,7 +167,8 @@ export function defaultFormFor(kind: VisitKind, flags?: Partial<FormPolicyFlags>
     builtin("areas", "optional", ["host"]),
     builtin("host", "required", ["kiosk"]),
     builtin("escort", "optional", ["host"]),
-    builtin("photo", "off", ["kiosk"]),
+    // Face photo: the policy's "Pide foto" makes it required on the visitor link and the kiosk; else optional there.
+    builtin("photo", f.requiresPhoto ? "required" : "optional", ["visitor", "kiosk"]),
   ];
 }
 
@@ -178,7 +179,7 @@ export type ResolvedForm = {
   templateName: string | null;
 };
 
-export type FormPolicyLike = { kind: VisitKind; form?: unknown; formTemplateId?: string | null; requiresDoc?: boolean; escortRequired?: boolean; requiresNda?: boolean } | null;
+export type FormPolicyLike = { kind: VisitKind; form?: unknown; formTemplateId?: string | null; requiresDoc?: boolean; escortRequired?: boolean; requiresNda?: boolean; requiresPhoto?: boolean } | null;
 export type FormTemplateLike = { id: string; name: string; elements: unknown; active?: boolean } | null | undefined;
 
 /**
@@ -246,7 +247,7 @@ export type Answers = Record<string, Answer>;
 /** One registered personal device. `id` is the IMEI or serial, normalised (upper case, no spaces or dashes). */
 export type Device = { kind: DeviceKind; id: string; model: string; color: string };
 /** Shape of `Pass.extra` / `Visit.extra`. `devicesNone`: the visitor declared they bring no device. */
-export type ExtraJson = { answers?: Answers; devices?: Device[]; devicesNone?: boolean };
+export type ExtraJson = { answers?: Answers; devices?: Device[]; devicesNone?: boolean; /** The host shares the site's guest Wi-Fi on the visitor link. */ wifi?: boolean };
 
 /** Normalises an IMEI / serial for storage and lookup: upper case, letters and digits only. */
 export function normalizeDeviceId(raw: string): string {

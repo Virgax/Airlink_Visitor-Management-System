@@ -15,6 +15,7 @@ import { builtinRule, BUILTIN_TYPES, elementsFor, readAnswers, type BuiltinType 
 import { formLabels } from "@/lib/forms/labels";
 import { loadFormsForSite } from "@/lib/server/forms";
 import { canInviteForOthers } from "@/lib/auth/host-access";
+import { readSiteSettings } from "@/lib/server/sites";
 import { createPassAction, searchFrequentAction } from "../actions";
 
 type Search = { siteId?: string; from?: string; error?: string; frequent?: string };
@@ -155,6 +156,11 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
           <label className="label" htmlFor="plate">{t("plate")}</label>
           <input id="plate" name="plate" maxLength={20} className="input" defaultValue={from?.plate ?? ""} required={req("plate")} />
         </div>
+        <div {...box("photo")}>
+          <label className="label" htmlFor="photo">{t("photo")}</label>
+          <input id="photo" name="photo" type="file" accept="image/*" className="input" required={req("photo")} />
+          <p className="muted mt-1">{t("photoHelp")}</p>
+        </div>
         <div className="sm:col-span-2">
           <label className="label" htmlFor="note">{t("note")}</label>
           <textarea id="note" name="note" maxLength={500} rows={2} className="input" defaultValue={from?.note ?? ""} />
@@ -164,6 +170,13 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
             <input type="checkbox" name="generatePin" className="mt-1" data-testid="generate-pin" /> <span>{tp("pin.generate")}<span className="muted block">{tp("pin.generateHelp")}</span></span>
           </label>
         </div>
+        {readSiteSettings(site).guestWifi.ssid ? (
+          <div className="sm:col-span-2">
+            <label className="flex items-start gap-2 text-sm">
+              <input type="checkbox" name="shareWifi" className="mt-1" data-testid="share-wifi" defaultChecked={Boolean((from?.extra as { wifi?: boolean } | null)?.wifi)} /> <span>{t("shareWifi", { ssid: readSiteSettings(site).guestWifi.ssid })}<span className="muted block">{t("shareWifiHelp")}</span></span>
+            </label>
+          </div>
+        ) : null}
       </div>
 
       {VISIT_KINDS.some((kind) => elementsFor(forms[kind].form.elements, "host").some((e) => e.type !== "signature" && !BUILTIN_TYPES.includes(e.type as BuiltinType))) ? (

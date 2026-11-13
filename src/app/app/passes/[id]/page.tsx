@@ -18,10 +18,12 @@ import { loadPolicy } from "@/lib/server/passes";
 import { evaluatePolicy } from "@/lib/policies/evaluate";
 import { parseSchedule } from "@/lib/passes/validate";
 import { readPinFlash } from "@/lib/server/invites";
-import { emailPassAction, renamePassAction, revokePassAction } from "../actions";
+import { emailPassAction, renamePassAction, revokePassAction, updateWindowAction } from "../actions";
+import { toLocalInput } from "@/lib/time/tz";
+import { CalendarClock } from "lucide-react";
 import { formatAnswer, listAnswers, readAnswers, readDevices, readDevicesNone } from "@/lib/forms/schema";
 
-type Search = { ok?: string; error?: string };
+type Search = { ok?: string; error?: string; warn?: string };
 
 export default async function PassDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Search> }) {
   const { id } = await params;
@@ -57,7 +59,8 @@ export default async function PassDetailPage({ params, searchParams }: { params:
   const groupLinks = group.map((g) => `${g.visitorName}: ${base}/v/${g.token}`).join("\n");
   const schedule = parseSchedule(pass.schedule);
   const canRevoke = pass.status === "active" || pass.status === "pending_approval";
-  const okKey = sp.ok && ["created", "createdGroup", "revoked", "renamed", "emailed"].includes(sp.ok) ? sp.ok : null;
+  const okKey = sp.ok && ["created", "createdGroup", "revoked", "renamed", "emailed", "window"].includes(sp.ok) ? sp.ok : null;
+  const windowError = sp.error && ["window_invalid", "window_closed", "window_order", "window_too_long", "window_past"].includes(sp.error) ? sp.error : null;
   const date = (d: Date) => fmtDate(d, locale, { timeZone: tz });
   const tp = await getTranslations("people");
   const flashPin = pass.pinHash ? await readPinFlash(pass.id) : null;
@@ -74,7 +77,9 @@ export default async function PassDetailPage({ params, searchParams }: { params:
     <AppShell user={tenant.user} subtitle={tenant.site?.name ?? ts("allSites")} title={t("title", { name: pass.visitorName })}>
       <HostNav userId={tenant.user.id} />
       {okKey ? <p className="alert-ok mb-4" role="status">{t(`ok.${okKey}`, { count: group.length })}</p> : null}
-      {sp.error && !emailErrorKey ? <p className="alert-error mb-4" role="alert">{t("errors.invalid")}</p> : null}
+      {sp.error && !emailErrorKey && !windowError ? <p className="alert-error mb-4" role="alert">{t("errors.invalid")}</p> : null}
+      {windowError ? <p className="alert-error mb-4" role="alert">{t(`errors.${windowError as "window_invalid"}`)}</p> : null}
+      {sp.warn?.startsWith("photo_") ? <p className="alert-error mb-4" role="alert">{t("photoWarn")}</p> : null}
       {emailErrorKey ? <p className="alert-error mb-4" role="alert">{tp(`email.errors.${emailErrorKey as "failed"}`)}</p> : null}
       {flashPin ? (
         <div className="alert-ok mb-4 flex flex-wrap items-center gap-3" role="status" data-testid="pass-pin">
@@ -98,6 +103,10 @@ export default async function PassDetailPage({ params, searchParams }: { params:
           {pass.approvedBy && pass.approvedAt && pass.status === "active" ? <p className="muted">{t("approvedBy", { name: pass.approvedBy.name, date: date(pass.approvedAt) })}</p> : null}
           {pass.approvedBy && pass.approvedAt && pass.status === "denied" ? <p className="muted">{t("deniedBy", { name: pass.approvedBy.name, date: date(pass.approvedAt) })}</p> : null}
 
+          {pass.photoKey ? (
+            // eslint-disable-next-line @next/next/no-img-element -- private media of this pass, opened with its token
+            <img src={`/api/media/${pass.photoKey}?pass=${encodeURIComponent(pass.token)}`} alt="" className="h-32 w-24 rounded-lg border border-border object-cover" data-testid="pass-photo" />
+          ) : null}
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
             <dt className="muted">{t("site")}</dt><dd>{pass.site.name}</dd>
             <dt className="muted">{t("host")}</dt><dd>{pass.host.name}</dd>
@@ -119,6 +128,7 @@ export default async function PassDetailPage({ params, searchParams }: { params:
             <dd>{!requiresNda ? t("ndaNotRequired") : pass.ndaAcceptedAt ? t("ndaAccepted", { date: date(pass.ndaAcceptedAt), version: pass.ndaVersion ?? "" }) : t("ndaPending")}</dd>
             {pass.note ? <><dt className="muted">{t("note")}</dt><dd className="whitespace-pre-wrap">{pass.note}</dd></> : null}
             {pass.pinHash ? <><dt className="muted">{tp("pin.title")}</dt><dd>{tp("pin.has")}</dd></> : null}
+            {(pass.extra as { wifi?: boolean } | null)?.wifi ? <><dt className="muted">{t("wifi")}</dt><dd>{t("wifiShared")}</dd></> : null}
             <dd className="muted col-span-2">{t("uses", { uses: pass.uses, max: pass.maxUses })}</dd>
           </dl>
 
@@ -186,6 +196,24 @@ export default async function PassDetailPage({ params, searchParams }: { params:
                   <input id="inviteEmail" name="email" type="email" required maxLength={200} className="input" defaultValue={pass.visitorEmail ?? ""} autoComplete="off" />
                   <button type="submit" className="btn-secondary whitespace-nowrap">{tp("email.send")}</button>
                 </div>
+              </form>
+            </section>
+          ) : null}
+          {canRevoke ? (
+            <section className="card space-y-3" data-testid="pass-window">
+              <h2 className="font-medium"><Icon icon={CalendarClock} /> {t("windowTitle")}</h2>
+              <p className="muted">{t("windowHelp")}</p>
+              <form action={updateWindowAction} className="space-y-2">
+                <input type="hidden" name="passId" value={pass.id} />
+                <div>
+                  <label className="label" htmlFor="windowFrom">{t("windowFrom")}</label>
+                  <input id="windowFrom" name="validFrom" type="datetime-local" required className="input" defaultValue={toLocalInput(pass.validFrom, tz)} />
+                </div>
+                <div>
+                  <label className="label" htmlFor="windowUntil">{t("windowUntil")}</label>
+                  <input id="windowUntil" name="validUntil" type="datetime-local" required className="input" defaultValue={toLocalInput(pass.validUntil, tz)} />
+                </div>
+                <button type="submit" className="btn-secondary" data-testid="save-window">{t("windowSave")}</button>
               </form>
             </section>
           ) : null}

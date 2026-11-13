@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import QRCode from "qrcode";
 import { db } from "@/lib/db";
+import { mediaConfigured } from "@/lib/media/putFile";
+import { readSiteSettings } from "@/lib/server/sites";
 import { fmtDate } from "@/lib/format";
 import { rateLimit } from "@/lib/rateLimit";
 import { clientIp } from "@/lib/auth/session";
@@ -44,6 +46,8 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const tp2 = await getTranslations("people");
   const locale = await getLocale();
   const tz = pass.site.timezone;
+  const siteSettings = readSiteSettings(pass.site);
+  const wifi = (pass.extra as { wifi?: boolean } | null)?.wifi && siteSettings.guestWifi.ssid ? siteSettings.guestWifi : null;
   const now = new Date();
   const open = isOpenForVisitor(pass, now);
   const registering = registrationPending(pass);
@@ -64,6 +68,7 @@ export default async function VisitorPassPage({ params, searchParams }: { params
     answers,
     devices,
     devicesNone,
+    photoKey: pass.photoKey ?? (mediaConfigured() ? null : "unavailable"),
     visitorPhone: pass.visitorPhone,
     visitorEmail: pass.visitorEmail,
     company: pass.companyId,
@@ -73,22 +78,23 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const needsNda = evaluation.warnings.includes("nda") && !pass.ndaAcceptedAt;
   const visitorElements = elementsFor(form.elements, "visitor");
   const mode = (type: BuiltinElement["type"]) => builtinMode(form.elements, type, "visitor");
+  const photoPending = mediaConfigured() && mode("photo") === "required" && !pass.photoKey;
   const signatureElement = visitorElements.find((e) => e.type === "signature") ?? null;
   const questions = visitorElements.filter((e) => e.type === "question");
   const unansweredQuestions = questions.some((e) => !hasAnswer(answers[e.id]?.value));
   const hasVisitorBlocks = visitorElements.some((e) => e.type === "text" || e.type === "media");
-  const showPrereg = editable && (registering || needsDoc || (mode("document") !== "off" && !pass.visitorDocHash) || (mode("phone") !== "off" && !pass.visitorPhone) || unansweredQuestions || hasVisitorBlocks || devicesPending || Boolean(devicesBlock));
+  const showPrereg = editable && (registering || needsDoc || photoPending || (mode("photo") !== "off" && mediaConfigured() && !pass.photoKey) || (mode("document") !== "off" && !pass.visitorDocHash) || (mode("phone") !== "off" && !pass.visitorPhone) || unansweredQuestions || hasVisitorBlocks || devicesPending || Boolean(devicesBlock));
   const nda = open && needsNda ? await activeNda(pass.siteId, now) : null;
   const ndaCopy = nda ? ndaText(nda, locale) : null;
   const labels = await formLabels();
   const mediaHref = (key: string) => `/api/media/${key}?pass=${encodeURIComponent(token)}`;
   const schedule = parseSchedule(pass.schedule);
-  const showQr = pass.status === "active" && pass.validUntil > now && !registering;
+  const showQr = pass.status === "active" && pass.validUntil > now && !registering && !photoPending;
   const qr = showQr ? await qrPayloadFor(pass, now) : null;
   const dataUrl = qr ? await QRCode.toDataURL(qr.payload, { margin: 1, width: 288, errorCorrectionLevel: "M" }) : null;
   const instructions = typeof pass.site.settings === "object" && pass.site.settings && "arrivalInstructions" in pass.site.settings ? String((pass.site.settings as Record<string, unknown>).arrivalInstructions ?? "") : "";
   const okKey = sp.ok === "prereg" ? "prereg" : sp.ok === "nda" ? "nda" : sp.ok === "registered" ? "register" : null;
-  const errorKey = sp.error && ["invalid", "rateLimited", "closed", "missing", "devices"].includes(sp.error) ? sp.error : null;
+  const errorKey = sp.error && ["invalid", "rateLimited", "closed", "missing", "devices", "photo_media", "photo_tooBig", "photo_invalid", "photo_failed"].includes(sp.error) ? sp.error : null;
   const statusClass = pass.status === "active" ? "bg-success-bg text-success" : pass.status === "pending_approval" ? "bg-warning-bg text-warning" : "bg-danger-bg text-danger";
 
   return (
@@ -118,6 +124,8 @@ export default async function VisitorPassPage({ params, searchParams }: { params
           </section>
         ) : registering && open ? (
           <p className="muted" data-testid="qr-register-note">{t("qr.register")}</p>
+        ) : photoPending && open ? (
+          <p className="muted" data-testid="qr-photo-note">{t("qr.photo")}</p>
         ) : pass.status === "pending_approval" ? (
           <p className="muted">{t("qr.pending")}</p>
         ) : (
@@ -135,6 +143,14 @@ export default async function VisitorPassPage({ params, searchParams }: { params
         {pass.pinHash ? <p className="muted" data-testid="pass-pin-note">{tp2("pin.visitorNote")}</p> : null}
         {instructions ? <p className="muted whitespace-pre-wrap">{instructions}</p> : null}
         {pass.visitorDocLast4 ? <p className="muted">{t("prereg.docSaved", { last4: pass.visitorDocLast4 })}</p> : null}
+        {wifi ? (
+          <section className="rounded-lg border border-border bg-surface-2 p-3 text-sm" data-testid="guest-wifi">
+            <h2 className="font-medium">{t("wifi.title")}</h2>
+            <p>{t("wifi.network")}: <span className="font-mono">{wifi.ssid}</span></p>
+            {wifi.password ? <p>{t("wifi.password")}: <span className="font-mono">{wifi.password}</span></p> : null}
+            <p className="muted mt-1">{t("wifi.help")}</p>
+          </section>
+        ) : null}
 
         {pass.selfRegistration && pass.registeredAt && !registering ? <p className="muted" data-testid="link-locked">{t("register.locked", { name: pass.visitorName })}</p> : null}
 
@@ -163,6 +179,18 @@ export default async function VisitorPassPage({ params, searchParams }: { params
                 const required = e.mode === "required";
                 const text = elementText(e, locale);
                 switch (e.type) {
+                  case "photo":
+                    return !mediaConfigured() ? null : (
+                      <div data-testid="photo-field">
+                        <label className="label" htmlFor="photo">{text.label || t("prereg.photo")}</label>
+                        {pass.photoKey ? (
+                          // eslint-disable-next-line @next/next/no-img-element -- private media of this pass
+                          <img src={mediaHref(pass.photoKey)} alt="" className="mb-2 h-32 w-24 rounded-lg border border-border object-cover" data-testid="photo-current" />
+                        ) : null}
+                        <input id="photo" name="photo" type="file" accept="image/*" capture="user" className="input" required={required && !pass.photoKey} />
+                        <p className="muted mt-1">{text.help || t("prereg.photoHelp")}</p>
+                      </div>
+                    );
                   case "document":
                     return pass.visitorDocHash ? null : (
                       <div>
