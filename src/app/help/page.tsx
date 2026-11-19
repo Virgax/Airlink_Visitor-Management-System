@@ -1,3 +1,4 @@
+import { FileDown } from "lucide-react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { AppShell } from "@/components/AppShell";
@@ -12,7 +13,14 @@ export default async function HelpIndexPage() {
   const t = await getTranslations("help");
   return (
     <AppShell user={user && !user.guardDeviceId ? user : null} kiosk={!!user?.guardDeviceId} title={t("title")}>
-      <p className="muted mb-6 max-w-3xl">{t("intro")}</p>
+      <p className="muted mb-4 max-w-3xl">{t("intro")}</p>
+      <a href="/help/guia-airlink-visitas.pdf" className="card mb-6 flex items-center gap-3 hover:bg-surface-2" data-testid="help-pdf" download>
+        <span className="rounded-lg bg-surface-2 p-2"><Icon icon={FileDown} size={22} /></span>
+        <span className="min-w-0">
+          <span className="block font-semibold">{t("downloadPdf")}</span>
+          <span className="muted block text-sm">{t("downloadPdfHint")}</span>
+        </span>
+      </a>
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="help-guides">
         {HELP_GUIDES.map((g) => (
           <li key={g.slug} className="card flex flex-col gap-3">

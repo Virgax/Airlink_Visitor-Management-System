@@ -22,7 +22,8 @@
     "cron:tick": "tsx scripts/cron-tick.ts",
     "ops:backup": "tsx scripts/backup.ts",
     "sync:employees": "tsx scripts/sync-employees.ts",
-    "help:screenshots": "tsx scripts/help-screenshots.ts"
+    "help:screenshots": "tsx scripts/help-screenshots.ts",
+    "help:pdf": "tsx scripts/help-pdf.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

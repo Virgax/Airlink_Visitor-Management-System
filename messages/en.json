@@ -2095,6 +2095,8 @@
     "prev": "Previous guide",
     "next": "Next guide",
     "notFound": "We could not find that guide.",
+    "downloadPdf": "Download the full guide (PDF)",
+    "downloadPdfHint": "Every guide in one document, ready to print or send to whoever you are training.",
     "kioskLink": "How do I activate a kiosk? See the step-by-step guide.",
     "guides": {
       "kiosk-setup": {

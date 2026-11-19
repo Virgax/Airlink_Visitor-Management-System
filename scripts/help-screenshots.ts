@@ -239,6 +239,8 @@ async function main() {
     await shot(host, "host-pass-detail", { fullPage: true });
     token1 = (await host.getByTestId("visitor-link").inputValue()).split("/v/")[1]!;
     pass1Id = (await db.pass.findUniqueOrThrow({ where: { token: token1 } })).id;
+    // The site demands registered devices of every visitor: Ana registered her phone from the link.
+    await db.pass.update({ where: { id: pass1Id }, data: { extra: { devices: [{ kind: "phone", id: "351234567890123", imei: "351234567890123", serial: "", model: "iPhone 15", color: "negro", capacity: "256 GB" }] } } });
 
     // A contractor pass needs Security approval: shows the pending state on the visitor link and in approvals.
     await host.goto(`/app/passes/new?siteId=${demo.site.id}`);

@@ -84,6 +84,8 @@ Full brief: `docs/PLAN.md`.
 - `npm run cron:tick` · `npm run ops:backup` · `npm run sync:employees`
 - `npm run help:screenshots` regenerates `public/help/*.png` for `/help` (run against a fresh seeded DB on `HELP_BASE_URL`,
   see the header of `scripts/help-screenshots.ts`); guides are defined in `src/lib/help/guides.ts`, texts in `messages/*.json` (`help.*`).
+  `npm run help:pdf` then builds the printable manual `public/help/guia-airlink-visitas.pdf` (linked from `/help`) from those
+  guides + screenshots plus the visitor chapter and FAQ written in `scripts/help-pdf.ts`; rerun both after changing a guide.
 - E2E in the Claude container: `PW_CHROMIUM_PATH=/opt/pw-browsers/chromium npm run test:e2e`
   (needs a running `npm run start` or let Playwright start it; Postgres on `DATABASE_URL`, seeded).
 

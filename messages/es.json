@@ -2095,6 +2095,8 @@
     "prev": "Guía anterior",
     "next": "Siguiente guía",
     "notFound": "No encontramos esa guía.",
+    "downloadPdf": "Descargar la guía completa (PDF)",
+    "downloadPdfHint": "Todas las guías en un solo documento, listo para imprimir o enviar a quien vas a entrenar.",
     "kioskLink": "¿Cómo se activa un kiosco? Ver la guía paso a paso.",
     "guides": {
       "kiosk-setup": {
