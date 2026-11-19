@@ -27,7 +27,7 @@ export type ScanPassInfo = {
   idBackKey?: string | null;
 };
 
-export type ScanDevice = { kind: string; id: string; model: string; color: string };
+export type ScanDevice = { kind: string; id: string; imei?: string; serial?: string; model: string; color: string; capacity?: string };
 
 export type ScanAnswer = { id: string; label: string; value: string | number | boolean };
 

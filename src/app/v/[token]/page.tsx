@@ -6,6 +6,8 @@ import QRCode from "qrcode";
 import { db } from "@/lib/db";
 import { mediaConfigured } from "@/lib/media/putFile";
 import { readSiteSettings } from "@/lib/server/sites";
+import { DevicesField } from "@/components/forms/DevicesField";
+import { DEVICE_KINDS } from "@/lib/forms/schema";
 import { fmtDate } from "@/lib/format";
 import { rateLimit } from "@/lib/rateLimit";
 import { clientIp } from "@/lib/auth/session";
@@ -58,7 +60,8 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const devices = readDevices(pass.extra);
   const devicesNone = readDevicesNone(pass.extra);
   const devicesBlock = elementsFor(form.elements, "visitor").find((e) => e.type === "devices");
-  const devicesPending = Boolean(devicesBlock && "required" in devicesBlock && devicesBlock.required && devices.length === 0 && !devicesNone);
+  const requireDevices = siteSettings.requireDevices;
+  const devicesPending = (requireDevices || Boolean(devicesBlock && "required" in devicesBlock && devicesBlock.required)) && devices.length === 0 && !devicesNone;
   const evaluation = evaluatePolicy(policy, {
     kind: pass.kind,
     visitorDocHash: pass.visitorDocHash,
@@ -91,12 +94,12 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const labels = await formLabels();
   const mediaHref = (key: string) => `/api/media/${key}?pass=${encodeURIComponent(token)}`;
   const schedule = parseSchedule(pass.schedule);
-  const showQr = pass.status === "active" && pass.validUntil > now && !registering && !photoPending;
+  const showQr = pass.status === "active" && pass.validUntil > now && !registering && !photoPending && !devicesPending;
   const qr = showQr ? await qrPayloadFor(pass, now) : null;
   const dataUrl = qr ? await QRCode.toDataURL(qr.payload, { margin: 1, width: 288, errorCorrectionLevel: "M" }) : null;
   const instructions = typeof pass.site.settings === "object" && pass.site.settings && "arrivalInstructions" in pass.site.settings ? String((pass.site.settings as Record<string, unknown>).arrivalInstructions ?? "") : "";
   const okKey = sp.ok === "prereg" ? "prereg" : sp.ok === "nda" ? "nda" : sp.ok === "registered" ? "register" : null;
-  const errorKey = sp.error && ["invalid", "rateLimited", "closed", "missing", "devices", "photo_media", "photo_tooBig", "photo_invalid", "photo_failed", "photos_missing"].includes(sp.error) ? sp.error : null;
+  const errorKey = sp.error && ["invalid", "rateLimited", "closed", "missing", "devices", "photo_media", "photo_tooBig", "photo_invalid", "photo_failed", "photos_missing", "devices_missing"].includes(sp.error) ? sp.error : null;
   const statusClass = pass.status === "active" ? "bg-success-bg text-success" : pass.status === "pending_approval" ? "bg-warning-bg text-warning" : "bg-danger-bg text-danger";
 
   return (
@@ -128,6 +131,8 @@ export default async function VisitorPassPage({ params, searchParams }: { params
           <p className="muted" data-testid="qr-register-note">{t("qr.register")}</p>
         ) : photoPending && open ? (
           <p className="muted" data-testid="qr-photo-note">{t("qr.photo")}</p>
+        ) : devicesPending && open ? (
+          <p className="muted" data-testid="qr-devices-note">{t("qr.devices")}</p>
         ) : pass.status === "pending_approval" ? (
           <p className="muted">{t("qr.pending")}</p>
         ) : (
@@ -188,6 +193,13 @@ export default async function VisitorPassPage({ params, searchParams }: { params
                   </div>
                 ))}
                 <p className="muted text-xs">{t("photos.help")}</p>
+              </fieldset>
+            ) : null}
+            {requireDevices && !devicesBlock ? (
+              <fieldset className="space-y-2 rounded-lg border border-border p-3" data-testid="site-devices">
+                <legend className="px-1 text-sm font-medium">{labels.devices.registered}</legend>
+                <p className="muted">{t("devicesIntro")}</p>
+                <DevicesField kinds={DEVICE_KINDS} initial={devices} none={devicesNone} required labels={labels.devices} />
               </fieldset>
             ) : null}
             <FormFields
@@ -264,6 +276,7 @@ export default async function VisitorPassPage({ params, searchParams }: { params
         {!showPrereg && (hasVisitorBlocks || devicesBlock) ? (
           <div className="space-y-3" data-testid="visitor-blocks">
             <FormFields elements={form.elements} surface="visitor" labels={labels} mediaHref={mediaHref} exclude={["question", "signature"]} locale={locale} devices={devices} devicesNone={devicesNone} devicesReadOnly />
+            {requireDevices && !devicesBlock && (devices.length || devicesNone) ? <DevicesField kinds={DEVICE_KINDS} initial={devices} none={devicesNone} required labels={labels.devices} readOnly /> : null}
           </div>
         ) : null}
 

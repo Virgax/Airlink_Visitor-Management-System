@@ -14,7 +14,8 @@ import { docHash, docLast4, normalizePlate } from "@/lib/crypto/docHash";
 import { upsertCompanyByName } from "@/lib/server/passes";
 import { loadPolicyAndForm } from "@/lib/server/forms";
 import { evaluatePolicy } from "@/lib/policies/evaluate";
-import { collectAnswers, collectDevices, elementsFor, mergeAnswers, readAnswers, readDevices, readDevicesNone, type ExtraJson } from "@/lib/forms/schema";
+import { collectAnswers, collectDevices, devicesSatisfied, elementsFor, mergeAnswers, readAnswers, readDevices, readDevicesNone, type ExtraJson } from "@/lib/forms/schema";
+import { readSiteSettings } from "@/lib/server/sites";
 import { mediaConfigured, mediaKey, putFile, sniffImage } from "@/lib/media/putFile";
 import { canEditFromLink, isOpenForVisitor, registrationPending, TOKEN_RE } from "@/lib/passes/visitor";
 import { log } from "@/lib/log";
@@ -77,7 +78,9 @@ export async function preregisterAction(formData: FormData): Promise<void> {
   if (collected.invalid.length) redirect(`/v/${pass.token}?error=invalid`);
   const answers = mergeAnswers(readAnswers(pass.extra), collected.answers);
   // Devices: what the visitor lists replaces the host's list (they know what they carry); "none" clears it.
-  const dev = collectDevices(form.elements, "visitor", formData);
+  const siteRow = await db.site.findUnique({ where: { id: pass.siteId }, select: { settings: true } });
+  const requireDevices = siteRow ? readSiteSettings(siteRow).requireDevices : false;
+  const dev = collectDevices(form.elements, "visitor", formData, { always: requireDevices });
   if (dev.invalid) redirect(`/v/${pass.token}?error=devices`);
   const devices = dev.present && (dev.devices.length || dev.none) ? dev.devices : readDevices(pass.extra);
   const devicesNone = dev.present && (dev.devices.length || dev.none) ? dev.none : readDevicesNone(pass.extra);
@@ -115,6 +118,7 @@ export async function preregisterAction(formData: FormData): Promise<void> {
   if (evaluation.missing.length > 0) redirect(`/v/${pass.token}?error=missing`);
   if (Object.keys(data).length > 0) await db.pass.update({ where: { id: pass.id }, data });
   if (stillMissing.length > 0) redirect(`/v/${pass.token}?error=photos_missing`);
+  if (requireDevices && !devicesSatisfied(devices, devicesNone)) redirect(`/v/${pass.token}?error=devices_missing`);
   if (registering) {
     await audit({ action: "pass.updated", siteId: pass.siteId, targetType: "Pass", targetId: pass.id, meta: { field: "selfRegistered", groupId: pass.groupId } });
     redirect(`/v/${pass.token}?ok=registered`);

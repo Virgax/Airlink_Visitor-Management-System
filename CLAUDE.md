@@ -40,8 +40,11 @@ Full brief: `docs/PLAN.md`.
   face photo is copied to `Visit.photoKey` and printed on the badge when the kiosk took none. Moot without a bucket.
   `purgeExpiredMedia` (cron) deletes pass/visit photos older than `retentionDays`.
 - Site settings (`readSiteSettings`): `earlyArrivalMin` (kiosk grace before the pass start), `allowUnannounced`
-  (walk-ins at the kiosk), `guestWifi` (shown on the link when `Pass.extra.wifi`). Hosts renew windows with
-  `updateWindowAction` (same link and QR).
+  (walk-ins at the kiosk), `guestWifi` (shown on the link when `Pass.extra.wifi`), `requireDevices` (default on:
+  every visitor registers devices or declares none; `collectDevices(..., { always })`, kiosk `devices_required`).
+  Devices: `{ kind, id (IMEI or serial, normalised lookup key), imei?, serial, model, color, capacity }` in
+  `Pass.extra.devices`; `lookupDevice` matches IMEI or serial. Hosts renew windows with `updateWindowAction`.
+  E2E: `e2e/global-setup.ts` turns `requirePhotos`/`requireDevices` off on the seeded test sites.
 - Visitor policy (NDA): `NdaVersion` rows are immutable, per site or global (`activeNda`/`ndaText` in
   `src/lib/server/nda.ts`), with optional `titleEn`/`bodyEn` and a PDF attachment; published from `/admin/nda`.
 - Deleting: gates only without history (`deleteGateAction`), sites only by an all-sites admin after typing the name

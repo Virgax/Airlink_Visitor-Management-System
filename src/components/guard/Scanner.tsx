@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { AlertTriangle, Camera, CameraOff, CheckCircle2, CloudOff, KeyRound, LogOut, ShieldCheck, Wifi, WifiOff, XCircle } from "lucide-react";
 import { Icon } from "@/components/Icon";
+import { describeDevice } from "@/lib/forms/devices";
+import type { Device } from "@/lib/forms/schema";
 import { BadgePanel } from "@/components/guard/BadgePanel";
 import type { KioskBadgeConfig } from "@/lib/badges/config";
 import { fmtDate } from "@/lib/format";
@@ -300,6 +302,7 @@ export function Scanner({ locale, timeZone, badgeConfig, checkpoint = false }: {
 
   useEffect(() => () => stopRef.current?.(), []);
 
+  const deviceWords = { kinds: { phone: t("devices.phone"), laptop: t("devices.laptop"), tablet: t("devices.tablet"), watch: t("devices.watch"), other: t("devices.other") }, imei: "IMEI", serial: t("scan.serial"), capacity: "" };
   const toneClass: Record<Tone, string> = {
     ok: "border-success bg-success-bg text-success",
     verified: "border-success bg-success-bg text-success",
@@ -422,7 +425,7 @@ export function Scanner({ locale, timeZone, badgeConfig, checkpoint = false }: {
                 {result.device ? (
                   <div className="sm:col-span-2 rounded-lg bg-surface-2 p-2" data-testid="result-device" data-inside={result.deviceInside ? "1" : "0"}>
                     <dt className="muted">{t("scan.device")}</dt>
-                    <dd className="font-medium">{t(`devices.${result.device.kind as "phone"}`)} · {result.device.model || "—"} · {result.device.color || "—"} · <span className="font-mono">{result.device.id}</span></dd>
+                    <dd className="font-medium">{describeDevice(result.device as Device, deviceWords)}</dd>
                     <dd className={result.deviceInside ? "text-success" : "text-warning"}>{result.deviceInside ? t("scan.deviceOwnerInside") : t("scan.deviceOwnerNotInside")}</dd>
                   </div>
                 ) : null}
@@ -444,7 +447,7 @@ export function Scanner({ locale, timeZone, badgeConfig, checkpoint = false }: {
                       {result.pass.devices?.length ? (
                         <ul className="space-y-0.5">
                           {result.pass.devices.map((d) => (
-                            <li key={d.id} data-device-id={d.id}><span className="font-medium">{t(`devices.${d.kind as "phone"}`)}</span> · {d.model || "—"} · {d.color || "—"} · <span className="font-mono text-xs">{d.id}</span></li>
+                            <li key={d.id} data-device-id={d.id}>{describeDevice(d as Device, deviceWords)}</li>
                           ))}
                         </ul>
                       ) : (

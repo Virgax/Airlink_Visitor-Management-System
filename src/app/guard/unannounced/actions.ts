@@ -69,7 +69,7 @@ export async function createUnannouncedAction(formData: FormData): Promise<void>
   const { policy, form } = await loadPolicyAndForm(site.id, data.kind);
   const collected = collectAnswers(form.elements, "kiosk", formData);
   if (collected.invalid.length) redirect("/guard/unannounced?error=invalid");
-  const dev = collectDevices(form.elements, "kiosk", formData);
+  const dev = collectDevices(form.elements, "kiosk", formData, { always: readSiteSettings(site).requireDevices });
   if (dev.invalid) redirect("/guard/unannounced?error=invalid");
   const evaluation = evaluatePolicy(policy, {
     kind: data.kind,

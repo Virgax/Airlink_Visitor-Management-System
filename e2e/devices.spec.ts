@@ -50,6 +50,8 @@ test("personal devices: HR requires them, host and visitor register IMEIs, kiosk
   const site = await db.site.findUniqueOrThrow({ where: { slug: "airlink-2" } });
   const reception = await db.gate.findFirstOrThrow({ where: { siteId: site.id, name: "Recepción" } });
   const templateName = `Dispositivos ${stamp}`;
+  const imei = `3512${String(stamp).slice(-11)}`; // 15 digits, unique per run
+  const imeiTyped = `${imei.slice(0, 2)}-${imei.slice(2, 8)}-${imei.slice(8, 14)}-${imei.slice(14)}`;
 
   // 1. HR: a vendor form with a required devices block.
   await loginAsAdmin(page);
@@ -83,12 +85,13 @@ test("personal devices: HR requires them, host and visitor register IMEIs, kiosk
   await expect(hostDevices).toBeVisible();
   const row = hostDevices.getByTestId("device-row").first();
   await row.locator("select").selectOption("phone");
-  await row.locator("input").nth(0).fill("35-123456-789012-3");
-  await row.locator("input").nth(1).fill("iPhone 15");
-  await row.locator("input").nth(2).fill("negro");
+  await row.getByLabel("IMEI", { exact: true }).fill(imeiTyped);
+  await row.getByLabel("Marca y modelo").fill("iPhone 15");
+  await row.getByLabel("Color").fill("negro");
+  await row.getByLabel("Capacidad").fill("256 GB");
   await h.getByRole("button", { name: "Crear pase" }).click();
   await expect(h).toHaveURL(/\/app\/passes\/[a-z0-9]+\?ok=created$/);
-  await expect(h.getByTestId("pass-devices")).toContainText("351234567890123");
+  await expect(h.getByTestId("pass-devices")).toContainText(imei);
   const token = (await h.getByTestId("visitor-link").inputValue()).split("/v/")[1]!;
   const pass = await db.pass.findUniqueOrThrow({ where: { token } });
 
@@ -96,17 +99,20 @@ test("personal devices: HR requires them, host and visitor register IMEIs, kiosk
   await v.goto(`/v/${token}`);
   const vDevices = v.getByTestId("devices-field");
   await expect(vDevices.getByTestId("device-row")).toHaveCount(1);
-  await expect(vDevices.getByTestId("device-row").first().locator("input").nth(0)).toHaveValue("351234567890123");
+  await expect(vDevices.getByTestId("device-row").first().getByLabel("IMEI", { exact: true })).toHaveValue(imei);
   await vDevices.getByTestId("add-device").click();
   const second = vDevices.getByTestId("device-row").nth(1);
   await second.locator("select").selectOption("laptop");
-  await second.locator("input").nth(0).fill("sn-abc123");
-  await second.locator("input").nth(1).fill("Dell Latitude");
-  await second.locator("input").nth(2).fill("gris");
+  await second.getByLabel("Número de serie").fill(`sn-abc${String(stamp).slice(-6)}`);
+  await second.getByLabel("Marca y modelo").fill("Dell Latitude");
+  await second.getByLabel("Color").fill("gris");
+  await second.getByLabel("Capacidad").fill("512 GB SSD · 16 GB RAM");
   await v.getByRole("button", { name: "Guardar" }).click();
   await expect(v.locator("[role=status]")).toContainText("Datos guardados");
   const updated = await db.pass.findUniqueOrThrow({ where: { id: pass.id } });
-  expect((updated.extra as { devices: { id: string; kind: string }[] }).devices.map((d) => `${d.kind}:${d.id}`)).toEqual(["phone:351234567890123", "laptop:SNABC123"]);
+  const regs = (updated.extra as { devices: { id: string; kind: string; capacity: string; serial: string }[] }).devices;
+  expect(regs.map((d) => `${d.kind}:${d.id}`)).toEqual([`phone:${imei}`, `laptop:SNABC${String(stamp).slice(-6)}`]);
+  expect(regs[1]).toMatchObject({ serial: `sn-abc${String(stamp).slice(-6)}`, capacity: "512 GB SSD · 16 GB RAM" });
 
   // 3. Kiosk: the scan lists the devices; an IMEI typed with spaces finds its owner; an unknown one is refused.
   const guardName = `Guardia Dispositivos ${stamp}`;
@@ -117,12 +123,14 @@ test("personal devices: HR requires them, host and visitor register IMEIs, kiosk
   const payloadFor = (id: string) => signStaticQr({ passId: id, exp: Math.floor((Date.now() + 86_400_000) / 1000), siteId: site.id }, SIGNING_KEY);
   const entered = await scan(k, payloadFor(pass.id));
   await expect(entered).toHaveAttribute("data-tone", "ok");
-  await expect(entered.getByTestId("result-devices")).toContainText("SNABC123");
+  await expect(entered.getByTestId("result-devices")).toContainText(`sn-abc${String(stamp).slice(-6)}`);
+  await expect(entered.getByTestId("result-devices")).toContainText("16 GB RAM");
   await expect(entered.getByTestId("result-devices").locator("li")).toHaveCount(2);
-  const found = await scan(k, "35 123456 789012 3");
+  const found = await scan(k, `${imei.slice(0, 2)} ${imei.slice(2, 8)} ${imei.slice(8)}`);
   await expect(found).toHaveAttribute("data-tone", "verified");
   await expect(found.getByTestId("result-device")).toHaveAttribute("data-inside", "1");
   await expect(found.getByTestId("result-name")).toContainText(`Proveedor Dispositivos ${stamp}`);
+  await expect((await scan(k, `SN-ABC${String(stamp).slice(-6)}`)).getByTestId("result-device")).toContainText("Dell Latitude");
   await expect(await scan(k, "99999999999")).toHaveAttribute("data-reason", "device_not_found");
 
   // 4. A vendor who registered nothing cannot enter until they register or declare none from the link.

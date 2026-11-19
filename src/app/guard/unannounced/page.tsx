@@ -12,6 +12,8 @@ import { enabledKinds } from "@/lib/server/policies";
 import { FormFields } from "@/components/forms/FormFields";
 import { KindFormSwitch, type KindFormRules } from "@/components/forms/KindFormSwitch";
 import { formLabels } from "@/lib/forms/labels";
+import { DevicesField } from "@/components/forms/DevicesField";
+import { DEVICE_KINDS } from "@/lib/forms/schema";
 import { builtinRule, BUILTIN_TYPES, elementsFor, type BuiltinType } from "@/lib/forms/schema";
 import { loadFormsForSite } from "@/lib/server/forms";
 import { createUnannouncedAction, searchHostsAction } from "./actions";
@@ -70,6 +72,12 @@ export default async function UnannouncedPage({ searchParams }: { searchParams: 
               <input id="plate" name="plate" maxLength={16} autoComplete="off" autoCapitalize="characters" className="input uppercase" required={req("plate")} />
             </div>
           </div>
+          {readSiteSettings(site).requireDevices ? (
+            <fieldset className="space-y-2 rounded-lg border border-border p-3" data-testid="site-devices">
+              <legend className="px-1 text-sm font-medium">{labels.devices.registered}</legend>
+              <DevicesField kinds={DEVICE_KINDS} required labels={labels.devices} />
+            </fieldset>
+          ) : null}
           {hasCustom
             ? KINDS.map((kind) => {
                 const active = kind === "visit";

@@ -229,7 +229,9 @@
       "wifiHelp": "Only visitors whose host ticked \"share Wi-Fi\" on the invitation see it.",
       "allowUnannounced": "Allow unannounced visits at the kiosk",
       "requirePhotos": "Photos required of every visitor",
-      "requirePhotosHelp": "Whatever the visit type: a face photo and both sides of the ID, from their link. Without them the QR does not appear and the kiosk refuses entry. Deleted when the photo retention expires."
+      "requirePhotosHelp": "Whatever the visit type: a face photo and both sides of the ID, from their link. Without them the QR does not appear and the kiosk refuses entry. Deleted when the photo retention expires.",
+      "requireDevices": "Device registration required of every visitor",
+      "requireDevicesHelp": "Phone, laptop, tablet or watch with IMEI or serial, model, colour and capacity, or a declaration of bringing none. Without it the QR does not appear and the kiosk refuses entry."
     },
     "policiesPage": {
       "title": "Visit policies",
@@ -574,7 +576,8 @@
       "deviceFound": "Registered device",
       "deviceOwnerInside": "Its owner is inside the site.",
       "deviceOwnerNotInside": "Its owner is not inside right now (valid pass or closed visit).",
-      "idPhotos": "ID document"
+      "idPhotos": "ID document",
+      "serial": "Serial"
     },
     "unannounced": {
       "title": "Unannounced visit",
@@ -879,7 +882,8 @@
       "pending": "The QR will appear once the pass is approved.",
       "unavailable": "This pass is no longer valid.",
       "register": "The QR will appear once you complete your registration.",
-      "photo": "The QR will appear once you upload your photo."
+      "photo": "The QR will appear once you upload your photo.",
+      "devices": "The QR will appear once you register your devices (or declare you bring none)."
     },
     "prereg": {
       "title": "Complete your details",
@@ -915,7 +919,8 @@
       "photo_tooBig": "The photo is too large (8 MB max).",
       "photo_invalid": "The file is not a JPG or PNG image.",
       "photo_failed": "The photo could not be stored. Try again.",
-      "photos_missing": "Required photos are missing. The ones you already uploaded were kept; complete the rest."
+      "photos_missing": "Required photos are missing. The ones you already uploaded were kept; complete the rest.",
+      "devices_missing": "Register your devices or tick that you bring none."
     },
     "status": {
       "active": "Valid",
@@ -948,7 +953,8 @@
       "idBack": "ID or passport, back",
       "done": "done",
       "help": "Good light, no glare. Only Security sees them and they are deleted automatically after the retention period."
-    }
+    },
+    "devicesIntro": "Register every device you bring (phone, laptop, tablet, watch). If you bring none, tick the box."
   },
   "passes": {
     "status": {
@@ -2038,14 +2044,23 @@
           "other": "Other"
         },
         "kind": "Kind",
-        "id": "IMEI or serial number",
-        "idHelp": "IMEI (15 digits) or serial",
         "model": "Make and model",
         "color": "Colour",
         "add": "Add another device",
         "remove": "Remove",
         "none": "I bring no devices",
-        "registered": "Personal devices"
+        "registered": "Personal devices",
+        "imei": "IMEI",
+        "imeiHelp": "15 digits: dial *#06#",
+        "serial": "Serial number",
+        "capacity": "Capacity",
+        "capacityHints": {
+          "phone": "e.g. 256 GB",
+          "laptop": "e.g. 512 GB SSD · 16 GB RAM",
+          "tablet": "e.g. 128 GB",
+          "watch": "e.g. 32 GB",
+          "other": "Capacity"
+        }
       }
     },
     "answers": {
@@ -2169,7 +2184,7 @@
           },
           "devices": {
             "title": "Personal devices (phone, laptop, watch)",
-            "body": "If the visit type's form asks for \"Personal devices\", the scan result shows what the visitor carries: kind, make and model, colour and IMEI or serial. If the form marks it required and the visitor registered nothing nor declared bringing none, the kiosk refuses entry until they complete it from their link.\nTo trace a device, type or scan its IMEI or serial under \"Manual code\": the kiosk says whose it is, which pass registered it and whether its owner is inside. An IMEI not registered on any pass of the day shows in red."
+            "body": "If the visit type's form asks for \"Personal devices\", the scan result shows what the visitor carries: kind, make and model, colour and IMEI or serial. If the form marks it required and the visitor registered nothing nor declared bringing none, the kiosk refuses entry until they complete it from their link.\nTo trace a device, type or scan its IMEI or serial under \"Manual code\": the kiosk says whose it is, which pass registered it and whether its owner is inside. An IMEI not registered on any pass of the day shows in red.\nWith \"Device registration required\" on for the site (the default), every visitor registers on their link each device they bring: phone (IMEI, serial, model, colour, capacity), laptop (serial, model, colour, SSD/HDD and RAM), tablet or watch (serial, model, colour, capacity), or declares bringing none. Without it their QR does not appear."
           }
         }
       },
@@ -2191,7 +2206,7 @@
           },
           "visitor": {
             "title": "What the visitor sees",
-            "body": "Their link shows the QR, site, host and validity. Before arriving they can complete ID, phone, plate and company under \"Complete your details\" for a faster entry.\nIf the visit type requires it, they must accept the visitor policy (NDA) by signing with their name; without it the kiosk will not let them in. Recurring passes show a QR that changes every 30 seconds.\nIf the visit type's policy \"requires a face photo\", the visitor takes it from their phone on the link and their QR appears once uploaded: Security sees it at the scan and it is printed on the badge. If you ticked \"Share the guest Wi-Fi\", the link shows the network and password.\nWith \"Photos required\" on for the site, the link asks for three phone photos: their face and both sides of the ID. The ones already uploaded are kept even if one is still missing."
+            "body": "Their link shows the QR, site, host and validity. Before arriving they can complete ID, phone, plate and company under \"Complete your details\" for a faster entry.\nIf the visit type requires it, they must accept the visitor policy (NDA) by signing with their name; without it the kiosk will not let them in. Recurring passes show a QR that changes every 30 seconds.\nIf the visit type's policy \"requires a face photo\", the visitor takes it from their phone on the link and their QR appears once uploaded: Security sees it at the scan and it is printed on the badge. If you ticked \"Share the guest Wi-Fi\", the link shows the network and password.\nWith \"Photos required\" on for the site, the link asks for three phone photos: their face and both sides of the ID. The ones already uploaded are kept even if one is still missing.\nThey also register their devices (phone, laptop, tablet, watch) with IMEI or serial, model, colour and capacity, or tick that they bring none; Security sees them at the scan and can look up any IMEI or serial from the kiosk."
           },
           "pending": {
             "title": "Passes that need approval",
@@ -2239,7 +2254,7 @@
           },
           "sites": {
             "title": "Sites, gates and areas",
-            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry.\nThe \"Identifier (URL)\" when creating a site is its short unique web-style name (lowercase, digits and hyphens, e.g. airlink-2): it identifies the site permanently in the audit log and integrations even if you later rename it, and cannot be edited afterwards.\nThe kiosk lets visitors in before the pass time according to the site's \"Early-arrival minutes\" (60 by default): a 10:00 visit may enter from 9:00, never the day before.\nThe site settings also hold the guest Wi-Fi (each invitation decides whether to share it) and whether the kiosk accepts \"Unannounced visit\"; turn it off if Security should only scan.\n\"Photos required of every visitor\" (on by default) demands from any visitor, whatever the type, a face photo and both sides of their ID from their link; without them their QR does not appear and the kiosk refuses entry. They are deleted automatically when the site's photo retention expires."
+            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry.\nThe \"Identifier (URL)\" when creating a site is its short unique web-style name (lowercase, digits and hyphens, e.g. airlink-2): it identifies the site permanently in the audit log and integrations even if you later rename it, and cannot be edited afterwards.\nThe kiosk lets visitors in before the pass time according to the site's \"Early-arrival minutes\" (60 by default): a 10:00 visit may enter from 9:00, never the day before.\nThe site settings also hold the guest Wi-Fi (each invitation decides whether to share it) and whether the kiosk accepts \"Unannounced visit\"; turn it off if Security should only scan.\n\"Photos required of every visitor\" (on by default) demands from any visitor, whatever the type, a face photo and both sides of their ID from their link; without them their QR does not appear and the kiosk refuses entry. They are deleted automatically when the site's photo retention expires.\n\"Device registration required of every visitor\" (on by default) demands on the link the devices they bring with IMEI or serial, model, colour and capacity, or a declaration of bringing none."
           },
           "policies": {
             "title": "Policies per visit type",

@@ -245,7 +245,11 @@ export type AnswerValue = string | number | boolean;
 export type Answer = { label: string; value: AnswerValue; onBadge?: boolean };
 export type Answers = Record<string, Answer>;
 /** One registered personal device. `id` is the IMEI or serial, normalised (upper case, no spaces or dashes). */
-export type Device = { kind: DeviceKind; id: string; model: string; color: string };
+/**
+ * One registered personal device. `id` is the lookup key (the IMEI for a phone, else the serial), normalised;
+ * `imei` (phones) and `serial` are kept as typed, with model, colour and capacity (storage; for laptops also RAM).
+ */
+export type Device = { kind: DeviceKind; id: string; imei?: string; serial: string; model: string; color: string; capacity: string };
 /** Shape of `Pass.extra` / `Visit.extra`. `devicesNone`: the visitor declared they bring no device. */
 export type ExtraJson = { answers?: Answers; devices?: Device[]; devicesNone?: boolean; /** The host shares the site's guest Wi-Fi on the visitor link. */ wifi?: boolean };
 
@@ -263,7 +267,8 @@ export function readDevices(extra: unknown): Device[] {
     if (!d || typeof d !== "object") continue;
     const x = d as Partial<Device>;
     if (!(DEVICE_KINDS as readonly string[]).includes(String(x.kind)) || typeof x.id !== "string") continue;
-    out.push({ kind: x.kind as DeviceKind, id: x.id, model: typeof x.model === "string" ? x.model : "", color: typeof x.color === "string" ? x.color : "" });
+    const str = (v: unknown) => (typeof v === "string" ? v : "");
+    out.push({ kind: x.kind as DeviceKind, id: x.id, ...(str(x.imei) ? { imei: str(x.imei) } : {}), serial: str(x.serial) || x.id, model: str(x.model), color: str(x.color), capacity: str(x.capacity) });
   }
   return out;
 }
@@ -273,7 +278,7 @@ export function readDevicesNone(extra: unknown): boolean {
 }
 
 /** Field names of the devices block (repeated once per row) and of the "no devices" declaration. */
-export const DEVICE_FIELDS = { kind: "dev_kind", id: "dev_id", model: "dev_model", color: "dev_color", none: "dev_none" } as const;
+export const DEVICE_FIELDS = { kind: "dev_kind", imei: "dev_imei", serial: "dev_serial", model: "dev_model", color: "dev_color", capacity: "dev_capacity", none: "dev_none" } as const;
 
 export type CollectedDevices = { devices: Device[]; none: boolean; invalid: boolean; present: boolean };
 
@@ -282,26 +287,33 @@ export type CollectedDevices = { devices: Device[]; none: boolean; invalid: bool
  * longer than 30 characters, or a kind the form does not allow, makes the block invalid. `present` says the surface
  * had the block at all (so a surface without it never clears what another surface registered).
  */
-export function collectDevices(elements: FormElement[], surface: FormSurface, values: FormValues): CollectedDevices {
+export function collectDevices(elements: FormElement[], surface: FormSurface, values: FormValues, opts: { always?: boolean } = {}): CollectedDevices {
   const block = elementsFor(elements, surface).find((e): e is DevicesElement => e.type === "devices");
-  if (!block) return { devices: [], none: false, invalid: false, present: false };
+  // `always`: the site demands devices of every visitor, so the block is on the page even when the form omits it.
+  const kindsAllowed: readonly DeviceKind[] = block ? block.kinds : DEVICE_KINDS;
+  if (!block && !opts.always) return { devices: [], none: false, invalid: false, present: false };
   const all = (name: string): string[] => (values.getAll ? values.getAll(name) : [values.get(name)]).map((v) => (typeof v === "string" ? v : "")).map((v) => v.trim());
   const kinds = all(DEVICE_FIELDS.kind);
-  const ids = all(DEVICE_FIELDS.id);
+  const imeis = all(DEVICE_FIELDS.imei);
+  const serials = all(DEVICE_FIELDS.serial);
   const models = all(DEVICE_FIELDS.model);
   const colors = all(DEVICE_FIELDS.color);
+  const capacities = all(DEVICE_FIELDS.capacity);
   const devices: Device[] = [];
   let invalid = false;
-  for (let i = 0; i < Math.max(kinds.length, ids.length); i++) {
-    const id = normalizeDeviceId(ids[i] ?? "");
+  for (let i = 0; i < Math.max(kinds.length, serials.length, imeis.length); i++) {
     const kind = kinds[i] ?? "";
-    if (!id && !(models[i] ?? "") && !(colors[i] ?? "")) continue; // empty row
-    if (id.length < 5 || id.length > 30 || !block.kinds.includes(kind as DeviceKind)) {
+    const imei = kind === "phone" ? normalizeDeviceId(imeis[i] ?? "") : "";
+    const serial = (serials[i] ?? "").trim().slice(0, 40);
+    const id = imei || normalizeDeviceId(serial);
+    const empty = !imei && !serial && !(models[i] ?? "") && !(colors[i] ?? "") && !(capacities[i] ?? "");
+    if (empty) continue; // untouched row
+    if (id.length < 5 || id.length > 30 || !kindsAllowed.includes(kind as DeviceKind) || (imei && (imei.length < 14 || imei.length > 16))) {
       invalid = true;
       continue;
     }
     if (devices.some((d) => d.id === id)) continue;
-    devices.push({ kind: kind as DeviceKind, id, model: (models[i] ?? "").slice(0, 60), color: (colors[i] ?? "").slice(0, 30) });
+    devices.push({ kind: kind as DeviceKind, id, ...(imei ? { imei } : {}), serial, model: (models[i] ?? "").slice(0, 60), color: (colors[i] ?? "").slice(0, 30), capacity: (capacities[i] ?? "").slice(0, 40) });
   }
   if (devices.length > MAX_DEVICES) invalid = true;
   const noneRaw = values.get(DEVICE_FIELDS.none);

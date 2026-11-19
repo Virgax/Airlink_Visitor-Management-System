@@ -8,6 +8,8 @@ import { HostNav } from "@/components/passes/HostNav";
 import { PassStatusBadge } from "@/components/passes/PassStatusBadge";
 import { ShareLink } from "@/components/passes/ShareLink";
 import { CopyAll } from "@/components/passes/CopyAll";
+import { describeDevice } from "@/lib/forms/devices";
+import { deviceLabels } from "@/lib/forms/deviceLabels";
 import { registrationPending } from "@/lib/passes/visitor";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
@@ -71,7 +73,7 @@ export default async function PassDetailPage({ params, searchParams }: { params:
   const answers = listAnswers(readAnswers(pass.extra));
   const devices = readDevices(pass.extra);
   const devicesNone = readDevicesNone(pass.extra);
-  const tfd = await getTranslations("forms.render.devices");
+  const tfd = await getTranslations("forms.render");
 
   return (
     <AppShell user={tenant.user} subtitle={tenant.site?.name ?? ts("allSites")} title={t("title", { name: pass.visitorName })}>
@@ -148,13 +150,13 @@ export default async function PassDetailPage({ params, searchParams }: { params:
 
           {devices.length || devicesNone ? (
             <div data-testid="pass-devices">
-              <h2 className="mb-1 font-medium">{tfd("registered")}</h2>
+              <h2 className="mb-1 font-medium">{tfd("devices.registered")}</h2>
               {devices.length ? (
                 <ul className="space-y-0.5 text-sm">
-                  {devices.map((d) => <li key={d.id} data-device-id={d.id}><span className="font-medium">{tfd(`kinds.${d.kind}`)}</span> · {d.model || "—"} · {d.color || "—"} · <span className="font-mono text-xs">{d.id}</span></li>)}
+                  {devices.map((d) => <li key={d.id} data-device-id={d.id}>{describeDevice(d, deviceLabels((k) => tfd(k as "none")))}</li>)}
                 </ul>
               ) : (
-                <p className="muted text-sm">{tfd("none")}</p>
+                <p className="muted text-sm">{tfd("devices.none")}</p>
               )}
             </div>
           ) : null}

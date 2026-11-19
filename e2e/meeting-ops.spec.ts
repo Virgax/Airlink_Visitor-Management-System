@@ -47,7 +47,7 @@ test("guest Wi-Fi on invitations, validity renewal, 'requires photo' policy and 
   await page.getByLabel("Red Wi-Fi de invitados").fill("ARL Guest");
   await page.getByLabel("Clave del Wi-Fi de invitados").fill(`clave-${stamp}`);
   await page.getByTestId("allow-unannounced").uncheck();
-  await expect(page.getByTestId("require-photos")).toBeChecked(); // on by default for every visitor
+  await page.getByTestId("require-photos").check();
   await page.getByRole("button", { name: "Guardar", exact: true }).first().click();
   await expect(page).toHaveURL(/ok=saved/);
   const settings = (await db.site.findUniqueOrThrow({ where: { id: site.id } })).settings as { guestWifi: { ssid: string }; allowUnannounced: boolean; requirePhotos: boolean };
@@ -110,6 +110,50 @@ test("guest Wi-Fi on invitations, validity renewal, 'requires photo' policy and 
   await expect(k.getByTestId("scan-result")).toHaveAttribute("data-tone", "ok");
 
   // Leave the site as it was for the other specs.
-  await db.site.update({ where: { id: site.id }, data: { settings: { ...settings, allowUnannounced: true, guestWifi: { ssid: "", password: "" } } } });
+  await db.site.update({ where: { id: site.id }, data: { settings: { ...settings, allowUnannounced: true, requirePhotos: false, requireDevices: false, guestWifi: { ssid: "", password: "" } } } });
   await db.visitPolicy.update({ where: { siteId_kind: { siteId: site.id, kind: "visit" } }, data: { requiresPhoto: false } });
+});
+
+test("the site rule makes every visitor register devices even when the form has no devices block", async ({ browser, page }) => {
+  const stamp = Date.now();
+  const site = await db.site.findUniqueOrThrow({ where: { slug: "airlink-2" } });
+  const before = (await db.site.findUniqueOrThrow({ where: { id: site.id } })).settings as Record<string, unknown>;
+  await db.site.update({ where: { id: site.id }, data: { settings: { ...before, requireDevices: true } } });
+  try {
+  await loginAsAdmin(page);
+  await page.goto(`/admin/sites/${site.id}`);
+  await expect(page.getByTestId("require-devices")).toBeChecked();
+  const host = await createLocalHost(stamp);
+  const h = await (await browser.newContext({ locale: "es-DO" })).newPage();
+  await login(h, host.email, host.password);
+  await h.goto(`/app/passes/new?siteId=${site.id}`);
+  await h.getByLabel("Tipo de visita").selectOption("visit");
+  await h.getByLabel("Nombre del visitante").fill(`Sin Formulario ${stamp}`);
+  await h.getByLabel("Cédula o pasaporte").fill("001-1234567-8");
+  await h.getByLabel("Válido desde").fill(localDate(-1, "08:00"));
+  await h.getByLabel("Válido hasta").fill(localDate(1, "18:00"));
+  await h.getByRole("button", { name: "Crear pase" }).click();
+  await expect(h).toHaveURL(/\?ok=created$/);
+  const token = (await h.getByTestId("visitor-link").inputValue()).split("/v/")[1]!;
+  const v = await (await browser.newContext({ locale: "es-DO" })).newPage();
+  await v.goto(`/v/${token}`);
+  // No QR until the devices are registered; the block is there although the "visit" form never mentioned it.
+  await expect(v.getByTestId("qr-devices-note")).toBeVisible();
+  await expect(v.getByTestId("pass-qr")).toHaveCount(0);
+  const block = v.getByTestId("site-devices");
+  const row = block.getByTestId("device-row").first();
+  await row.locator("select").selectOption("tablet");
+  await row.getByLabel("Número de serie").fill("TAB-9988");
+  await row.getByLabel("Marca y modelo").fill("iPad Air");
+  await row.getByLabel("Color").fill("plateado");
+  await row.getByLabel("Capacidad").fill("128 GB");
+  await v.getByRole("button", { name: "Guardar" }).click();
+  await expect(v.locator("[role=status]")).toContainText("Datos guardados");
+  await expect(v.getByTestId("pass-qr")).toBeVisible();
+  await expect(v.getByTestId("site-devices").getByTestId("device-row").first().getByLabel("Marca y modelo")).toHaveValue("iPad Air");
+  const pass = await db.pass.findUniqueOrThrow({ where: { token } });
+  expect((pass.extra as { devices: { kind: string; serial: string; capacity: string }[] }).devices[0]).toMatchObject({ kind: "tablet", serial: "TAB-9988", capacity: "128 GB" });
+  } finally {
+    await db.site.update({ where: { id: site.id }, data: { settings: { ...before, requireDevices: false } } });
+  }
 });
