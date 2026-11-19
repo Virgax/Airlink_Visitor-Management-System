@@ -782,7 +782,8 @@
         "revoked": "Pass cancelled.",
         "renamed": "Name updated.",
         "emailed": "Invitation sent.",
-        "window": "Validity updated."
+        "window": "Validity updated.",
+        "devices": "Devices updated."
       },
       "errors": {
         "invalid": "Could not save. Check the data.",
@@ -790,7 +791,9 @@
         "window_closed": "This pass no longer accepts validity changes; duplicate it.",
         "window_order": "The end must be after the start.",
         "window_too_long": "The validity cannot exceed one year.",
-        "window_past": "The end date has already passed."
+        "window_past": "The end date has already passed.",
+        "devices_invalid": "Check the devices: 15-digit IMEI or a serial of 5 to 30 characters.",
+        "devices_closed": "This pass no longer accepts changes."
       },
       "registrationPending": "Registration pending: the visitor has not completed their details from the link yet. The QR will appear once they do.",
       "registeredAt": "Registration completed by the visitor on {date}.",
@@ -804,7 +807,9 @@
       "windowHelp": "If the visitor arrives after the end or the visit moved to another day, extend or shift the validity here: the link and the QR stay the same.",
       "windowFrom": "Valid from",
       "windowUntil": "Valid until",
-      "windowSave": "Save validity"
+      "windowSave": "Save validity",
+      "devicesHelp": "What the visitor registered. If they got it wrong, correct it here and save; the audit log records it under your name.",
+      "devicesSave": "Save devices"
     },
     "approvalsPage": {
       "title": "Pending approvals",
@@ -2202,7 +2207,7 @@
           },
           "detail": {
             "title": "Share the link",
-            "body": "After creating the pass you see its detail with the visitor link. Copy it and send it by WhatsApp or use \"Send by e-mail\": the visitor receives the QR, the address and the instructions.\nIf the visitor has no phone, tick \"Generate 6-digit PIN\": it is shown once and lets them enter at the kiosk. From here you can also cancel, duplicate or rename the pass.\nIf the visitor arrives after the end or the visit moves to another day, use \"Change validity\" to extend or shift the dates: the link and the QR stay the same."
+            "body": "After creating the pass you see its detail with the visitor link. Copy it and send it by WhatsApp or use \"Send by e-mail\": the visitor receives the QR, the address and the instructions.\nIf the visitor has no phone, tick \"Generate 6-digit PIN\": it is shown once and lets them enter at the kiosk. From here you can also cancel, duplicate or rename the pass.\nIf the visitor arrives after the end or the visit moves to another day, use \"Change validity\" to extend or shift the dates: the link and the QR stay the same.\nThe detail also shows what the visitor registered, and you can correct their devices if they got them wrong."
           },
           "visitor": {
             "title": "What the visitor sees",
@@ -2352,7 +2357,7 @@
           },
           "signIn": {
             "title": "Sign a visit in by hand",
-            "body": "\"Sign in visit\" lets Security or Administration record someone's entry from the panel, without a kiosk: site, gate, type, host and visitor details. The visit is approved and inside, and the audit records it as an in-person approval."
+            "body": "\"Sign in visit\" lets Security or Administration record someone's entry from the panel, without a kiosk: site, gate, type, host and visitor details. The visit is approved and inside, and the audit records it as an in-person approval.\nTo check or correct what a visitor registered (photos, devices, details), open their pass from Reports → Invitations → \"View\": Security and HR see the face and ID photos there and can edit the devices with \"Save devices\"; the change is audited."
           },
           "audit": {
             "title": "Audit",

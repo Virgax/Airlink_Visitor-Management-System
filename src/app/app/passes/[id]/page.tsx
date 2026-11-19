@@ -20,7 +20,10 @@ import { loadPolicy } from "@/lib/server/passes";
 import { evaluatePolicy } from "@/lib/policies/evaluate";
 import { parseSchedule } from "@/lib/passes/validate";
 import { readPinFlash } from "@/lib/server/invites";
-import { emailPassAction, renamePassAction, revokePassAction, updateWindowAction } from "../actions";
+import { emailPassAction, renamePassAction, revokePassAction, updatePassDevicesAction, updateWindowAction } from "../actions";
+import { DevicesField } from "@/components/forms/DevicesField";
+import { DEVICE_KINDS } from "@/lib/forms/schema";
+import { formLabels } from "@/lib/forms/labels";
 import { toLocalInput } from "@/lib/time/tz";
 import { CalendarClock } from "lucide-react";
 import { formatAnswer, listAnswers, readAnswers, readDevices, readDevicesNone } from "@/lib/forms/schema";
@@ -61,8 +64,10 @@ export default async function PassDetailPage({ params, searchParams }: { params:
   const groupLinks = group.map((g) => `${g.visitorName}: ${base}/v/${g.token}`).join("\n");
   const schedule = parseSchedule(pass.schedule);
   const canRevoke = pass.status === "active" || pass.status === "pending_approval";
-  const okKey = sp.ok && ["created", "createdGroup", "revoked", "renamed", "emailed", "window"].includes(sp.ok) ? sp.ok : null;
-  const windowError = sp.error && ["window_invalid", "window_closed", "window_order", "window_too_long", "window_past"].includes(sp.error) ? sp.error : null;
+  const okKey = sp.ok && ["created", "createdGroup", "revoked", "renamed", "emailed", "window", "devices"].includes(sp.ok) ? sp.ok : null;
+  const labels = await formLabels();
+  const staff = tenant.role === "admin" || tenant.role === "security";
+  const windowError = sp.error && ["window_invalid", "window_closed", "window_order", "window_too_long", "window_past", "devices_invalid", "devices_closed"].includes(sp.error) ? sp.error : null;
   const date = (d: Date) => fmtDate(d, locale, { timeZone: tz });
   const tp = await getTranslations("people");
   const flashPin = pass.pinHash ? await readPinFlash(pass.id) : null;
@@ -105,9 +110,19 @@ export default async function PassDetailPage({ params, searchParams }: { params:
           {pass.approvedBy && pass.approvedAt && pass.status === "active" ? <p className="muted">{t("approvedBy", { name: pass.approvedBy.name, date: date(pass.approvedAt) })}</p> : null}
           {pass.approvedBy && pass.approvedAt && pass.status === "denied" ? <p className="muted">{t("deniedBy", { name: pass.approvedBy.name, date: date(pass.approvedAt) })}</p> : null}
 
-          {pass.photoKey ? (
-            // eslint-disable-next-line @next/next/no-img-element -- private media of this pass, opened with its token
-            <img src={`/api/media/${pass.photoKey}?pass=${encodeURIComponent(pass.token)}`} alt="" className="h-32 w-24 rounded-lg border border-border object-cover" data-testid="pass-photo" />
+          {pass.photoKey || (staff && (pass.idFrontKey || pass.idBackKey)) ? (
+            <div className="flex flex-wrap gap-2" data-testid="pass-photos">
+              {pass.photoKey ? (
+                // eslint-disable-next-line @next/next/no-img-element -- private media of this pass, opened with its token
+                <img src={`/api/media/${pass.photoKey}?pass=${encodeURIComponent(pass.token)}`} alt="" className="h-32 w-24 rounded-lg border border-border object-cover" data-testid="pass-photo" />
+              ) : null}
+              {staff
+                ? [pass.idFrontKey, pass.idBackKey].filter((k): k is string => Boolean(k)).map((k) => (
+                    // eslint-disable-next-line @next/next/no-img-element -- ID photos: staff only
+                    <img key={k} src={`/api/media/${k}`} alt="" className="h-32 w-48 rounded-lg border border-border object-cover" />
+                  ))
+                : null}
+            </div>
           ) : null}
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
             <dt className="muted">{t("site")}</dt><dd>{pass.site.name}</dd>
@@ -148,18 +163,23 @@ export default async function PassDetailPage({ params, searchParams }: { params:
             </div>
           ) : null}
 
-          {devices.length || devicesNone ? (
-            <div data-testid="pass-devices">
-              <h2 className="mb-1 font-medium">{tfd("devices.registered")}</h2>
-              {devices.length ? (
-                <ul className="space-y-0.5 text-sm">
-                  {devices.map((d) => <li key={d.id} data-device-id={d.id}>{describeDevice(d, deviceLabels((k) => tfd(k as "none")))}</li>)}
-                </ul>
-              ) : (
-                <p className="muted text-sm">{tfd("devices.none")}</p>
-              )}
-            </div>
-          ) : null}
+          <div data-testid="pass-devices">
+            <h2 className="mb-1 font-medium">{tfd("devices.registered")}</h2>
+            {canRevoke ? (
+              <form action={updatePassDevicesAction} className="space-y-2" data-testid="pass-devices-form">
+                <input type="hidden" name="passId" value={pass.id} />
+                <p className="muted text-sm">{t("devicesHelp")}</p>
+                <DevicesField kinds={DEVICE_KINDS} initial={devices} none={devicesNone} required={false} labels={labels.devices} idPrefix="pd-" />
+                <button type="submit" className="btn-secondary text-sm" data-testid="save-devices">{t("devicesSave")}</button>
+              </form>
+            ) : devices.length ? (
+              <ul className="space-y-0.5 text-sm">
+                {devices.map((d) => <li key={d.id} data-device-id={d.id}>{describeDevice(d, deviceLabels((k) => tfd(k as "none")))}</li>)}
+              </ul>
+            ) : (
+              <p className="muted text-sm">{devicesNone ? tfd("devices.none") : "—"}</p>
+            )}
+          </div>
 
           {group.length > 1 ? (
             <div>

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
+import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { assertSiteAllowed } from "@/lib/auth/guards";
 import { canInviteForOthers, getHostTenantOrThrow } from "@/lib/auth/host-access";
@@ -195,6 +196,23 @@ export async function revokePassAction(formData: FormData): Promise<void> {
   const pass = await loadOwnPassId(formData.get("passId"));
   await revokePass(pass.id, tenant.user.id);
   redirect(`/app/passes/${pass.id}?ok=revoked`);
+}
+
+/**
+ * Corrects the personal devices of a pass (host, or HR/security from the same page) when the visitor filled them
+ * wrong: the list is replaced as a whole and the change is audited with who made it.
+ */
+export async function updatePassDevicesAction(formData: FormData): Promise<void> {
+  const tenant = await getHostTenantOrThrow();
+  const own = await loadOwnPassId(formData.get("passId"));
+  const pass = await db.pass.findUniqueOrThrow({ where: { id: own.id } });
+  if (pass.status !== "active" && pass.status !== "pending_approval") redirect(`/app/passes/${pass.id}?error=devices_closed`);
+  const dev = collectDevices([], "visitor", formData, { always: true });
+  if (dev.invalid) redirect(`/app/passes/${pass.id}?error=devices_invalid`);
+  const extra = { ...((pass.extra as Record<string, unknown> | null) ?? {}), devices: dev.devices, devicesNone: dev.none } as unknown as Prisma.InputJsonObject;
+  await db.pass.update({ where: { id: pass.id }, data: { extra } });
+  await audit({ action: "pass.updated", siteId: pass.siteId, actorId: tenant.user.id, targetType: "Pass", targetId: pass.id, meta: { field: "devices", role: tenant.role, count: dev.devices.length, none: dev.none } });
+  redirect(`/app/passes/${pass.id}?ok=devices`);
 }
 
 const windowSchema = z.object({ passId: z.string().min(1), validFrom: z.string().min(1), validUntil: z.string().min(1) });

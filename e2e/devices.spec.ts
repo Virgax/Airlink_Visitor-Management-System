@@ -53,6 +53,7 @@ test("personal devices: HR requires them, host and visitor register IMEIs, kiosk
   const imei = `3512${String(stamp).slice(-11)}`; // 15 digits, unique per run
   const imeiTyped = `${imei.slice(0, 2)}-${imei.slice(2, 8)}-${imei.slice(8, 14)}-${imei.slice(14)}`;
 
+  try {
   // 1. HR: a vendor form with a required devices block.
   await loginAsAdmin(page);
   await page.goto("/admin/forms");
@@ -91,7 +92,7 @@ test("personal devices: HR requires them, host and visitor register IMEIs, kiosk
   await row.getByLabel("Capacidad").fill("256 GB");
   await h.getByRole("button", { name: "Crear pase" }).click();
   await expect(h).toHaveURL(/\/app\/passes\/[a-z0-9]+\?ok=created$/);
-  await expect(h.getByTestId("pass-devices")).toContainText(imei);
+  await expect(h.getByTestId("pass-devices-form").getByTestId("device-row").first().getByLabel("IMEI", { exact: true })).toHaveValue(imei);
   const token = (await h.getByTestId("visitor-link").inputValue()).split("/v/")[1]!;
   const pass = await db.pass.findUniqueOrThrow({ where: { token } });
 
@@ -156,6 +157,53 @@ test("personal devices: HR requires them, host and visitor register IMEIs, kiosk
   await expect(ok).toHaveAttribute("data-tone", "ok");
   await expect(ok.getByTestId("result-devices")).toContainText("no trae");
 
-  // Leave the vendor policy as it was.
-  await db.visitPolicy.update({ where: { siteId_kind: { siteId: site.id, kind: "vendor" } }, data: { formTemplateId: null } });
+  } finally {
+    // Leave the vendor policy as it was, even when an assertion above failed.
+    await db.visitPolicy.update({ where: { siteId_kind: { siteId: site.id, kind: "vendor" } }, data: { formTemplateId: null } });
+  }
+});
+
+test("the host and security correct a visitor's devices from the pass page; the change is audited", async ({ browser, page }) => {
+  const stamp = Date.now();
+  const site = await db.site.findUniqueOrThrow({ where: { slug: "airlink-2" } });
+  const host = await createLocalHost(stamp);
+  const h = await (await browser.newContext({ locale: "es-DO" })).newPage();
+  await login(h, host.email, host.password);
+  await h.goto(`/app/passes/new?siteId=${site.id}`);
+  await h.getByLabel("Tipo de visita").selectOption("visit");
+  await h.getByLabel("Nombre del visitante").fill(`Corrige Dispositivos ${stamp}`);
+  await h.getByLabel("Cédula o pasaporte").fill("001-1234567-8");
+  await h.getByLabel("Válido desde").fill(localDate(-1, "08:00"));
+  await h.getByLabel("Válido hasta").fill(localDate(1, "18:00"));
+  await h.getByRole("button", { name: "Crear pase" }).click();
+  await expect(h).toHaveURL(/\?ok=created$/);
+  const token = (await h.getByTestId("visitor-link").inputValue()).split("/v/")[1]!;
+  const pass = await db.pass.findUniqueOrThrow({ where: { token } });
+  // The visitor registered a laptop with a typo in the model.
+  await db.pass.update({ where: { id: pass.id }, data: { extra: { devices: [{ kind: "laptop", id: `LT${stamp}`, serial: `LT${stamp}`, model: "Lenovo Thinkpd", color: "negro", capacity: "1 TB SSD · 32 GB RAM" }] } } });
+
+  // Host corrects it.
+  await h.goto(`/app/passes/${pass.id}`);
+  const form = h.getByTestId("pass-devices-form");
+  await expect(form.getByTestId("device-row")).toHaveCount(1);
+  await form.getByTestId("device-row").first().getByLabel("Marca y modelo").fill("Lenovo ThinkPad");
+  await form.getByTestId("save-devices").click();
+  await expect(h.locator("[role=status]")).toContainText("Dispositivos actualizados");
+  let regs = (await db.pass.findUniqueOrThrow({ where: { id: pass.id } })).extra as { devices: { model: string; color: string }[] };
+  expect(regs.devices[0]!.model).toBe("Lenovo ThinkPad");
+
+  // Security (no host membership) opens the same pass from the invitations report and adds the colour.
+  const secEmail = `sec-dev-${stamp}@airlink.test`;
+  await db.user.create({ data: { email: secEmail, name: `Seguridad Dev ${stamp}`, passwordHash: await hashPassword(`Sec-${stamp}-pass!`), memberships: { create: { role: "security", siteId: site.id } } } });
+  await login(page, secEmail, `Sec-${stamp}-pass!`);
+  await page.goto(`/admin/reports/invites?q=${encodeURIComponent(String(stamp))}`);
+  await page.getByRole("link", { name: "Ver" }).first().click();
+  await expect(page).toHaveURL(new RegExp(`/app/passes/${pass.id}`));
+  const sform = page.getByTestId("pass-devices-form");
+  await sform.getByTestId("device-row").first().getByLabel("Color").fill("gris oscuro");
+  await sform.getByTestId("save-devices").click();
+  await expect(page.locator("[role=status]")).toContainText("Dispositivos actualizados");
+  regs = (await db.pass.findUniqueOrThrow({ where: { id: pass.id } })).extra as { devices: { model: string; color: string }[] };
+  expect(regs.devices[0]).toMatchObject({ model: "Lenovo ThinkPad", color: "gris oscuro" });
+  expect(await db.auditLog.count({ where: { action: "pass.updated", targetId: pass.id } })).toBe(2);
 });

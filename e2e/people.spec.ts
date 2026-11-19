@@ -215,7 +215,7 @@ test("warden sees the offline-capable evacuation list with roll call; admin send
 test("frequent visitor with PIN: admin creates it, kiosk enters and leaves with the PIN", async ({ browser, page }) => {
   const stamp = Date.now();
   const site = await db.site.findUniqueOrThrow({ where: { slug: "airlink-2" } });
-  const host = await db.employee.create({ data: { name: `Supervisor Frecuente ${stamp}`, department: "Facilities", siteId: site.id, source: "manual" } });
+  const host = await db.employee.create({ data: { name: `AAA Supervisor Frecuente ${stamp}`, department: "Facilities", siteId: site.id, source: "manual" } });
   const kiosk = await seedKiosk(stamp, site.id);
   const name = `Limpieza Frecuente ${stamp}`;
   const pin = String(stamp).slice(-6); // unique per run: PIN candidates are matched first-wins

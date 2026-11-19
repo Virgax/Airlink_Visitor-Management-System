@@ -184,6 +184,7 @@ test("host creates passes, security approves, visitor link shows QR, status and 
   await expect(page.locator("[role=status]")).toContainText("3 pases");
   await expect(page.getByRole("link", { name: "Visitante 2" })).toBeVisible();
   await page.getByRole("link", { name: "Visitante 3" }).click();
+  await expect(page.getByRole("heading", { name: "Pase de Visitante 3", level: 1 })).toBeVisible(); // navigated before renaming
   await page.getByLabel("Nombre del visitante").fill(`Tercero ${stamp}`);
   await page.getByRole("button", { name: "Guardar", exact: true }).click();
   await expect(page.locator("[role=status]")).toContainText("Nombre actualizado");

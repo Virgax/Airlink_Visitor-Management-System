@@ -20,7 +20,7 @@ export async function FrequentForm({ tenant, site, existing, error }: { tenant: 
   const tk = await getTranslations("passes");
   const [areas, employees, needsNda] = await Promise.all([
     db.area.findMany({ where: { siteId: site.id, active: true }, orderBy: { name: "asc" } }),
-    db.employee.findMany({ where: { active: true, OR: [{ siteId: site.id }, { siteId: null }] }, orderBy: { name: "asc" }, take: 300, select: { id: true, name: true, department: true } }),
+    db.employee.findMany({ where: { active: true, OR: [{ siteId: site.id }, { siteId: null }] }, orderBy: { name: "asc" }, take: 2000, select: { id: true, name: true, department: true } }),
     frequentNeedsNda(site.id),
   ]);
   const ndaDone = Boolean(existing?.pass?.ndaAcceptedAt);

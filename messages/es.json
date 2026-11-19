@@ -782,7 +782,8 @@
         "revoked": "Pase cancelado.",
         "renamed": "Nombre actualizado.",
         "emailed": "Invitación enviada.",
-        "window": "Vigencia actualizada."
+        "window": "Vigencia actualizada.",
+        "devices": "Dispositivos actualizados."
       },
       "errors": {
         "invalid": "No se pudo guardar. Revisa los datos.",
@@ -790,7 +791,9 @@
         "window_closed": "Este pase ya no admite cambios de vigencia; duplícalo.",
         "window_order": "La fecha de fin debe ser posterior a la de inicio.",
         "window_too_long": "La vigencia no puede superar un año.",
-        "window_past": "La fecha de fin ya pasó."
+        "window_past": "La fecha de fin ya pasó.",
+        "devices_invalid": "Revisa los dispositivos: IMEI de 15 dígitos o serial de 5 a 30 caracteres.",
+        "devices_closed": "Este pase ya no admite cambios."
       },
       "registrationPending": "Registro pendiente: el visitante todavía no ha completado sus datos desde el enlace. El QR aparecerá cuando lo haga.",
       "registeredAt": "Registro completado por el visitante el {date}.",
@@ -804,7 +807,9 @@
       "windowHelp": "Si el visitante llega después de la hora o la visita se movió de día, amplía o corre la vigencia aquí: el enlace y el QR siguen siendo los mismos.",
       "windowFrom": "Válido desde",
       "windowUntil": "Válido hasta",
-      "windowSave": "Guardar vigencia"
+      "windowSave": "Guardar vigencia",
+      "devicesHelp": "Lo que registró el visitante. Si lo llenó mal, corrígelo aquí y guarda; queda en la auditoría con tu nombre.",
+      "devicesSave": "Guardar dispositivos"
     },
     "approvalsPage": {
       "title": "Aprobaciones pendientes",
@@ -2202,7 +2207,7 @@
           },
           "detail": {
             "title": "Comparte el enlace",
-            "body": "Al crear el pase ves su detalle con el enlace para el visitante. Cópialo y envíalo por WhatsApp o usa \"Enviar por correo\": el visitante recibe el QR, la dirección y las indicaciones.\nSi el visitante no tiene celular, marca \"Generar PIN de 6 dígitos\": se muestra una sola vez y le sirve para entrar en el kiosco. Desde aquí también puedes cancelar, duplicar o cambiar el nombre del pase.\nSi el visitante llega después de la hora o la visita se mueve de día, en \"Cambiar vigencia\" amplías o corres las fechas: el enlace y el QR siguen siendo los mismos."
+            "body": "Al crear el pase ves su detalle con el enlace para el visitante. Cópialo y envíalo por WhatsApp o usa \"Enviar por correo\": el visitante recibe el QR, la dirección y las indicaciones.\nSi el visitante no tiene celular, marca \"Generar PIN de 6 dígitos\": se muestra una sola vez y le sirve para entrar en el kiosco. Desde aquí también puedes cancelar, duplicar o cambiar el nombre del pase.\nSi el visitante llega después de la hora o la visita se mueve de día, en \"Cambiar vigencia\" amplías o corres las fechas: el enlace y el QR siguen siendo los mismos.\nEn el detalle también ves lo que el visitante registró y puedes corregir sus dispositivos si los llenó mal."
           },
           "visitor": {
             "title": "Lo que ve el visitante",
@@ -2352,7 +2357,7 @@
           },
           "signIn": {
             "title": "Registrar una visita a mano",
-            "body": "\"Registrar visita\" permite a Seguridad o Administración registrar la entrada de alguien desde el panel, sin kiosco: sitio, puerta, tipo, anfitrión y datos del visitante. La visita queda aprobada y dentro, y en la auditoría consta como aprobación en persona."
+            "body": "\"Registrar visita\" permite a Seguridad o Administración registrar la entrada de alguien desde el panel, sin kiosco: sitio, puerta, tipo, anfitrión y datos del visitante. La visita queda aprobada y dentro, y en la auditoría consta como aprobación en persona.\nPara consultar o corregir lo que un visitante registró (fotos, dispositivos, datos), abre su pase desde Reportes → Invitaciones → \"Ver\": ahí Seguridad y RRHH ven las fotos de cara y cédula y pueden editar los dispositivos con \"Guardar dispositivos\"; el cambio queda en la auditoría."
           },
           "audit": {
             "title": "Auditoría",
