@@ -100,7 +100,7 @@ ${img("visitor-register", true)}
 
 <section class="step"><h3><span class="n">2</span>Ten a mano antes de empezar</h3>
 <ul>
-<li>Tu cédula o pasaporte (vas a escribir el número y fotografiarla por delante y por detrás).</li>
+<li>Tu cédula o pasaporte: la fotografías por delante y por detrás y el sistema lee tu nombre y número de la zona de tres líneas (en el pasaporte, de la página con foto). Si no se lee bien, los escribes.</li>
 <li>Un celular con cámara, para la foto de tu cara.</li>
 <li>De cada dispositivo que traerás: <b>teléfono</b> (IMEI, que ves marcando *#06#, serial, modelo, color y capacidad), <b>laptop</b> (serial, modelo, color, disco SSD/HDD y RAM), <b>tablet</b> o <b>reloj inteligente</b> (serial, modelo, color, capacidad).</li>
 <li>Tu teléfono de contacto, correo, empresa y placa del vehículo si vienes en carro.</li>
@@ -109,7 +109,7 @@ ${img("visitor-register", true)}
 </section>
 
 <section class="step"><h3><span class="n">3</span>Completa el formulario</h3>
-<p>El enlace te pide, en este orden: tu nombre completo (si tu anfitrión no lo puso), teléfono, cédula y placa; las tres fotos obligatorias (tu cara de frente, la cédula por delante y por detrás); tus dispositivos personales, o la casilla "No traigo dispositivos"; las preguntas e instrucciones que la empresa haya definido para tu tipo de visita (normas de planta, ruta de evacuación, herramientas); y, si aplica, la política de visitantes, que aceptas marcando la casilla y firmando.</p>
+<p>Empieza por la foto de tu cédula por detrás (las tres líneas de letras y números) o de la página con foto de tu pasaporte: el sistema lee tu nombre y tu número de documento y los escribe por ti; revisa que estén correctos. Luego el enlace te pide lo que falte: teléfono y placa; las tres fotos obligatorias (tu cara de frente, la cédula por delante y por detrás); tus dispositivos personales, o la casilla "No traigo dispositivos"; las preguntas e instrucciones que la empresa haya definido para tu tipo de visita (normas de planta, ruta de evacuación, herramientas); y, si aplica, la política de visitantes, que aceptas marcando la casilla y firmando.</p>
 <p>Las fotos y dispositivos que ya guardaste no se pierden si te falta algo: completa lo que falte y guarda otra vez. El formulario está en español e inglés (selector arriba a la derecha).</p>
 </section>
 

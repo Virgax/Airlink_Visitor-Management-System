@@ -45,6 +45,13 @@ Full brief: `docs/PLAN.md`.
   Devices: `{ kind, id (IMEI or serial, normalised lookup key), imei?, serial, model, color, capacity }` in
   `Pass.extra.devices`; `lookupDevice` matches IMEI or serial. Hosts renew windows with `updateWindowAction`.
   E2E: `e2e/global-setup.ts` turns `requirePhotos`/`requireDevices` off on the seeded test sites.
+- Document reading (MRZ): the visitor link posts the ID photo to `/api/v/<token>/mrz` (rate-limited, open links only);
+  `src/lib/server/mrz.ts` runs tesseract.js (WASM, OCR-B model `data/tessdata/mrz.traineddata`, one worker per replica,
+  several pre-processing passes) and the pure `src/lib/mrz/extract.ts` locates the TD1 (cédula, 3 × 30) or TD3 (passport,
+  2 × 44) lines, repairs OCR confusions, votes between passes and validates check digits (`mrz` package). The DR cédula
+  number is the 11-digit group in the optional data of line 1 (the MRZ document number is the card serial). The browser
+  (`IdScanner`) pre-fills name + document only when every check digit holds; the server keeps `Pass.extra.identity`
+  (docType, nationality, expiry, verified) next to the hashed number. Nothing is stored by the API itself.
 - Visitor policy (NDA): `NdaVersion` rows are immutable, per site or global (`activeNda`/`ndaText` in
   `src/lib/server/nda.ts`), with optional `titleEn`/`bodyEn` and a PDF attachment; published from `/admin/nda`.
 - Deleting: gates only without history (`deleteGateAction`), sites only by an all-sites admin after typing the name

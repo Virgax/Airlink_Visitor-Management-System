@@ -809,7 +809,13 @@
       "windowUntil": "Válido hasta",
       "windowSave": "Guardar vigencia",
       "devicesHelp": "Lo que registró el visitante. Si lo llenó mal, corrígelo aquí y guarda; queda en la auditoría con tu nombre.",
-      "devicesSave": "Guardar dispositivos"
+      "devicesSave": "Guardar dispositivos",
+      "docRead": "Leído del documento: {type} ({nationality}) · vence {expiry} · {verified, select, yes {dígitos de control correctos} other {sin verificar}}",
+      "docTypes": {
+        "cedula": "cédula",
+        "passport": "pasaporte",
+        "id": "documento de identidad"
+      }
     },
     "approvalsPage": {
       "title": "Aprobaciones pendientes",
@@ -959,7 +965,22 @@
       "done": "lista",
       "help": "Con buena luz y sin reflejos. Solo las ve Seguridad y se eliminan automáticamente pasado el plazo de retención."
     },
-    "devicesIntro": "Registra cada dispositivo que traes (teléfono, laptop, tablet, reloj). Si no traes ninguno, márcalo."
+    "devicesIntro": "Registra cada dispositivo que traes (teléfono, laptop, tablet, reloj). Si no traes ninguno, márcalo.",
+    "scan": {
+      "hint": "Toma la foto de frente, con buena luz y sin tapar las líneas de letras y números del documento: leemos tu nombre y número automáticamente. Sirve la parte de atrás de la cédula dominicana o la página con foto de tu pasaporte.",
+      "optional": "Escanear cédula o pasaporte (opcional)",
+      "reading": "Leyendo tu documento…",
+      "found": "Leímos: {name} · {doc}. Revisa que estén correctos.",
+      "unverified": "Leímos parte del documento, pero los datos no pasaron la verificación. Vuelve a tomar la foto de frente, sin tapar las líneas, o escribe tus datos.",
+      "notFound": "No pudimos leer el documento. Vuelve a tomar la foto más cerca y sin reflejos, o escribe tus datos.",
+      "error": "No se pudo leer ahora; escribe tus datos.",
+      "expires": "vence {date}",
+      "docTypes": {
+        "cedula": "Cédula",
+        "passport": "Pasaporte",
+        "id": "Documento"
+      }
+    }
   },
   "passes": {
     "status": {

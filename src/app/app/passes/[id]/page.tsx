@@ -26,7 +26,7 @@ import { DEVICE_KINDS } from "@/lib/forms/schema";
 import { formLabels } from "@/lib/forms/labels";
 import { toLocalInput } from "@/lib/time/tz";
 import { CalendarClock } from "lucide-react";
-import { formatAnswer, listAnswers, readAnswers, readDevices, readDevicesNone } from "@/lib/forms/schema";
+import { formatAnswer, listAnswers, readAnswers, readDevices, readDevicesNone, readIdentity } from "@/lib/forms/schema";
 
 type Search = { ok?: string; error?: string; warn?: string };
 
@@ -77,6 +77,7 @@ export default async function PassDetailPage({ params, searchParams }: { params:
   const tf = await getTranslations("forms.answers");
   const answers = listAnswers(readAnswers(pass.extra));
   const devices = readDevices(pass.extra);
+  const identity = readIdentity(pass.extra);
   const devicesNone = readDevicesNone(pass.extra);
   const tfd = await getTranslations("forms.render");
 
@@ -129,7 +130,15 @@ export default async function PassDetailPage({ params, searchParams }: { params:
             <dt className="muted">{t("host")}</dt><dd>{pass.host.name}</dd>
             <dt className="muted">{t("company")}</dt><dd>{pass.company?.name ?? "—"}</dd>
             <dt className="muted">{t("contact")}</dt><dd>{[pass.visitorPhone, pass.visitorEmail].filter(Boolean).join(" · ") || "—"}</dd>
-            <dt className="muted">{t("doc")}</dt><dd>{pass.visitorDocLast4 ? t("docEnding", { last4: pass.visitorDocLast4 }) : t("docMissing")}</dd>
+            <dt className="muted">{t("doc")}</dt>
+            <dd>
+              {pass.visitorDocLast4 ? t("docEnding", { last4: pass.visitorDocLast4 }) : t("docMissing")}
+              {identity ? (
+                <span className="muted block text-xs" data-testid="doc-identity">
+                  {t("docRead", { type: t(`docTypes.${identity.docType}`), nationality: identity.nationality ?? "—", expiry: identity.expiryDate ?? "—", verified: identity.verified ? "yes" : "no" })}
+                </span>
+              ) : null}
+            </dd>
             <dt className="muted">{t("plate")}</dt><dd>{pass.plate ?? "—"}</dd>
             <dt className="muted">{t("window")}</dt><dd>{date(pass.validFrom)} → {date(pass.validUntil)}</dd>
             {schedule ? (

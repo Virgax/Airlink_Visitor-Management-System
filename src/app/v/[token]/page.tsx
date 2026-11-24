@@ -23,6 +23,7 @@ import { FormFields } from "@/components/forms/FormFields";
 import { formLabels } from "@/lib/forms/labels";
 import { builtinMode, elementsFor, elementText, hasAnswer, readAnswers, readDevices, readDevicesNone, type BuiltinElement } from "@/lib/forms/schema";
 import { activeNda, ndaText } from "@/lib/server/nda";
+import { IdScanner } from "@/components/visitor/IdScanner";
 import { acceptNdaAction, preregisterAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -94,6 +95,17 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const labels = await formLabels();
   const mediaHref = (key: string) => `/api/media/${key}?pass=${encodeURIComponent(token)}`;
   const schedule = parseSchedule(pass.schedule);
+  const scanLabels = {
+    hint: t("scan.hint"),
+    optional: t("scan.optional"),
+    reading: t("scan.reading"),
+    found: t("scan.found", { name: "{name}", doc: "{doc}" }),
+    unverified: t("scan.unverified"),
+    notFound: t("scan.notFound"),
+    error: t("scan.error"),
+    docTypes: { cedula: t("scan.docTypes.cedula"), passport: t("scan.docTypes.passport"), id: t("scan.docTypes.id") },
+    expires: t("scan.expires", { date: "{date}" }),
+  };
   const showQr = pass.status === "active" && pass.validUntil > now && !registering && !photoPending && !devicesPending;
   const qr = showQr ? await qrPayloadFor(pass, now) : null;
   const dataUrl = qr ? await QRCode.toDataURL(qr.payload, { margin: 1, width: 288, errorCorrectionLevel: "M" }) : null;
@@ -176,24 +188,39 @@ export default async function VisitorPassPage({ params, searchParams }: { params
               <fieldset className="space-y-3 rounded-lg border border-border p-3" data-testid="identity-photos">
                 <legend className="px-1 text-sm font-medium">{t("photos.title")}</legend>
                 <p className="muted">{t("photos.intro")}</p>
+                <div data-testid="photo-face" data-done={pass.photoKey ? "1" : "0"}>
+                  <label className="label" htmlFor="photo-face">{t("photos.face")}{pass.photoKey ? ` · ${t("photos.done")}` : ""}</label>
+                  {pass.photoKey ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- private media of this pass
+                    <img src={mediaHref(pass.photoKey)} alt="" className="mb-2 h-32 w-24 rounded-lg border border-border object-cover" />
+                  ) : null}
+                  <input id="photo-face" name="photo" type="file" accept="image/*" capture="user" className="input" required={!pass.photoKey} />
+                </div>
                 {(
                   [
-                    { slot: "face", key: pass.photoKey, capture: "user" },
-                    { slot: "idFront", key: pass.idFrontKey, capture: "environment" },
-                    { slot: "idBack", key: pass.idBackKey, capture: "environment" },
+                    { slot: "idFront", key: pass.idFrontKey },
+                    { slot: "idBack", key: pass.idBackKey },
                   ] as const
-                ).map((p) => (
-                  <div key={p.slot} data-testid={`photo-${p.slot}`} data-done={p.key ? "1" : "0"}>
-                    <label className="label" htmlFor={`photo-${p.slot}`}>{t(`photos.${p.slot}`)}{p.key ? ` · ${t("photos.done")}` : ""}</label>
-                    {p.key ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- private media of this pass
-                      <img src={mediaHref(p.key)} alt="" className={`mb-2 rounded-lg border border-border object-cover ${p.slot === "face" ? "h-32 w-24" : "h-24 w-36"}`} />
-                    ) : null}
-                    <input id={`photo-${p.slot}`} name={p.slot === "face" ? "photo" : p.slot} type="file" accept="image/*" capture={p.capture} className="input" required={!p.key} />
-                  </div>
-                ))}
+                ).map((p) =>
+                  p.key ? (
+                    <div key={p.slot} data-testid={`photo-${p.slot}`} data-done="1">
+                      <label className="label">{t(`photos.${p.slot}`)} · {t("photos.done")}</label>
+                      {/* eslint-disable-next-line @next/next/no-img-element -- private media of this pass */}
+                      <img src={mediaHref(p.key)} alt="" className="mb-2 h-24 w-36 rounded-lg border border-border object-cover" />
+                    </div>
+                  ) : null,
+                )}
+                {!pass.idFrontKey || !pass.idBackKey ? (
+                  <IdScanner
+                    token={token}
+                    slots={(["idFront", "idBack"] as const).filter((slot) => !(slot === "idFront" ? pass.idFrontKey : pass.idBackKey)).map((slot) => ({ slot, label: t(`photos.${slot}`), done: false, capture: "environment" as const }))}
+                    labels={scanLabels}
+                  />
+                ) : null}
                 <p className="muted text-xs">{t("photos.help")}</p>
               </fieldset>
+            ) : (registering || (mode("document") !== "off" && !pass.visitorDocHash)) && !pass.idBackKey ? (
+              <IdScanner token={token} slots={[]} standalone labels={scanLabels} />
             ) : null}
             {requireDevices && !devicesBlock ? (
               <fieldset className="space-y-2 rounded-lg border border-border p-3" data-testid="site-devices">

@@ -809,7 +809,13 @@
       "windowUntil": "Valid until",
       "windowSave": "Save validity",
       "devicesHelp": "What the visitor registered. If they got it wrong, correct it here and save; the audit log records it under your name.",
-      "devicesSave": "Save devices"
+      "devicesSave": "Save devices",
+      "docRead": "Read from the document: {type} ({nationality}) · expires {expiry} · {verified, select, yes {check digits OK} other {unverified}}",
+      "docTypes": {
+        "cedula": "ID card",
+        "passport": "passport",
+        "id": "identity document"
+      }
     },
     "approvalsPage": {
       "title": "Pending approvals",
@@ -959,7 +965,22 @@
       "done": "done",
       "help": "Good light, no glare. Only Security sees them and they are deleted automatically after the retention period."
     },
-    "devicesIntro": "Register every device you bring (phone, laptop, tablet, watch). If you bring none, tick the box."
+    "devicesIntro": "Register every device you bring (phone, laptop, tablet, watch). If you bring none, tick the box.",
+    "scan": {
+      "hint": "Take the photo straight on, in good light, without covering the lines of letters and numbers: we read your name and number automatically. The back of the Dominican cédula or the photo page of your passport both work.",
+      "optional": "Scan ID card or passport (optional)",
+      "reading": "Reading your document…",
+      "found": "We read: {name} · {doc}. Check that they are correct.",
+      "unverified": "We read part of the document, but the data failed verification. Take the photo again straight on, without covering the lines, or type your details.",
+      "notFound": "We could not read the document. Take the photo again, closer and without glare, or type your details.",
+      "error": "Could not read it right now; type your details.",
+      "expires": "expires {date}",
+      "docTypes": {
+        "cedula": "ID card",
+        "passport": "Passport",
+        "id": "Document"
+      }
+    }
   },
   "passes": {
     "status": {

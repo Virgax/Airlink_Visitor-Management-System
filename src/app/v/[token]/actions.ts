@@ -44,6 +44,11 @@ const preregSchema = z.object({
   email: z.string().trim().max(200).optional().transform((v) => (v ? v.toLowerCase() : null)).refine((v) => v === null || z.string().email().safeParse(v).success),
   plate: optional(20),
   company: optional(120),
+  // What the MRZ reader saw on the document photo (hidden fields filled by the browser; optional).
+  idType: z.enum(["cedula", "passport", "id"]).optional(),
+  idNationality: z.string().trim().regex(/^[A-Z]{3}$/).optional().or(z.literal("")),
+  idExpiry: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")),
+  idVerified: z.enum(["0", "1"]).optional(),
 });
 
 /** Visitor pre-registration from the public link: document → hash + last 4, phone, plate, company. */
@@ -85,7 +90,10 @@ export async function preregisterAction(formData: FormData): Promise<void> {
   const devices = dev.present && (dev.devices.length || dev.none) ? dev.devices : readDevices(pass.extra);
   const devicesNone = dev.present && (dev.devices.length || dev.none) ? dev.none : readDevicesNone(pass.extra);
   const nextExtra: ExtraJson = { ...((pass.extra as ExtraJson | null) ?? {}), answers, devices, devicesNone };
-  if (Object.keys(collected.answers).length || (dev.present && (dev.devices.length || dev.none))) data.extra = nextExtra as unknown as Prisma.InputJsonObject;
+  // The document was read from its MRZ: keep what it said (type, nationality, expiry, whether the check digits held).
+  const identity: ExtraJson["identity"] | null = data.visitorDocHash && d.idType ? { docType: d.idType, nationality: d.idNationality || null, expiryDate: d.idExpiry || null, verified: d.idVerified === "1", readAt: new Date().toISOString() } : null;
+  if (identity) nextExtra.identity = identity;
+  if (Object.keys(collected.answers).length || (dev.present && (dev.devices.length || dev.none)) || identity) data.extra = nextExtra as unknown as Prisma.InputJsonObject;
   // Photos from the phone (face, ID front, ID back): stored first so the rules below see them. What was stored stays
   // even when a later check fails, so the visitor never re-takes a photo.
   const keys = { photoKey: pass.photoKey, idFrontKey: pass.idFrontKey, idBackKey: pass.idBackKey };

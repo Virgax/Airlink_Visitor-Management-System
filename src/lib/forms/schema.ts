@@ -251,7 +251,16 @@ export type Answers = Record<string, Answer>;
  */
 export type Device = { kind: DeviceKind; id: string; imei?: string; serial: string; model: string; color: string; capacity: string };
 /** Shape of `Pass.extra` / `Visit.extra`. `devicesNone`: the visitor declared they bring no device. */
-export type ExtraJson = { answers?: Answers; devices?: Device[]; devicesNone?: boolean; /** The host shares the site's guest Wi-Fi on the visitor link. */ wifi?: boolean };
+/** What the MRZ reader saw on the visitor's document photo. The number itself is only kept hashed (`visitorDocHash`). */
+export type DocumentIdentity = { docType: "cedula" | "passport" | "id"; nationality: string | null; expiryDate: string | null; verified: boolean; readAt: string };
+export type ExtraJson = { answers?: Answers; devices?: Device[]; devicesNone?: boolean; /** The host shares the site's guest Wi-Fi on the visitor link. */ wifi?: boolean; identity?: DocumentIdentity };
+
+export function readIdentity(extra: unknown): DocumentIdentity | null {
+  if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
+  const id = (extra as ExtraJson).identity;
+  if (!id || typeof id !== "object" || !["cedula", "passport", "id"].includes(id.docType)) return null;
+  return { docType: id.docType, nationality: typeof id.nationality === "string" ? id.nationality : null, expiryDate: typeof id.expiryDate === "string" ? id.expiryDate : null, verified: id.verified === true, readAt: typeof id.readAt === "string" ? id.readAt : "" };
+}
 
 /** Normalises an IMEI / serial for storage and lookup: upper case, letters and digits only. */
 export function normalizeDeviceId(raw: string): string {

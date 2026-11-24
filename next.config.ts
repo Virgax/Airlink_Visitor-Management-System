@@ -6,7 +6,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  serverExternalPackages: ["@prisma/client", "prisma", "sharp"],
+  serverExternalPackages: ["@prisma/client", "prisma", "sharp", "tesseract.js"],
   experimental: {
     serverActions: { bodySizeLimit: "4mb" },
   },
