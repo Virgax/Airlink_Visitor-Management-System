@@ -13,6 +13,8 @@ export type ScanPassInfo = {
   hostDepartment: string | null;
   areas: string[];
   warnings: PassWarning[];
+  /** The visitor already accepted the visitor policy (the "nda" warning is then dropped). */
+  ndaAccepted?: boolean;
   docLast4: string | null;
   plate: string | null;
   /** Custom answers of the sign-in form (host + visitor surfaces). */

@@ -94,6 +94,7 @@ export const HELP_GUIDES: readonly HelpGuide[] = [
     audience: ["admin"],
     steps: [
       { key: "panels", shot: "select-panel" },
+      { key: "menu", shot: "admin-menu" },
       { key: "sites", shot: "admin-site" },
       { key: "policies", shot: "admin-policies" },
       { key: "nda", shot: "admin-nda" },

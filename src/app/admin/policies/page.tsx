@@ -34,7 +34,7 @@ export default async function PoliciesPage({ searchParams }: { searchParams: Pro
   }
   const [policies, gates, templates] = await Promise.all([
     db.visitPolicy.findMany({ where: { siteId: site.id } }),
-    db.gate.findMany({ where: { siteId: site.id, active: true }, orderBy: { name: "asc" } }),
+    db.gate.findMany({ where: { siteId: site.id, active: true, kind: { not: "checkpoint" } }, orderBy: { name: "asc" } }),
     db.formTemplate.findMany({ where: { ...templateWhereForSite(site.id), active: true }, select: { id: true, name: true, siteId: true }, orderBy: { name: "asc" } }),
   ]);
   const byKind = new Map(policies.map((p) => [p.kind, p]));

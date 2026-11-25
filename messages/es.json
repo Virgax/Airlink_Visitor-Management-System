@@ -406,7 +406,25 @@
         "notPdf": "El archivo no es un PDF."
       }
     },
-    "invite": "Invitar visitante"
+    "invite": "Invitar visitante",
+    "menu": {
+      "visits": "Visitas",
+      "approvals": "Aprobaciones",
+      "evacuation": "Lista de evacuación",
+      "setup": "Configuración",
+      "kiosks": "Kioscos",
+      "inviteHint": "Crear un pase o enlace de invitación, también en nombre de un anfitrión",
+      "approvalsHint": "Pases y visitas no anunciadas que esperan respuesta",
+      "frequentHint": "Contratistas y choferes habituales con pase de larga duración",
+      "evacuationHint": "Quién está dentro ahora, por área y anfitrión",
+      "sitesHint": "Plantas, puertas, áreas y reglas de cada sitio",
+      "policiesHint": "Aprobación, cédula, NDA, gafete y formulario por tipo de visita",
+      "formsHint": "Plantillas de registro: preguntas, instrucciones, dispositivos",
+      "ndaHint": "Texto que acepta el visitante, en español e inglés",
+      "peopleHint": "Empleados, cuentas, roles, PIN de kiosco",
+      "companiesHint": "Proveedores, contratistas y clientes; bloqueo por empresa",
+      "blacklistHint": "Personas y vehículos vetados"
+    }
   },
   "guard": {
     "title": "Seguridad",
@@ -493,7 +511,7 @@
       "qr_stale": "El código QR es antiguo. Pide al visitante que actualice la pantalla.",
       "wrong_site": "Este pase es de otro sitio.",
       "pending_approval": "El pase todavía no está aprobado.",
-      "revoked": "El pase fue cancelado por el anfitrión.",
+      "revoked": "El pase fue cancelado (por el anfitrión, Seguridad o Administración).",
       "denied": "El pase fue rechazado.",
       "used": "El pase ya fue usado.",
       "expired": "El pase venció.",
@@ -512,7 +530,7 @@
       "not_inside": "No ha registrado entrada en recepción. Debe pasar primero por el kiosco de la entrada.",
       "area_not_allowed": "Su pase no incluye las áreas de este punto. Verifica con el anfitrión o con Seguridad.",
       "not_registered": "El visitante no ha completado su registro desde el enlace de invitación.",
-      "device_not_found": "Ese IMEI o serial no está registrado en ningún pase de hoy. El visitante debe registrarlo antes de entrar.",
+      "device_not_found": "No es un código QR de Airlink Visitas ni un IMEI o serial registrado en un pase de hoy. Si es un dispositivo, el visitante debe registrarlo en su enlace antes de entrar.",
       "devices_required": "Debe registrar sus dispositivos personales (o declarar que no trae) desde su enlace antes de entrar.",
       "photo_required": "Faltan fotos obligatorias del visitante (cara o cédula). Debe subirlas desde su enlace antes de entrar."
     },
@@ -520,7 +538,8 @@
       "escort": "Debe ir acompañado",
       "nda": "NDA / política de visitantes",
       "receptionOnly": "Solo recepción",
-      "noBadge": "Sin gafete"
+      "noBadge": "Sin gafete",
+      "ndaAccepted": "Política de visitantes aceptada"
     },
     "scan": {
       "title": "Escanear QR",
@@ -611,7 +630,8 @@
       "deny": "Rechazar",
       "enter": "Registrar entrada",
       "since": "Desde {time}",
-      "refresh": "Se actualiza cada {seconds} s."
+      "refresh": "Se actualiza cada {seconds} s.",
+      "okNoAccount": "Visita registrada, pero el anfitrión todavía no tiene cuenta en Visitas y no recibirá el aviso: llámalo a su extensión y, cuando confirme, pulsa \"Aprobado en persona\"."
     },
     "inside": {
       "title": "Dentro ahora",
@@ -895,7 +915,10 @@
       "unavailable": "Este pase ya no está vigente.",
       "register": "El QR aparecerá cuando completes tu registro.",
       "photo": "El QR aparecerá cuando subas tu foto.",
-      "devices": "El QR aparecerá cuando registres tus dispositivos (o declares que no traes)."
+      "devices": "El QR aparecerá cuando registres tus dispositivos (o declares que no traes).",
+      "nda": "El QR aparecerá cuando aceptes la política de visitantes (más abajo, botón \"Aceptar\").",
+      "expired": "Este pase venció. Pide a tu anfitrión que amplíe la vigencia: el enlace seguirá siendo este.",
+      "revoked": "Tu anfitrión, Seguridad o Administración cancelaron esta visita. Contáctalo antes de presentarte."
     },
     "prereg": {
       "title": "Completa tus datos",
@@ -926,7 +949,7 @@
       "rateLimited": "Demasiados intentos. Espera un momento.",
       "closed": "Este pase ya no admite cambios.",
       "missing": "Faltan respuestas obligatorias. Revisa el formulario.",
-      "devices": "Revisa los dispositivos: el IMEI o serial debe tener de 5 a 30 caracteres y el tipo debe ser uno de los permitidos.",
+      "devices": "Revisa los dispositivos: el IMEI de un teléfono tiene 15 dígitos (márcalo *#06#); el serial, de 5 a 30 caracteres.",
       "photo_media": "No se pudo guardar la foto en este momento. Inténtalo de nuevo más tarde.",
       "photo_tooBig": "La foto es muy pesada (máximo 8 MB).",
       "photo_invalid": "El archivo no es una imagen JPG o PNG.",
@@ -949,7 +972,8 @@
       "name": "Nombre completo",
       "submit": "Completar registro",
       "ok": "Registro completado. Tu pase está listo.",
-      "locked": "Este enlace ya fue registrado y no admite cambios. Si no eres {name}, pide a tu anfitrión un enlace nuevo."
+      "locked": "Este enlace ya fue registrado y no admite cambios. Si no eres {name}, pide a tu anfitrión un enlace nuevo.",
+      "okPending": "Registro completado. Tu pase queda pendiente de aprobación: el QR aparecerá en este mismo enlace cuando lo aprueben."
     },
     "wifi": {
       "title": "Wi-Fi de invitados",
@@ -966,7 +990,7 @@
       "done": "lista",
       "help": "Con buena luz y sin reflejos. Solo las ve Seguridad y se eliminan automáticamente pasado el plazo de retención."
     },
-    "devicesIntro": "Registra cada dispositivo que traes (teléfono, laptop, tablet, reloj). Si no traes ninguno, márcalo.",
+    "devicesIntro": "Registra cada dispositivo que traes. Teléfono: IMEI de 15 dígitos (márcalo *#06#). Laptop, tablet o reloj: número de serie. Agrega modelo, color y capacidad. Si no traes ninguno, marca la casilla.",
     "scan": {
       "hint": "Toma la foto de frente, con buena luz y sin tapar las líneas de letras y números del documento: leemos tu nombre y número automáticamente. Sirve la parte de atrás de la cédula dominicana o la página con foto de tu pasaporte.",
       "optional": "Escanear cédula o pasaporte (opcional)",
@@ -980,7 +1004,22 @@
         "cedula": "Cédula",
         "passport": "Pasaporte",
         "id": "Documento"
-      }
+      },
+      "privacy": "La foto solo se usa para leer tus datos; no se guarda."
+    },
+    "inside": {
+      "status": "Dentro de la planta",
+      "note": "Ya registraste tu entrada: tu gafete es tu pase. Entrégalo en recepción al salir."
+    },
+    "areas": "Áreas",
+    "escort": "debes ir acompañado",
+    "arrival": {
+      "title": "A tu llegada",
+      "qr": "Muestra este QR en recepción junto con tu cédula o pasaporte físico.",
+      "badge": "Recibirás un gafete: llévalo visible todo el tiempo y entrégalo al salir.",
+      "devices": "Solo entran los dispositivos que registraste aquí; Seguridad puede revisarlos.",
+      "areas": "Circula solo por las áreas de tu pase, acompañado si así se indica, y no tomes fotos ni video sin autorización.",
+      "photos": "Si en recepción te dicen que faltan datos, dispositivos o fotos, abre este enlace, complétalos y vuelve a mostrar el QR."
     }
   },
   "passes": {
@@ -2127,19 +2166,19 @@
         "steps": {
           "guardPin": {
             "title": "Crea al personal de seguridad con PIN",
-            "body": "En Administración → Personas pulsa \"Agregar persona\". Escribe nombre, correo y sitio, marca el rol Seguridad y pon un PIN de 4 a 8 dígitos (evita 1234 o dígitos repetidos).\nSi la persona ya existe, usa \"Fijar PIN\" o \"Cambiar PIN\" en su fila. Ese PIN es el que usará para entrar al kiosco."
+            "body": "En Administración, menú Personas → Personas, pulsa \"Agregar persona\". Escribe nombre, correo y sitio, marca el rol Seguridad y pon un PIN de 4 a 8 dígitos (evita 1234 o dígitos repetidos).\nSi la persona ya existe, usa \"Fijar PIN\" o \"Cambiar PIN\" en su fila. Ese PIN es el que usará para entrar al kiosco."
           },
           "device": {
             "title": "Registra el dispositivo",
-            "body": "En Administración → Dispositivos de kiosco escribe un nombre que identifique el equipo (por ejemplo \"Tablet Recepción A2\"), elige la puerta donde estará (la lista va agrupada por sitio) y pulsa \"Crear dispositivo\".\nCada tablet o PC es un dispositivo distinto y queda ligado a una sola puerta."
+            "body": "En Administración, menú Kioscos, escribe un nombre que identifique el equipo (por ejemplo \"Tablet Recepción A2\"), elige la puerta donde estará (la lista va agrupada por sitio) y pulsa \"Crear dispositivo\".\nCada tablet o PC es un dispositivo distinto y queda ligado a una sola puerta."
           },
           "code": {
             "title": "Copia el código de enrolamiento",
-            "body": "Al crear el dispositivo aparece una tarjeta verde arriba de la página \"Dispositivos de kiosco\", con el título \"Código de enrolamiento\" y el código en grande. Vale 15 minutos y una sola vez.\nSi se vence antes de usarlo, pulsa \"Generar código\" en la tarjeta del dispositivo para obtener otro."
+            "body": "Al crear el dispositivo aparece una tarjeta verde arriba de la página Kioscos (\"Dispositivos de kiosco\"), con el título \"Código de enrolamiento\" y el código en grande. Vale 15 minutos y una sola vez.\nSi se vence antes de usarlo, pulsa \"Generar código\" en la tarjeta del dispositivo para obtener otro."
           },
           "enroll": {
             "title": "Enrola la tablet o PC de recepción",
-            "body": "En el equipo de recepción abre la dirección de Visitas seguida de /guard, o en la pantalla de inicio de sesión pulsa \"¿Eres de Seguridad o recepción? Abrir el modo kiosco\". No hace falta iniciar sesión con correo.\nEscribe el código y pulsa \"Enrolar\". El navegador queda vinculado a esa puerta de forma permanente: usa siempre el mismo navegador y no borres sus datos de navegación.\nSi un equipo quedó enrolado en el sitio o la puerta equivocada, en la pantalla del PIN pulsa \"Cambiar de dispositivo\": suelta el enrolamiento y vuelve a pedir un código nuevo."
+            "body": "En el equipo de recepción abre la dirección de Visitas seguida de /guard, o en la pantalla de inicio de sesión pulsa \"¿Eres de Seguridad o recepción? Abrir el modo kiosco\". No hace falta iniciar sesión con correo.\nEscribe el código y pulsa \"Enrolar\". El navegador queda vinculado a esa puerta de forma permanente: usa siempre el mismo navegador y no borres sus datos de navegación.\nSi un equipo quedó enrolado en el sitio o la puerta equivocada, en la pantalla del PIN pulsa \"Cambiar de dispositivo\": suelta el enrolamiento y vuelve a pedir un código. El código anterior ya no sirve: un administrador pulsa \"Generar código\" en la tarjeta del dispositivo (que ahora dice \"Sin enrolar\") y ese código también dura 15 minutos."
           },
           "pin": {
             "title": "Entra con el PIN del guardia",
@@ -2155,11 +2194,11 @@
           },
           "printer": {
             "title": "Impresora de gafetes (opcional)",
-            "body": "Para imprimir gafetes en la Zebra ZP450 conectada por USB a la PC de recepción, IT instala el agente de impresión en esa PC y en Administración → Sitios → la puerta elige \"Agente de impresión\" y el nombre de la impresora compartida.\nSin impresora configurada, el kiosco descarga el archivo del gafete para imprimirlo a mano. La guía técnica está en docs/BADGES.md del repositorio."
+            "body": "Para imprimir gafetes en la Zebra ZP450 conectada por USB a la PC de recepción, IT instala el agente de impresión en esa PC y en Administración, Configuración → Sitios → la puerta elige \"Agente de impresión\" y el nombre de la impresora compartida.\nSin impresora configurada, el kiosco descarga el archivo del gafete para imprimirlo a mano. La guía técnica está en docs/BADGES.md del repositorio."
           },
           "checkpoint": {
             "title": "Punto de control en el segundo piso (verificación)",
-            "body": "Si hay un puesto de seguridad después de recepción (la escalera al segundo piso, el pasillo a las áreas seguras), crea en Sitios una puerta de tipo \"Punto de control\" y marca las áreas que controla. Enrola ahí otra tablet igual que la de recepción.\nEn ese kiosco el guardia solo escanea el gafete o el QR: ve que la persona entró por recepción, quién la invitó y si su pase incluye esa área. No registra entradas, salidas ni visitas no anunciadas; nadie debe subir sin gafete."
+            "body": "Si hay un puesto de seguridad después de recepción (la escalera al segundo piso, el pasillo a las áreas seguras), crea en Configuración → Sitios una puerta de tipo \"Punto de control\" y marca las áreas que controla. Enrola ahí otra tablet igual que la de recepción.\nEn ese kiosco el guardia solo escanea el gafete o el QR: ve que la persona entró por recepción, quién la invitó y si su pase incluye esa área. No registra entradas, salidas ni visitas no anunciadas; nadie debe subir sin gafete."
           }
         }
       },
@@ -2169,15 +2208,15 @@
         "steps": {
           "scan": {
             "title": "Escanea el QR del visitante",
-            "body": "Pulsa \"Escanear QR\" y enciende la cámara. El visitante muestra el QR de su enlace, del correo o de su tarjeta de frecuente.\nSi la cámara no funciona, pega el contenido del código en \"Código manual\" y pulsa \"Validar\". El segundo escaneo del mismo pase registra la salida."
+            "body": "Pulsa \"Escanear QR\" y luego \"Encender cámara\". La franja de estado (\"En línea · Sin escaneos pendientes · Pases en caché: N\") te dice que el kiosco está conectado y listo para trabajar sin red. El visitante muestra el QR de su enlace, del correo o de su tarjeta de frecuente.\nSi la cámara no funciona, pega el contenido del código en \"Código manual\" y pulsa \"Validar\". El segundo escaneo del mismo pase registra la salida."
           },
           "result": {
             "title": "Lee el resultado",
-            "body": "En verde: entrada registrada, con el nombre, la empresa, el anfitrión, las áreas permitidas y los avisos (acompañante obligatorio, NDA, solo recepción). El anfitrión recibe una notificación automática.\nEn rojo: no puede entrar y el motivo (pase vencido, de otro sitio, pendiente de aprobación, lista negra, empresa bloqueada, NDA sin aceptar…). Si es lista negra, Seguridad ya fue avisada.\nSi el pase trae foto de la cara, aparece junto al nombre: compárala con la persona antes de imprimir el gafete.\nLas fotos de la cédula aparecen debajo para cotejarlas con el documento físico."
+            "body": "En verde: entrada registrada, con el nombre, la empresa, el anfitrión, las áreas permitidas y los avisos (acompañante obligatorio, NDA, solo recepción). El anfitrión recibe una notificación automática.\nEn rojo: no puede entrar y el motivo. Los más frecuentes y qué hacer: \"El pase venció\" (su anfitrión amplía la vigencia desde su panel; el mismo enlace sirve); \"El pase ya fue usado\" (un pase de una entrada no vale para dos personas: la segunda necesita el suyo); \"Debe registrar sus dispositivos\" o \"No ha completado su registro\" (que abra su enlace en el celular y complete; el QR sale al instante); \"Pendiente de aprobación\" (el visitante ni siquiera ve su QR hasta que lo aprueben); de otro sitio, lista negra, empresa bloqueada, política sin aceptar. Si es lista negra, Seguridad ya fue avisada. Un pase pendiente se aprueba desde el panel web (Aprobaciones), no desde el kiosco.\nSi el pase trae foto de la cara, aparece junto al nombre: compárala con la persona antes de imprimir el gafete.\nLas fotos de la cédula aparecen debajo para cotejarlas con el documento físico."
           },
           "badge": {
             "title": "Imprime el gafete",
-            "body": "Tras una entrada válida se abre el panel del gafete. Puedes tomar una foto rápida con la cámara del kiosco (sale en blanco y negro) o continuar sin foto, y pulsar \"Imprimir gafete\".\nEl gafete lleva el QR de la visita, el nombre, la empresa, el anfitrión, el área y las advertencias. Para reimprimirlo, ábrelo desde \"Dentro ahora\"."
+            "body": "Tras una entrada válida se abre el panel del gafete. Si el pase trae la foto de la cara, sale en el gafete. Pulsa \"Imprimir gafete\"; \"Listo\" cierra el panel. Si la puerta no tiene impresora asignada, el kiosco descarga el archivo del gafete (ZPL) para enviarlo a la Zebra desde la PC; IT lo configura en Configuración → Sitios → la puerta.\nEl gafete lleva el QR de la visita, el nombre, la empresa, el anfitrión, el área y las advertencias. Para reimprimirlo, ábrelo desde \"Dentro ahora\"."
           },
           "pin": {
             "title": "Visitante sin QR: entrada con PIN",
@@ -2185,7 +2224,7 @@
           },
           "unannounced": {
             "title": "Visita no anunciada",
-            "body": "Pulsa \"Visita no anunciada\", busca al anfitrión por nombre o departamento, completa los datos del visitante (tipo, nombre, empresa, cédula, placa) y pulsa \"Avisar al anfitrión\".\nLa visita aparece en \"En espera en la puerta\". Cuando el anfitrión aprueba desde su panel o te lo confirma en persona, pulsa \"Registrar entrada\". Si no responde en el tiempo configurado, se escala a Seguridad."
+            "body": "Pulsa \"Visita no anunciada\", busca al anfitrión en \"Anfitrión\" (por nombre o departamento), completa los datos del visitante (tipo, nombre, empresa, cédula, placa y sus dispositivos personales) y pulsa \"Avisar al anfitrión\".\nLa visita aparece en \"En espera en la puerta\". Si el anfitrión te lo confirma por teléfono o en persona, pulsa \"Aprobado en persona\": la entrada queda registrada de inmediato y sale el gafete. Si lo aprueba desde su celular (le llega a la campana de notificaciones, Teams o push), la tarjeta cambia a \"Aprobada\" y pulsas \"Registrar entrada\". Si no responde en el tiempo configurado, se escala a Seguridad.\nSi el kiosco avisa que el anfitrión todavía no tiene cuenta en Visitas, no recibirá el aviso: llámalo a su extensión y usa \"Aprobado en persona\"."
           },
           "inside": {
             "title": "Dentro ahora y salidas",
@@ -2209,11 +2248,11 @@
           },
           "checkpoint": {
             "title": "Verificar en un punto de control",
-            "body": "En las tablets configuradas como punto de control, \"Verificar acceso\" muestra en verde que el visitante está dentro, su anfitrión, las áreas permitidas y la hora de entrada. En rojo: no pasó por recepción, su pase no incluye las áreas de ese punto, o la visita ya cerró. Avisa a Seguridad y mándalo a recepción.\nEste kiosco necesita conexión; no hay PIN ni impresión de gafete."
+            "body": "En las tablets configuradas como punto de control, \"Verificar acceso\" muestra en verde que el visitante está dentro, su anfitrión, las áreas permitidas y la hora de entrada. En rojo: no pasó por recepción, su pase no incluye las áreas de ese punto, o la visita ya cerró. Avisa a Seguridad y mándalo a recepción.\nEl guardia entra con su PIN como en recepción. La pantalla principal tiene \"Verificar acceso\" (en lugar de \"Escanear QR\"), \"Dentro ahora\", \"Lista de evacuación\" y \"Bitácora\"; no hay \"Visita no anunciada\", no se marcan salidas ni se imprimen gafetes. Este kiosco necesita conexión."
           },
           "devices": {
             "title": "Dispositivos personales (teléfono, laptop, reloj)",
-            "body": "Si el formulario del tipo de visita pide \"Dispositivos personales\", el resultado del escaneo muestra qué trae el visitante: tipo, marca y modelo, color e IMEI o serial. Si el formulario lo marca obligatorio y el visitante no registró nada ni declaró que no trae, el kiosco no lo deja entrar hasta que lo complete desde su enlace.\nPara rastrear un equipo, escribe o escanea su IMEI o serial en \"Código manual\": el kiosco dice de quién es, qué pase lo registró y si su dueño está dentro. Un IMEI que no esté registrado en ningún pase del día sale en rojo.\nCon \"Registro de dispositivos obligatorio\" activo en el sitio (lo está por defecto), todo visitante registra en su enlace cada equipo que trae: teléfono (IMEI, serial, modelo, color, capacidad), laptop (serial, modelo, color, SSD/HDD y RAM), tablet o reloj (serial, modelo, color, capacidad), o declara que no trae ninguno. Sin eso no aparece su QR."
+            "body": "Si el formulario del tipo de visita pide \"Dispositivos personales\", el resultado del escaneo muestra qué trae el visitante: tipo, marca y modelo, color e IMEI o serial. Si el formulario lo marca obligatorio y el visitante no registró nada ni declaró que no trae, el kiosco no lo deja entrar hasta que lo complete desde su enlace: pídele que abra su enlace en el celular y registre sus dispositivos o marque \"No traigo dispositivos\"; el QR aparece al instante. Si no puede, Seguridad o RRHH lo corrigen desde el panel web (Reportes → Invitaciones → \"Ver\" → \"Guardar dispositivos\"), no desde el kiosco.\nPara rastrear un equipo, escribe o escanea su IMEI o serial en \"Código manual\": el kiosco dice de quién es, qué pase lo registró y si su dueño está dentro. Un IMEI que no esté registrado en ningún pase del día sale en rojo.\nCon \"Registro de dispositivos obligatorio\" activo en el sitio (lo está por defecto), todo visitante registra en su enlace cada equipo que trae: teléfono (IMEI, serial, modelo, color, capacidad), laptop (serial, modelo, color, SSD/HDD y RAM), tablet o reloj (serial, modelo, color, capacidad), o declara que no trae ninguno. Sin eso no aparece su QR."
           }
         }
       },
@@ -2231,7 +2270,7 @@
           },
           "detail": {
             "title": "Comparte el enlace",
-            "body": "Al crear el pase ves su detalle con el enlace para el visitante. Cópialo y envíalo por WhatsApp o usa \"Enviar por correo\": el visitante recibe el QR, la dirección y las indicaciones.\nSi el visitante no tiene celular, marca \"Generar PIN de 6 dígitos\": se muestra una sola vez y le sirve para entrar en el kiosco. Desde aquí también puedes cancelar, duplicar o cambiar el nombre del pase.\nSi el visitante llega después de la hora o la visita se mueve de día, en \"Cambiar vigencia\" amplías o corres las fechas: el enlace y el QR siguen siendo los mismos.\nEn el detalle también ves lo que el visitante registró y puedes corregir sus dispositivos si los llenó mal."
+            "body": "Al crear el pase ves su detalle con el enlace para el visitante. Cópialo y envíalo por WhatsApp o usa \"Enviar por correo\": el visitante recibe el QR, la dirección y las indicaciones.\nSi el visitante no tiene celular, marca \"Generar PIN de 6 dígitos\": se muestra una sola vez y le sirve para entrar en el kiosco. Desde aquí también puedes cancelar, duplicar o cambiar el nombre del pase.\nSi el visitante llega después de la hora o la visita se mueve de día, en \"Cambiar vigencia\" amplías o corres las fechas: el enlace y el QR siguen siendo los mismos.\nEn el detalle también ves lo que el visitante registró y puedes corregir sus dispositivos si los llenó mal, mientras el pase no se haya usado."
           },
           "visitor": {
             "title": "Lo que ve el visitante",
@@ -2243,7 +2282,7 @@
           },
           "arrival": {
             "title": "Cuando el visitante llega",
-            "body": "Recibes una notificación (push, Teams o correo según tus preferencias) al registrarse su entrada y, si vino sin pase, una solicitud para aprobar la visita no anunciada desde \"Aprobaciones\".\nAl marcarse la salida en el kiosco, el pase pasa a \"Usado\" y aparece en tu historial."
+            "body": "Recibes una notificación (push, Teams o correo según tus preferencias) al registrarse su entrada y, si vino sin pase, una solicitud para aprobar la visita no anunciada: aparece en la campana de notificaciones (y por Teams o push), con \"Aprobar\", \"Voy en camino\" y \"Rechazar\".\nAl marcarse la salida en el kiosco, el pase pasa a \"Usado\" y aparece en tu historial."
           },
           "selfRegister": {
             "title": "Enlace de invitación: el visitante llena sus datos",
@@ -2251,7 +2290,7 @@
           },
           "onBehalf": {
             "title": "Seguridad o Administración generan el enlace por ti",
-            "body": "Si prefieres pedir el enlace por correo (\"tengo tal visita a tal hora\"), Seguridad o Administración entran a \"Nuevo pase\", eligen tu nombre en \"Anfitrión de la visita\" y lo crean. Tú recibes los avisos y apruebas como anfitrión; ellos ven el pase en su lista para reenviar el enlace."
+            "body": "Si prefieres pedir el enlace por correo (\"tengo tal visita a tal hora\"), Seguridad o Administración entran a Visitas → \"Invitar visitante\" (en el panel Anfitrión, \"Nuevo pase\"), eligen tu nombre en \"Anfitrión de la visita\" y lo crean. Tú recibes los avisos y apruebas como anfitrión; ellos ven el pase en su lista para reenviar el enlace."
           }
         }
       },
@@ -2261,7 +2300,7 @@
         "steps": {
           "list": {
             "title": "Revisa los pendientes",
-            "body": "Abre el panel Anfitrión (icono de paneles en la cabecera → \"Anfitrión\") y pulsa \"Aprobaciones\" en la barra superior; no está en el menú de Administración. Ahí ves los pases y las visitas no anunciadas que esperan tu respuesta: visitante, tipo, anfitrión, sitio, ventana y áreas. Cada fila indica con qué rol apruebas (anfitrión, aprobador o seguridad)."
+            "body": "Como administrador: menú Visitas → \"Aprobaciones\". Como aprobador o Seguridad: panel Anfitrión (icono de paneles en la cabecera → \"Anfitrión\") → \"Aprobaciones\". Ahí ves los pases y las visitas no anunciadas que esperan tu respuesta: visitante, tipo, anfitrión, sitio, ventana y áreas. Cada fila indica con qué rol apruebas (anfitrión, aprobador o seguridad).\nLas aprobaciones se hacen desde el panel web, no desde el kiosco: el guardia necesita cuenta (no solo PIN) para aprobar."
           },
           "decide": {
             "title": "Aprueba o rechaza",
@@ -2281,29 +2320,33 @@
             "title": "Paneles según tus roles",
             "body": "Al entrar eliges el panel: Administración, Seguridad, Anfitrión, Aprobador o Brigadista, por sitio o para todos los sitios. El icono de paneles en la cabecera te permite cambiar en cualquier momento.\nUn administrador con alcance \"todos los sitios\" ve y configura Airlink 2 y Airlink 3; un administrador de sitio solo el suyo."
           },
+          "menu": {
+            "title": "El menú de Administración",
+            "body": "Arriba de cada página de Administración está el menú por secciones. \"Resumen\" es el inicio. \"Visitas\" despliega Invitar visitante, Aprobaciones, Visitantes frecuentes y Lista de evacuación. \"Configuración\" despliega Sitios, Políticas de visita, Formularios y Política de visitantes. \"Personas\" despliega Personas, Empresas y Lista negra. \"Kioscos\", \"Reportes\" y \"Ayuda\" abren directo.\nPulsa el nombre de una sección para abrir su lista y elige la opción; la sección de la página en la que estás se ve en rojo. En esta guía las rutas se escriben así: Configuración → Sitios."
+          },
           "sites": {
             "title": "Sitios, puertas y áreas",
-            "body": "Cada planta es un sitio con su zona horaria, retención de fotos y minutos de espera para escalar visitas no anunciadas. Dentro del sitio defines las puertas (peatonal, vehicular, muelle), la impresora de gafete de cada puerta y el QR de auto-registro para imprimir en recepción.\nLas áreas pueden marcarse como restringidas o con acompañante obligatorio; el kiosco lo muestra como aviso al entrar.\nEl \"Identificador (URL)\" al crear un sitio es su nombre corto y único en formato web (minúsculas, números y guiones, ej. airlink-2): identifica el sitio de forma fija en la auditoría y las integraciones aunque luego cambies el nombre visible, y no se puede editar después.\nEl kiosco deja entrar antes de la hora del pase según los \"Minutos de llegada anticipada\" del sitio (60 por defecto): si la visita es a las 10:00, puede entrar desde las 9:00, nunca el día anterior.\nEn la configuración del sitio también defines el Wi-Fi de invitados (nombre de la red y clave; cuando están guardados, el anfitrión ve en cada invitación la casilla \"Compartir el Wi-Fi de invitados\") y si el kiosco admite \"Visita no anunciada\"; desactívalo si Seguridad solo debe escanear.\n\"Fotos obligatorias para todo visitante\" (activado por defecto) exige a cualquier visitante, sin importar el tipo, una foto de la cara y de la cédula por delante y por detrás desde su enlace; sin ellas no aparece su QR y el kiosco no lo deja entrar. Se borran solas al cumplirse la retención de fotos del sitio.\n\"Registro de dispositivos obligatorio para todo visitante\" (activado por defecto) exige en el enlace los dispositivos que trae con IMEI o serial, modelo, color y capacidad, o la declaración de que no trae ninguno."
+            "body": "Cada planta es un sitio con su zona horaria, retención de fotos y minutos de espera para escalar visitas no anunciadas. En Configuración → Sitios, dentro del sitio defines las puertas (peatonal, vehicular, muelle), la impresora de gafete de cada puerta y el QR de auto-registro para imprimir en recepción.\nLas áreas pueden marcarse como restringidas o con acompañante obligatorio; el kiosco lo muestra como aviso al entrar.\nEl \"Identificador (URL)\" al crear un sitio es su nombre corto y único en formato web (minúsculas, números y guiones, ej. airlink-2): identifica el sitio de forma fija en la auditoría y las integraciones aunque luego cambies el nombre visible, y no se puede editar después.\nEl kiosco deja entrar antes de la hora del pase según los \"Minutos de llegada anticipada\" del sitio (60 por defecto): si la visita es a las 10:00, puede entrar desde las 9:00, nunca el día anterior.\nEn la configuración del sitio también defines el Wi-Fi de invitados (nombre de la red y clave; cuando están guardados, el anfitrión ve en cada invitación la casilla \"Compartir el Wi-Fi de invitados\") y si el kiosco admite \"Visita no anunciada\"; desactívalo si Seguridad solo debe escanear.\n\"Fotos obligatorias para todo visitante\" (activado por defecto) exige a cualquier visitante, sin importar el tipo, una foto de la cara y de la cédula por delante y por detrás desde su enlace; sin ellas no aparece su QR y el kiosco no lo deja entrar. Se borran solas al cumplirse la retención de fotos del sitio.\n\"Registro de dispositivos obligatorio para todo visitante\" (activado por defecto) exige en el enlace los dispositivos que trae con IMEI o serial, modelo, color y capacidad, o la declaración de que no trae ninguno."
           },
           "policies": {
             "title": "Políticas por tipo de visita",
-            "body": "Para cada sitio y tipo (visita, candidato, contratista, proveedor, auditor, transportista, entrega, recurrente) decides si requiere aprobación y de quién, si pide cédula, NDA, acompañante y gafete, las puertas permitidas, la duración máxima y si es solo recepción.\nTambién puedes deshabilitar un tipo, fijar una hora de salida automática, avisar por correo a direcciones fijas al entrar, imprimir el gafete automáticamente y asignar el formulario de registro. \"Valores por defecto\" restaura la política original.\n\"Pide foto de la cara\" exige una foto del visitante (desde su enlace o la cámara del kiosco) antes de entrar; se imprime en el gafete."
+            "body": "En Configuración → Políticas de visita, para cada sitio y tipo (visita, candidato, contratista, proveedor, auditor, transportista, entrega, recurrente) decides si requiere aprobación y de quién, si pide cédula, NDA, acompañante y gafete, las puertas permitidas, la duración máxima y si es solo recepción.\nTambién puedes deshabilitar un tipo, fijar una hora de salida automática, avisar por correo a direcciones fijas al entrar, imprimir el gafete automáticamente y asignar el formulario de registro. \"Valores por defecto\" restaura la política original.\n\"Pide foto de la cara\" exige una foto del visitante (desde su enlace o la cámara del kiosco) antes de entrar; se imprime en el gafete."
           },
           "companies": {
             "title": "Empresas y lista negra",
-            "body": "En \"Empresas\" registras proveedores, contratistas, clientes y transportistas (con RNC y notas) y puedes bloquear una empresa: sus visitantes no reciben pases.\nEn \"Lista negra\" vetas personas por cédula o pasaporte, o vehículos por placa, con motivo y vencimiento opcional. La cédula no se guarda completa. El kiosco bloquea la entrada y avisa a Seguridad."
+            "body": "En Personas → \"Empresas\" registras proveedores, contratistas, clientes y transportistas (con RNC y notas) y puedes bloquear una empresa: sus visitantes no reciben pases.\nEn Personas → \"Lista negra\" vetas personas por cédula o pasaporte, o vehículos por placa, con motivo y vencimiento opcional. La cédula no se guarda completa. El kiosco bloquea la entrada y avisa a Seguridad."
           },
           "frequent": {
             "title": "Visitantes frecuentes",
-            "body": "Contratistas fijos, temporales o choferes habituales se registran una vez como frecuentes con su pase recurrente de larga duración. Desde su ficha imprimes una tarjeta de 85 × 54 mm con QR, o les asignas un PIN si entran sin tarjeta.\nAl crear un pase, el anfitrión puede elegir a un frecuente y el formulario se rellena solo."
+            "body": "Contratistas fijos, temporales o choferes habituales se registran una vez como frecuentes (menú Visitas → Visitantes frecuentes) con su pase recurrente de larga duración. Desde su ficha imprimes una tarjeta de 85 × 54 mm con QR, o les asignas un PIN si entran sin tarjeta.\nAl crear un pase, el anfitrión puede elegir a un frecuente y el formulario se rellena solo."
           },
           "devices": {
             "title": "Kioscos de seguridad",
-            "body": "Los equipos de recepción se registran en \"Dispositivos de kiosco\" y se enrolan con un código. La guía \"Activar un kiosco de seguridad\" lo explica paso a paso."
+            "body": "Los equipos de recepción se registran en el menú Kioscos (\"Dispositivos de kiosco\") y se enrolan con un código. La guía \"Activar un kiosco de seguridad\" lo explica paso a paso."
           },
           "nda": {
             "title": "Política de visitantes (NDA) en español e inglés",
-            "body": "En \"Política de visitantes\" publicas el texto que cada visitante acepta desde su enlace cuando el tipo de visita lo exige (contratistas, auditores, recurrentes). Escríbelo en español y, opcionalmente, en inglés: el visitante lo ve en el idioma de su enlace. Puedes adjuntar el documento completo en PDF.\nCada versión es inmutable y queda registrada con la aceptación; para corregir, publica una versión nueva. Una versión por sitio manda sobre la global."
+            "body": "En Configuración → \"Política de visitantes\" publicas el texto que cada visitante acepta desde su enlace cuando el tipo de visita lo exige (contratistas, auditores, recurrentes). Escríbelo en español y, opcionalmente, en inglés: el visitante lo ve en el idioma de su enlace. Puedes adjuntar el documento completo en PDF.\nCada versión es inmutable y queda registrada con la aceptación; para corregir, publica una versión nueva. Una versión por sitio manda sobre la global."
           },
           "sitesDelete": {
             "title": "Eliminar sitios y puertas",
@@ -2317,7 +2360,7 @@
         "steps": {
           "directory": {
             "title": "Directorio de personas",
-            "body": "\"Personas\" reúne a los empleados sincronizados desde SPN y Microsoft Entra (anfitriones) y a los usuarios locales. Las pestañas filtran por anfitriones, administradores, seguridad, brigadistas, con PIN e inactivos; la búsqueda acepta nombre, correo o departamento."
+            "body": "Personas → \"Personas\" reúne a los empleados sincronizados desde SPN y Microsoft Entra (anfitriones) y a los usuarios locales. Las pestañas filtran por anfitriones, administradores, seguridad, brigadistas, con PIN e inactivos; la búsqueda acepta nombre, correo o departamento."
           },
           "add": {
             "title": "Agrega una persona",
@@ -2347,7 +2390,7 @@
         "steps": {
           "list": {
             "title": "Formularios por tipo de visita",
-            "body": "En \"Formularios\" creas plantillas con nombre y sitio (o compartidas por todos los sitios). Cada tipo de visita usa una plantilla o el formulario por defecto con los campos estándar.\nPuedes duplicar, renombrar, desactivar o ver en qué tipos de visita se usa cada una."
+            "body": "En Configuración → \"Formularios\" creas plantillas con nombre y sitio (o compartidas por todos los sitios). Cada tipo de visita usa una plantilla o el formulario por defecto con los campos estándar.\nPuedes duplicar, renombrar, desactivar o ver en qué tipos de visita se usa cada una."
           },
           "editor": {
             "title": "Arma el formulario",
@@ -2355,7 +2398,7 @@
           },
           "assign": {
             "title": "Asígnalo a un tipo de visita",
-            "body": "En \"Políticas de visita\", en el tipo que corresponde, elige la plantilla en \"Formulario de registro\" y pulsa \"Guardar\". A partir de entonces la tarjeta muestra el enlace \"Editar formulario\", que abre el editor de esa plantilla (\"Administrar formularios\" lleva a la lista)."
+            "body": "En Configuración → \"Políticas de visita\", en el tipo que corresponde, elige la plantilla en \"Formulario de registro\" y pulsa \"Guardar\". A partir de entonces la tarjeta muestra el enlace \"Editar formulario\", que abre el editor de esa plantilla (\"Administrar formularios\" lleva a la lista)."
           },
           "result": {
             "title": "Dónde se ve",
@@ -2373,7 +2416,7 @@
         "steps": {
           "overview": {
             "title": "Reportes",
-            "body": "En \"Reportes\" tienes Visitas, Auditoría, Bitácora de turno e Invitaciones. Usa los rangos rápidos (hoy, ayer, esta semana, este mes) o fechas, y filtra por sitio, puerta, tipo, estado, anfitrión, área, empresa o búsqueda libre. Arriba ves dentro ahora, entradas y salidas del período."
+            "body": "En el menú Reportes tienes Visitas, Auditoría, Bitácora de turno e Invitaciones. Usa los rangos rápidos (hoy, ayer, esta semana, este mes) o fechas, y filtra por sitio, puerta, tipo, estado, anfitrión, área, empresa o búsqueda libre. Arriba ves dentro ahora, entradas y salidas del período."
           },
           "export": {
             "title": "Exporta a CSV",
@@ -2411,7 +2454,7 @@
           },
           "kiosk": {
             "title": "En el kiosco",
-            "body": "El kiosco de recepción tiene la misma lista en \"Lista de evacuación\", también sin conexión, y puede imprimirla."
+            "body": "El kiosco de recepción tiene la misma lista en \"Lista de evacuación\", también sin conexión, y puede imprimirla. En el kiosco solo hay \"Imprimir\": el pase de lista y \"Enviar a brigadistas\" están en el panel web."
           }
         }
       },
@@ -2429,7 +2472,7 @@
           },
           "language": {
             "title": "Idioma y tema",
-            "body": "En la cabecera, el selector \"ES/EN\" seguido de \"OK\" cambia el idioma (español/inglés): elige y pulsa OK. El icono de luna/sol cambia el tema claro u oscuro. El kiosco usa siempre el idioma del dispositivo."
+            "body": "En la cabecera, el selector \"ES/EN\" seguido de \"OK\" cambia el idioma (español/inglés): elige EN o ES y pulsa OK. El icono de luna/sol cambia el tema claro u oscuro. El kiosco usa siempre el idioma del dispositivo."
           }
         }
       }

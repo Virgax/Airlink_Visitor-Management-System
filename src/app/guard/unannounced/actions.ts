@@ -39,6 +39,7 @@ const schema = z.object({
 
 export async function createUnannouncedAction(formData: FormData): Promise<void> {
   const { user, site, gate } = await requireKiosk();
+  if (gate.kind === "checkpoint") redirect("/guard"); // walk-ins are registered at reception, never at a checkpoint
   const raw = Object.fromEntries(formData);
   if (!String(raw.hostEmployeeId ?? "").trim()) redirect("/guard/unannounced?error=host");
   const parsed = schema.safeParse(raw);
@@ -121,5 +122,7 @@ export async function createUnannouncedAction(formData: FormData): Promise<void>
     plate,
     extra,
   });
-  redirect("/guard/unannounced?ok=1");
+  // Notifications reach users; an employee who never signed in has none yet, so the guard must call the host.
+  const hostUser = await db.user.findFirst({ where: { employeeId: host.id, status: "active" }, select: { id: true } });
+  redirect(hostUser ? "/guard/unannounced?ok=1" : "/guard/unannounced?ok=noaccount");
 }

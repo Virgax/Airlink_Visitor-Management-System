@@ -190,7 +190,11 @@ export function validatePass(payload: string, pass: PassForValidation | null, ct
   const now = ctx.now ?? new Date();
 
   const qr = verifyQr(payload, { siteId: pass.siteId, key: ctx.key, now: now.getTime() });
-  if (!qr.ok) return { ok: false, reason: qr.reason };
+  if (!qr.ok) {
+    // A static QR expires with its pass: tell the guard the pass expired, not the code (the window can be renewed).
+    if (qr.reason === "qr_expired" && pass.validUntil.getTime() <= now.getTime()) return { ok: false, reason: "expired" };
+    return { ok: false, reason: qr.reason };
+  }
   if (qr.qr.passId !== pass.id) return { ok: false, reason: "bad_signature" };
 
   const state = validatePassState(pass, ctx);

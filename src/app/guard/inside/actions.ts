@@ -5,7 +5,8 @@ import { requireKiosk } from "@/lib/auth/kiosk";
 import { checkoutVisit, VisitError } from "@/lib/server/visits";
 
 export async function checkoutAction(formData: FormData): Promise<void> {
-  const { user, site } = await requireKiosk();
+  const { user, site, gate } = await requireKiosk();
+  if (gate.kind === "checkpoint") redirect("/guard"); // a verification post closes no visit
   const visitId = String(formData.get("visitId") ?? "");
   try {
     await checkoutVisit(visitId, site.id, user.id);

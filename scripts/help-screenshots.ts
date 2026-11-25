@@ -123,6 +123,10 @@ async function main() {
     await login(admin, ADMIN_EMAIL, ADMIN_PASSWORD);
     await admin.goto("/select-panel");
     await shot(admin, "select-panel");
+    await admin.goto("/admin");
+    await admin.getByTestId("menu-visits").click();
+    await admin.getByTestId("menu-visits-panel").waitFor();
+    await shot(admin, "admin-menu");
   });
   await step("admin-people", async () => {
     await admin.goto("/admin/people");

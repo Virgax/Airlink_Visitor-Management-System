@@ -475,14 +475,19 @@ export function Scanner({ locale, timeZone, badgeConfig, checkpoint = false }: {
                     </dd>
                   </div>
                 ) : null}
-                {result.pass.warnings?.length ? (
+                {result.pass.warnings?.length || result.pass.ndaAccepted ? (
                   <div className="sm:col-span-2">
                     <ul className="mt-1 flex flex-wrap gap-2">
-                      {result.pass.warnings.map((w) => (
+                      {(result.pass.warnings ?? []).map((w) => (
                         <li key={w} className="inline-flex items-center gap-1 rounded-full bg-warning-bg px-2 py-0.5 text-sm font-medium text-warning">
                           <Icon icon={AlertTriangle} size={14} /> {t(`warnings.${w}`)}
                         </li>
                       ))}
+                      {result.pass.ndaAccepted ? (
+                        <li className="inline-flex items-center gap-1 rounded-full bg-success-bg px-2 py-0.5 text-sm font-medium text-success" data-testid="nda-accepted">
+                          <Icon icon={CheckCircle2} size={14} /> {t("warnings.ndaAccepted")}
+                        </li>
+                      ) : null}
                     </ul>
                   </div>
                 ) : null}

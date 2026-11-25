@@ -14,6 +14,7 @@ export const dynamic = "force-dynamic";
 export default async function InsidePage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   const sp = await searchParams;
   const { user, site, gate } = await requireKiosk();
+  const checkpoint = gate.kind === "checkpoint"; // verification post: sees who is inside, closes nothing
   const t = await getTranslations("guard");
   const tb = await getTranslations("badges.panel");
   const locale = await getLocale();
@@ -51,12 +52,14 @@ export default async function InsidePage({ searchParams }: { searchParams: Promi
               <Link href={`/guard/badge/${v.id}`} className="btn-secondary" data-testid="reprint-badge">
                 <Icon icon={Printer} /> {tb("reprint")}
               </Link>
+              {checkpoint ? null : (
               <form action={checkoutAction}>
                 <input type="hidden" name="visitId" value={v.id} />
                 <button type="submit" className="btn-primary">
                   <Icon icon={v.status === "at_dock" ? Truck : LogOut} /> {v.status === "at_dock" ? t("inside.dockLeft") : t("inside.checkout")}
                 </button>
               </form>
+              )}
             </li>
           ))}
         </ul>

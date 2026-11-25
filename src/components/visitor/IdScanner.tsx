@@ -12,6 +12,8 @@ export type IdScannerLabels = {
   error: string;
   docTypes: Record<"cedula" | "passport" | "id", string>;
   expires: string;
+  /** Standalone input only: the photo is read, not stored. */
+  privacy?: string;
 };
 type Slot = { slot: "idFront" | "idBack"; label: string; done: boolean; capture: "environment" };
 type Identity = { docType: "cedula" | "passport" | "id"; docNumber: string; fullName: string; nationality: string | null; expiryDate: string | null; valid: boolean };
@@ -78,7 +80,7 @@ export function IdScanner({ token, slots, standalone, labels }: { token: string;
           </div>
         ))
       )}
-      <p className="muted text-xs">{labels.hint}</p>
+      <p className="muted text-xs">{labels.hint}{standalone && labels.privacy ? ` ${labels.privacy}` : ""}</p>
       {status ? (
         <p className={`text-sm ${state.kind === "found" ? "text-success" : state.kind === "reading" ? "muted" : "text-warning"}`} role="status" data-testid="id-scan-status">{status}</p>
       ) : null}

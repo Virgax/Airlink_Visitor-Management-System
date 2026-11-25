@@ -57,7 +57,7 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
   const forOthers = await canInviteForOthers(tenant.user.id, site.id);
   const [areas, gates, employees, forms, from, VISIT_KINDS, frequent, labels] = await Promise.all([
     db.area.findMany({ where: { siteId: site.id, active: true }, orderBy: { name: "asc" } }),
-    db.gate.findMany({ where: { siteId: site.id, active: true }, orderBy: { name: "asc" } }),
+    db.gate.findMany({ where: { siteId: site.id, active: true, kind: { not: "checkpoint" } }, orderBy: { name: "asc" } }),
     db.employee.findMany({ where: { active: true, OR: [{ siteId: site.id }, { siteId: null }] }, orderBy: { name: "asc" }, take: 2000, select: { id: true, name: true, department: true } }),
     loadFormsForSite(site.id),
     sp.from ? db.pass.findFirst({ where: { id: sp.from, ...ownPassWhere(tenant) } }) : null,

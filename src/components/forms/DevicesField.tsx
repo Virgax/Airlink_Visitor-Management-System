@@ -48,12 +48,12 @@ export function DevicesField({ kinds, initial = [], none = false, required, labe
     );
   }
 
-  const field = (r: Row, name: keyof typeof DEVICE_FIELDS, label: string, value: string, patch: (v: string) => Partial<Row>, extra: { placeholder?: string; mono?: boolean; required?: boolean; maxLength?: number } = {}) => {
+  const field = (r: Row, name: keyof typeof DEVICE_FIELDS, label: string, value: string, patch: (v: string) => Partial<Row>, extra: { placeholder?: string; mono?: boolean; required?: boolean; maxLength?: number; pattern?: string; minLength?: number; inputMode?: "numeric" | "text"; title?: string } = {}) => {
     const id = `${idPrefix}dev-${name}-${r.key}`;
     return (
       <div>
         <label className="label" htmlFor={id}>{label}</label>
-        <input id={id} name={DEVICE_FIELDS[name]} className={`input text-sm ${extra.mono ? "font-mono" : ""}`} value={value} onChange={(e) => update(r.key, patch(e.target.value))} maxLength={extra.maxLength ?? 40} autoComplete="off" placeholder={extra.placeholder} required={Boolean(extra.required) && !preview} disabled={preview} />
+        <input id={id} name={DEVICE_FIELDS[name]} className={`input text-sm ${extra.mono ? "font-mono" : ""}`} value={value} onChange={(e) => update(r.key, patch(e.target.value))} maxLength={extra.maxLength ?? 40} minLength={extra.minLength} pattern={extra.pattern} inputMode={extra.inputMode} title={extra.title} autoComplete="off" placeholder={extra.placeholder} required={Boolean(extra.required) && !preview} disabled={preview} />
       </div>
     );
   };
@@ -71,8 +71,8 @@ export function DevicesField({ kinds, initial = [], none = false, required, labe
                     {kinds.map((k) => <option key={k} value={k}>{labels.kinds[k]}</option>)}
                   </select>
                 </div>
-                {r.kind === "phone" ? field(r, "imei", labels.imei, r.imei, (v) => ({ imei: v }), { placeholder: labels.imeiHelp, mono: true, required: required && i === 0 && !r.serial, maxLength: 20 }) : <input type="hidden" name={DEVICE_FIELDS.imei} value="" />}
-                {field(r, "serial", labels.serial, r.serial, (v) => ({ serial: v }), { mono: true, required: required && i === 0 && !(r.kind === "phone" && r.imei) })}
+                {r.kind === "phone" ? field(r, "imei", labels.imei, r.imei, (v) => ({ imei: v }), { placeholder: labels.imeiHelp, mono: true, required: required && i === 0 && !r.serial, maxLength: 20, pattern: "(?:[^0-9]*[0-9]){14,16}[^0-9]*", inputMode: "numeric", title: labels.imeiHelp }) : <input type="hidden" name={DEVICE_FIELDS.imei} value="" />}
+                {field(r, "serial", labels.serial, r.serial, (v) => ({ serial: v }), { mono: true, required: required && i === 0 && !(r.kind === "phone" && r.imei), minLength: 5 })}
                 <div className="flex items-end">
                   <button type="button" className="btn-secondary px-2 py-2 text-danger" onClick={() => remove(r.key)} title={labels.remove} aria-label={labels.remove} disabled={preview || rows.length === 1}><Icon icon={Trash2} size={16} /></button>
                 </div>

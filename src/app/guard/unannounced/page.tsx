@@ -21,6 +21,7 @@ import { createUnannouncedAction, searchHostsAction } from "./actions";
 export default async function UnannouncedPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   const sp = await searchParams;
   const { user, site, gate } = await requireKiosk();
+  if (gate.kind === "checkpoint") redirect("/guard"); // walk-ins are registered at reception, never at a checkpoint
   if (!readSiteSettings(site).allowUnannounced) redirect("/guard");
   const t = await getTranslations("guard");
   const locale = await getLocale();
@@ -44,7 +45,7 @@ export default async function UnannouncedPage({ searchParams }: { searchParams: 
       <div className="grid gap-6 lg:grid-cols-2">
         <form action={createUnannouncedAction} className="card space-y-4">
           <p className="muted">{t("unannounced.intro")}</p>
-          {sp.ok ? <p className="alert-ok" role="status">{t("unannounced.ok")}</p> : null}
+          {sp.ok ? <p className={sp.ok === "noaccount" ? "alert-warning" : "alert-ok"} role="status">{sp.ok === "noaccount" ? t("unannounced.okNoAccount") : t("unannounced.ok")}</p> : null}
           {errorKey ? <p className="alert-error" role="alert">{t(`unannounced.errors.${errorKey}` as "unannounced.errors.invalid")}</p> : null}
           <HostPicker search={searchHostsAction} />
           <div {...box("name")}>

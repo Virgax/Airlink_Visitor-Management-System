@@ -71,8 +71,8 @@ const chapters: { title: string; intro: string; guides: string[]; extra?: string
   {
     title: "Administración",
     intro:
-      "El administrador configura la plataforma y da acceso a los demás. Entra en " + APP_URL + "/login con su usuario y contraseña (o con su cuenta de Microsoft cuando esté conectada), elige el panel \"Administración\" y trabaja desde la barra de menú: Resumen, Sitios, Políticas de visita, Política de visitantes, Personas, Visitantes frecuentes, Formularios, Empresas, Lista negra, Dispositivos de kiosco, Reportes y Ayuda.\nOrden recomendado para dejar todo listo: (1) sitios con sus puertas y áreas, Wi-Fi de invitados y reglas de fotos y dispositivos; (2) políticas por tipo de visita; (3) política de visitantes (NDA) en español e inglés; (4) formularios de registro de RRHH; (5) personas: anfitriones, seguridad y sus accesos; (6) kioscos de recepción y puntos de control.",
-    guides: ["admin-setup", "admin-people", "admin-forms", "kiosk-setup", "reports"],
+      "El administrador configura la plataforma y da acceso a los demás. Entra en " + APP_URL + "/login con su usuario y contraseña (o con su cuenta de Microsoft cuando esté conectada), elige el panel \"Administración\" y trabaja desde el menú por secciones: Resumen · Visitas (Invitar visitante, Aprobaciones, Visitantes frecuentes, Lista de evacuación) · Configuración (Sitios, Políticas de visita, Formularios, Política de visitantes) · Personas (Personas, Empresas, Lista negra) · Kioscos · Reportes · Ayuda. En esta guía las rutas se escriben así: Configuración → Sitios.\nOrden recomendado para dejar todo listo: (1) sitios con sus puertas y áreas, Wi-Fi de invitados y reglas de fotos y dispositivos; (2) políticas por tipo de visita; (3) política de visitantes (NDA) en español e inglés; (4) formularios de registro de RRHH; (5) personas: anfitriones, seguridad y sus accesos; (6) kioscos de recepción y puntos de control.",
+    guides: ["admin-setup", "admin-people", "admin-forms", "reports"],
   },
   {
     title: "Anfitriones",
@@ -83,8 +83,8 @@ const chapters: { title: string; intro: string; guides: string[]; extra?: string
   {
     title: "Seguridad y recepción",
     intro:
-      "Seguridad trabaja desde la tablet o PC de recepción enrolada como kiosco (" + APP_URL + "/guard), que no usa usuario ni contraseña: entra con el nombre del guardia y su PIN. En el kiosco no se registran datos de visitantes: se escanea el QR, se verifica lo que el sistema muestra (foto, cédula, dispositivos, áreas, avisos), se imprime el gafete y se marcan las salidas. Lo que no está registrado, no entra.",
-    guides: ["kiosk-daily", "evacuation"],
+      "Seguridad trabaja desde la tablet o PC de recepción enrolada como kiosco (la dirección de Visitas seguida de /guard, o el enlace \"Abrir el modo kiosco\" al pie de la pantalla de inicio de sesión), que no usa correo ni contraseña: entra con el nombre del guardia y su PIN. La activación del equipo (código de enrolamiento, PIN, punto de control) es el primer apartado de este capítulo. En el kiosco se escanea el QR, se verifica lo que el sistema muestra (foto, cédula, dispositivos, áreas, avisos), se imprime el gafete, se registran las visitas no anunciadas y se marcan las salidas. Lo que no está registrado, no entra. Aprobar pases pendientes se hace desde el panel web (Aprobaciones), con cuenta, no desde el kiosco.",
+    guides: ["kiosk-setup", "kiosk-daily", "evacuation"],
   },
 ];
 
@@ -100,36 +100,39 @@ ${img("visitor-register", true)}
 
 <section class="step"><h3><span class="n">2</span>Ten a mano antes de empezar</h3>
 <ul>
-<li>Tu cédula o pasaporte: la fotografías por delante y por detrás y el sistema lee tu nombre y número de la zona de tres líneas (en el pasaporte, de la página con foto). Si no se lee bien, los escribes.</li>
-<li>Un celular con cámara, para la foto de tu cara.</li>
-<li>De cada dispositivo que traerás: <b>teléfono</b> (IMEI, que ves marcando *#06#, serial, modelo, color y capacidad), <b>laptop</b> (serial, modelo, color, disco SSD/HDD y RAM), <b>tablet</b> o <b>reloj inteligente</b> (serial, modelo, color, capacidad).</li>
+<li>Tu cédula o pasaporte. Le tomas una foto por detrás (las tres líneas de letras y números) o a la página con foto del pasaporte, y el sistema lee tu nombre y tu número; esa foto solo se usa para leer los datos. Si no se lee bien, los escribes. Trae el documento físico el día de la visita.</li>
+<li>Un celular con cámara, para la foto de tu cara y las de tu cédula cuando el sitio las pide (si tu enlace no muestra el bloque "Fotos obligatorias", ese sitio no las exige).</li>
+<li>De cada dispositivo que traerás: <b>teléfono</b> (IMEI de 15 dígitos, que ves marcando *#06#; puedes escribirlo con espacios), modelo, color y capacidad; <b>laptop</b> (número de serie, modelo, color, disco SSD/HDD y RAM); <b>tablet</b>, <b>reloj inteligente</b> u <b>otro</b> (número de serie, modelo, color, capacidad). Lo que no registres no puede entrar.</li>
 <li>Tu teléfono de contacto, correo, empresa y placa del vehículo si vienes en carro.</li>
 <li>Para contratistas: la lista de herramientas y equipos que traes.</li>
 </ul>
 </section>
 
 <section class="step"><h3><span class="n">3</span>Completa el formulario</h3>
-<p>Empieza por la foto de tu cédula por detrás (las tres líneas de letras y números) o de la página con foto de tu pasaporte: el sistema lee tu nombre y tu número de documento y los escribe por ti; revisa que estén correctos. Luego el enlace te pide lo que falte: teléfono y placa; las tres fotos obligatorias (tu cara de frente, la cédula por delante y por detrás); tus dispositivos personales, o la casilla "No traigo dispositivos"; las preguntas e instrucciones que la empresa haya definido para tu tipo de visita (normas de planta, ruta de evacuación, herramientas); y, si aplica, la política de visitantes, que aceptas marcando la casilla y firmando.</p>
-<p>Las fotos y dispositivos que ya guardaste no se pierden si te falta algo: completa lo que falte y guarda otra vez. El formulario está en español e inglés (selector arriba a la derecha).</p>
+<p>El formulario "Completa tu registro" va en este orden: primero "Escanear cédula o pasaporte" (o las fotos obligatorias), que llena por ti "Nombre completo" y "Cédula o pasaporte"; revisa que estén correctos. Luego teléfono, placa y empresa; las preguntas e instrucciones de tu tipo de visita (normas de planta, ruta de evacuación, herramientas); y al final "Dispositivos personales", donde agregas cada equipo con "Agregar otro dispositivo" o marcas "No traigo dispositivos". Pulsa "Completar registro".</p>
+<p>Debajo hay un <b>segundo formulario</b>, "Política de visitantes", con su propio botón "Aceptar": léela, marca "He leído y acepto", escribe tu nombre como firma y pulsa Aceptar. Sin ese segundo paso el QR no aparece y Seguridad no te deja entrar. Hazlo aunque tu pase diga "Pendiente de aprobación".</p>
+<p>Si el navegador marca un campo en rojo (IMEI incompleto, campo vacío), corrígelo antes de enviar: nada se pierde. Si te equivocaste de nombre o cédula después de completar el registro, no puedes corregirlo tú: tu anfitrión o Seguridad lo corrigen desde el pase. El formulario está en español e inglés: arriba a la derecha elige EN o ES y pulsa OK.</p>
 </section>
 
 <section class="step"><h3><span class="n">4</span>Qué ves en tu pase</h3>
-<p>Al terminar aparece tu QR, el sitio y su dirección, tu anfitrión, la vigencia (desde y hasta) y, si tu anfitrión lo compartió, la red Wi-Fi de invitados y su clave. Si tu pase requiere aprobación verás "Pendiente de aprobación" y el QR aparecerá cuando la aprueben. Los pases recurrentes muestran un QR que cambia cada 30 segundos: ábrelo desde el enlace al llegar, no desde una captura de pantalla.</p>
+<p>Al terminar aparece tu QR, el sitio, tu anfitrión, la vigencia (desde y hasta), las áreas autorizadas (y si debes ir acompañado), "Documento registrado (termina en …)", la lista de tus dispositivos, la fecha en que aceptaste la política y, si tu anfitrión lo compartió, la red Wi-Fi de invitados y su clave. El recuadro "A tu llegada" resume lo que te pedirán en recepción.</p>
+<p>Si tu pase requiere aprobación verás "Pendiente de aprobación" y "Registro completado. Tu pase queda pendiente de aprobación": el QR aparece en este mismo enlace cuando lo aprueben; vuelve a abrirlo al llegar. Los pases recurrentes muestran un QR que cambia cada 30 segundos: ábrelo desde el enlace al llegar, no desde una captura de pantalla.</p>
 ${img("visitor-link", true)}
 </section>
 
 <section class="step"><h3><span class="n">5</span>A tu llegada</h3>
 <ul>
-<li>Preséntate en recepción con tu QR en el celular y tu cédula física. Seguridad escanea el QR y compara tu cara, tu cédula y tus dispositivos con lo registrado.</li>
-<li>Puedes llegar hasta una hora antes de la hora de tu pase (según lo configure cada sitio), nunca el día anterior. Si llegas después de que venza, tu anfitrión amplía la vigencia desde su panel; no hace falta un pase nuevo.</li>
-<li>Recibes un gafete impreso con tu foto, nombre, empresa, anfitrión y áreas: llévalo visible todo el tiempo. En los puntos de control internos te lo escanean para verificar que puedes estar en esa área.</li>
+<li>Preséntate en recepción con tu QR en el celular y tu cédula física. Seguridad escanea el QR y compara tu cara, tu cédula, tu placa y tus dispositivos con lo registrado; también ve tus respuestas (por ejemplo las herramientas que traes) y puede revisarlas.</li>
+<li>Puedes llegar hasta una hora antes de la hora de tu pase (según lo configure cada sitio), nunca el día anterior. Si tu enlace dice "Este pase venció", pide a tu anfitrión que amplíe la vigencia: el mismo enlace vuelve a funcionar. Si dice "Cancelado", tu anfitrión anuló la visita: contáctalo antes de presentarte.</li>
+<li>Recibes un gafete impreso con tu foto, nombre, empresa, anfitrión y áreas: llévalo visible todo el tiempo. Al entrar, tu enlace pasa a "Dentro de la planta": desde ese momento tu gafete es tu pase. En los puntos de control internos te lo escanean para verificar que puedes estar en esa área.</li>
+<li>Si en recepción te dicen que faltan datos, dispositivos o fotos, abre tu enlace, complétalos y vuelve a mostrar el QR: aparece al instante.</li>
 <li>Si vienes acompañado, cada persona necesita su propio pase; pídeselo a tu anfitrión antes de llegar.</li>
-<li>Al salir, entrega o muestra el gafete: Seguridad registra tu salida.</li>
+<li>Al salir, entrega el gafete en recepción: Seguridad registra tu salida.</li>
 </ul>
 </section>
 
 <section class="step"><h3><span class="n">6</span>Qué está permitido y qué no</h3>
-<p>Las normas exactas las define Airlink en el formulario y la política de visitantes de tu tipo de visita (las lees y aceptas en tu enlace). En general:</p>
+<p>Tu enlace lo resume en "A tu llegada"; las normas completas están en las instrucciones y la política de visitantes de tu tipo de visita, que lees y aceptas en el enlace. En general:</p>
 <ul>
 <li>Permitido: los dispositivos que registraste; conectarte al Wi-Fi de invitados si tu anfitrión lo compartió; circular por las áreas que indica tu pase, acompañado cuando el área lo exige.</li>
 <li>No permitido: entrar sin pase, con el pase de otra persona o con dispositivos no registrados; fotografiar o grabar líneas de producción sin autorización; entrar a áreas que no están en tu pase; permanecer después de la hora de tu pase sin que tu anfitrión la amplíe.</li>

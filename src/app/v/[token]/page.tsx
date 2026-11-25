@@ -105,6 +105,7 @@ export default async function VisitorPassPage({ params, searchParams }: { params
     error: t("scan.error"),
     docTypes: { cedula: t("scan.docTypes.cedula"), passport: t("scan.docTypes.passport"), id: t("scan.docTypes.id") },
     expires: t("scan.expires", { date: "{date}" }),
+    privacy: t("scan.privacy"),
   };
   const showQr = pass.status === "active" && pass.validUntil > now && !registering && !photoPending && !devicesPending;
   const qr = showQr ? await qrPayloadFor(pass, now) : null;
@@ -112,7 +113,10 @@ export default async function VisitorPassPage({ params, searchParams }: { params
   const instructions = typeof pass.site.settings === "object" && pass.site.settings && "arrivalInstructions" in pass.site.settings ? String((pass.site.settings as Record<string, unknown>).arrivalInstructions ?? "") : "";
   const okKey = sp.ok === "prereg" ? "prereg" : sp.ok === "nda" ? "nda" : sp.ok === "registered" ? "register" : null;
   const errorKey = sp.error && ["invalid", "rateLimited", "closed", "missing", "devices", "photo_media", "photo_tooBig", "photo_invalid", "photo_failed", "photos_missing", "devices_missing"].includes(sp.error) ? sp.error : null;
-  const statusClass = pass.status === "active" ? "bg-success-bg text-success" : pass.status === "pending_approval" ? "bg-warning-bg text-warning" : "bg-danger-bg text-danger";
+  const insideVisit = pass.status === "used" || pass.status === "active" ? await db.visit.findFirst({ where: { passId: pass.id, status: { in: ["inside", "at_dock"] } }, select: { id: true, enteredAt: true } }) : null;
+  const statusClass = insideVisit || pass.status === "active" ? "bg-success-bg text-success" : pass.status === "pending_approval" ? "bg-warning-bg text-warning" : "bg-danger-bg text-danger";
+  const areaNames = pass.areaIds.length ? (await db.area.findMany({ where: { id: { in: pass.areaIds }, siteId: pass.siteId }, select: { name: true } })).map((a) => a.name) : [];
+  const escort = evaluation.warnings.includes("escort");
 
   return (
     <main className="mx-auto min-h-dvh max-w-md px-4 py-8">
@@ -124,8 +128,8 @@ export default async function VisitorPassPage({ params, searchParams }: { params
         </div>
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
         <p className="text-xl">{pass.visitorName}{pass.company ? <span className="muted"> · {pass.company.name}</span> : null}</p>
-        <p className={`rounded-lg px-3 py-2 text-sm ${statusClass}`} data-testid="pass-status" data-status={pass.status}>{tp(`status.${pass.status}`)}</p>
-        {okKey ? <p className="alert-ok" role="status">{t(`${okKey}.ok`)}</p> : null}
+        <p className={`rounded-lg px-3 py-2 text-sm ${statusClass}`} data-testid="pass-status" data-status={insideVisit ? "inside" : pass.status}>{insideVisit ? t("inside.status") : tp(`status.${pass.status}`)}</p>
+        {okKey ? <p className="alert-ok" role="status">{okKey === "register" && pass.status === "pending_approval" ? t("register.okPending") : t(`${okKey}.ok`)}</p> : null}
         {errorKey ? <p className="alert-error" role="alert">{t(`errors.${errorKey}`)}</p> : null}
 
         {qr && dataUrl ? (
@@ -145,8 +149,16 @@ export default async function VisitorPassPage({ params, searchParams }: { params
           <p className="muted" data-testid="qr-photo-note">{t("qr.photo")}</p>
         ) : devicesPending && open ? (
           <p className="muted" data-testid="qr-devices-note">{t("qr.devices")}</p>
+        ) : needsNda && open ? (
+          <p className="muted" data-testid="qr-nda-note">{t("qr.nda")}</p>
         ) : pass.status === "pending_approval" ? (
           <p className="muted">{t("qr.pending")}</p>
+        ) : insideVisit ? (
+          <p className="muted" data-testid="qr-inside-note">{t("inside.note")}</p>
+        ) : pass.status === "expired" || (pass.status === "active" && pass.validUntil <= now) ? (
+          <p className="muted">{t("qr.expired")}</p>
+        ) : pass.status === "revoked" ? (
+          <p className="muted">{t("qr.revoked")}</p>
         ) : (
           <p className="muted">{t("qr.unavailable")}</p>
         )}
@@ -157,8 +169,14 @@ export default async function VisitorPassPage({ params, searchParams }: { params
           <dt className="muted">{t("from")}</dt><dd>{fmtDate(pass.validFrom, locale, { timeZone: tz })}</dd>
           <dt className="muted">{t("until")}</dt><dd>{fmtDate(pass.validUntil, locale, { timeZone: tz })}</dd>
           {schedule ? <><dt className="muted">{t("schedule")}</dt><dd>{schedule.days.map((d) => tp(`weekdays.${d}`)).join(" ")} · {schedule.from}–{schedule.to}</dd></> : null}
+          {areaNames.length ? <><dt className="muted">{t("areas")}</dt><dd data-testid="pass-areas">{areaNames.join(", ")}{escort ? ` · ${t("escort")}` : ""}</dd></> : null}
         </dl>
-        <p className="muted">{t("instructions")}</p>
+        <section className="rounded-lg border border-border p-3 text-sm" data-testid="arrival-rules">
+          <h2 className="font-medium">{t("arrival.title")}</h2>
+          <ul className="mt-1 list-disc space-y-1 pl-5">
+            {(["qr", "badge", "devices", "areas", "photos"] as const).map((k) => <li key={k}>{t(`arrival.${k}`)}</li>)}
+          </ul>
+        </section>
         {pass.pinHash ? <p className="muted" data-testid="pass-pin-note">{tp2("pin.visitorNote")}</p> : null}
         {instructions ? <p className="muted whitespace-pre-wrap">{instructions}</p> : null}
         {pass.visitorDocLast4 ? <p className="muted">{t("prereg.docSaved", { last4: pass.visitorDocLast4 })}</p> : null}
@@ -178,12 +196,6 @@ export default async function VisitorPassPage({ params, searchParams }: { params
             <input type="hidden" name="token" value={token} />
             <h2 className="font-medium">{registering ? t("register.title") : t("prereg.title")}</h2>
             <p className="muted">{registering ? t("register.intro") : t("prereg.intro")}</p>
-            {registering ? (
-              <div>
-                <label className="label" htmlFor="name">{t("register.name")}</label>
-                <input id="name" name="name" required minLength={2} maxLength={120} className="input" autoComplete="name" />
-              </div>
-            ) : null}
             {requirePhotos ? (
               <fieldset className="space-y-3 rounded-lg border border-border p-3" data-testid="identity-photos">
                 <legend className="px-1 text-sm font-medium">{t("photos.title")}</legend>
@@ -222,12 +234,11 @@ export default async function VisitorPassPage({ params, searchParams }: { params
             ) : (registering || (mode("document") !== "off" && !pass.visitorDocHash)) && !pass.idBackKey ? (
               <IdScanner token={token} slots={[]} standalone labels={scanLabels} />
             ) : null}
-            {requireDevices && !devicesBlock ? (
-              <fieldset className="space-y-2 rounded-lg border border-border p-3" data-testid="site-devices">
-                <legend className="px-1 text-sm font-medium">{labels.devices.registered}</legend>
-                <p className="muted">{t("devicesIntro")}</p>
-                <DevicesField kinds={DEVICE_KINDS} initial={devices} none={devicesNone} required labels={labels.devices} />
-              </fieldset>
+            {registering ? (
+              <div>
+                <label className="label" htmlFor="name">{t("register.name")}</label>
+                <input id="name" name="name" required minLength={2} maxLength={120} className="input" autoComplete="name" />
+              </div>
             ) : null}
             <FormFields
               elements={form.elements}
@@ -296,6 +307,13 @@ export default async function VisitorPassPage({ params, searchParams }: { params
                 }
               }}
             />
+            {requireDevices && !devicesBlock ? (
+              <fieldset className="space-y-2 rounded-lg border border-border p-3" data-testid="site-devices">
+                <legend className="px-1 text-sm font-medium">{labels.devices.registered}</legend>
+                <p className="muted">{t("devicesIntro")}</p>
+                <DevicesField kinds={DEVICE_KINDS} initial={devices} none={devicesNone} required labels={labels.devices} />
+              </fieldset>
+            ) : null}
             <button type="submit" className="btn-primary w-full">{registering ? t("register.submit") : t("prereg.submit")}</button>
           </form>
         ) : null}
@@ -323,8 +341,8 @@ export default async function VisitorPassPage({ params, searchParams }: { params
               <FormFields elements={[signatureElement]} surface="visitor" labels={labels} locale={locale} />
             ) : (
               <div>
-                <label className="label" htmlFor="name">{t("nda.name")}</label>
-                <input id="name" name="name" required minLength={3} maxLength={120} className="input" autoComplete="name" />
+                <label className="label" htmlFor="ndaName">{t("nda.name")}</label>
+                <input id="ndaName" name="name" required minLength={3} maxLength={120} className="input" autoComplete="name" />
               </div>
             )}
             <button type="submit" className="btn-primary w-full">{t("nda.submit")}</button>

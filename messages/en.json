@@ -406,7 +406,25 @@
         "notPdf": "The file is not a PDF."
       }
     },
-    "invite": "Invite visitor"
+    "invite": "Invite visitor",
+    "menu": {
+      "visits": "Visits",
+      "approvals": "Approvals",
+      "evacuation": "Evacuation list",
+      "setup": "Setup",
+      "kiosks": "Kiosks",
+      "inviteHint": "Create a pass or invitation link, also on behalf of a host",
+      "approvalsHint": "Passes and unannounced visits awaiting an answer",
+      "frequentHint": "Regular contractors and drivers with long-term passes",
+      "evacuationHint": "Who is inside right now, by area and host",
+      "sitesHint": "Plants, gates, areas and each site's rules",
+      "policiesHint": "Approval, ID, NDA, badge and form per visit type",
+      "formsHint": "Registration templates: questions, instructions, devices",
+      "ndaHint": "The text visitors accept, in Spanish and English",
+      "peopleHint": "Employees, accounts, roles, kiosk PIN",
+      "companiesHint": "Vendors, contractors and clients; block by company",
+      "blacklistHint": "Banned people and vehicles"
+    }
   },
   "guard": {
     "title": "Security",
@@ -493,7 +511,7 @@
       "qr_stale": "The QR code is stale. Ask the visitor to refresh the screen.",
       "wrong_site": "This pass belongs to another site.",
       "pending_approval": "The pass is not approved yet.",
-      "revoked": "The pass was cancelled by the host.",
+      "revoked": "The pass was cancelled (by the host, Security or Administration).",
       "denied": "The pass was denied.",
       "used": "The pass was already used.",
       "expired": "The pass has expired.",
@@ -512,7 +530,7 @@
       "not_inside": "No entry recorded at reception. They must go through the entrance kiosk first.",
       "area_not_allowed": "Their pass does not include the areas of this post. Check with the host or Security.",
       "not_registered": "The visitor has not completed their registration from the invitation link.",
-      "device_not_found": "That IMEI or serial is not registered on any pass today. The visitor must register it before entering.",
+      "device_not_found": "Not an Airlink Visitas QR code nor an IMEI or serial registered on any pass today. If it is a device, the visitor must register it on their link before entering.",
       "devices_required": "They must register their personal devices (or declare they bring none) from their link before entering.",
       "photo_required": "The visitor's required photos (face or ID) are missing. They must upload them from their link before entering."
     },
@@ -520,7 +538,8 @@
       "escort": "Escort required",
       "nda": "NDA / visitor policy",
       "receptionOnly": "Reception only",
-      "noBadge": "No badge"
+      "noBadge": "No badge",
+      "ndaAccepted": "Visitor policy accepted"
     },
     "scan": {
       "title": "Scan QR",
@@ -611,7 +630,8 @@
       "deny": "Deny",
       "enter": "Register entry",
       "since": "Since {time}",
-      "refresh": "Refreshes every {seconds} s."
+      "refresh": "Refreshes every {seconds} s.",
+      "okNoAccount": "Visit registered, but the host has no Visitas account yet and will not get the notice: call their extension and, once they confirm, press \"Approved in person\"."
     },
     "inside": {
       "title": "Inside now",
@@ -895,7 +915,10 @@
       "unavailable": "This pass is no longer valid.",
       "register": "The QR will appear once you complete your registration.",
       "photo": "The QR will appear once you upload your photo.",
-      "devices": "The QR will appear once you register your devices (or declare you bring none)."
+      "devices": "The QR will appear once you register your devices (or declare you bring none).",
+      "nda": "The QR will appear once you accept the visitor policy (below, \"Accept\" button).",
+      "expired": "This pass expired. Ask your host to extend its validity: the link stays the same.",
+      "revoked": "Your host, Security or Administration cancelled this visit. Contact them before coming."
     },
     "prereg": {
       "title": "Complete your details",
@@ -926,7 +949,7 @@
       "rateLimited": "Too many attempts. Wait a moment.",
       "closed": "This pass no longer accepts changes.",
       "missing": "Required answers are missing. Check the form.",
-      "devices": "Check the devices: the IMEI or serial must have 5 to 30 characters and the kind must be one of the allowed ones.",
+      "devices": "Check the devices: a phone IMEI has 15 digits (dial *#06#); a serial, 5 to 30 characters.",
       "photo_media": "The photo could not be stored right now. Try again later.",
       "photo_tooBig": "The photo is too large (8 MB max).",
       "photo_invalid": "The file is not a JPG or PNG image.",
@@ -949,7 +972,8 @@
       "name": "Full name",
       "submit": "Complete registration",
       "ok": "Registration completed. Your pass is ready.",
-      "locked": "This link has already been registered and accepts no changes. If you are not {name}, ask your host for a new link."
+      "locked": "This link has already been registered and accepts no changes. If you are not {name}, ask your host for a new link.",
+      "okPending": "Registration completed. Your pass awaits approval: the QR will appear on this same link once approved."
     },
     "wifi": {
       "title": "Guest Wi-Fi",
@@ -966,7 +990,7 @@
       "done": "done",
       "help": "Good light, no glare. Only Security sees them and they are deleted automatically after the retention period."
     },
-    "devicesIntro": "Register every device you bring (phone, laptop, tablet, watch). If you bring none, tick the box.",
+    "devicesIntro": "Register every device you bring. Phone: 15-digit IMEI (dial *#06#). Laptop, tablet or watch: serial number. Add model, colour and capacity. If you bring none, tick the box.",
     "scan": {
       "hint": "Take the photo straight on, in good light, without covering the lines of letters and numbers: we read your name and number automatically. The back of the Dominican cédula or the photo page of your passport both work.",
       "optional": "Scan ID card or passport (optional)",
@@ -980,7 +1004,22 @@
         "cedula": "ID card",
         "passport": "Passport",
         "id": "Document"
-      }
+      },
+      "privacy": "The photo is only used to read your details; it is not stored."
+    },
+    "inside": {
+      "status": "Inside the plant",
+      "note": "Your entry is registered: your badge is your pass. Hand it in at reception when you leave."
+    },
+    "areas": "Areas",
+    "escort": "escort required",
+    "arrival": {
+      "title": "On arrival",
+      "qr": "Show this QR at reception together with your physical ID card or passport.",
+      "badge": "You will get a badge: wear it visibly at all times and hand it in when you leave.",
+      "devices": "Only the devices you registered here may enter; Security may check them.",
+      "areas": "Stay within the areas of your pass, escorted when indicated, and take no photos or video without permission.",
+      "photos": "If reception says data, devices or photos are missing, open this link, complete them and show the QR again."
     }
   },
   "passes": {
@@ -2127,19 +2166,19 @@
         "steps": {
           "guardPin": {
             "title": "Create security staff with a PIN",
-            "body": "In Administration → People press \"Add person\". Enter name, e-mail and site, tick the Security role and set a 4 to 8 digit PIN (avoid 1234 or repeated digits).\nIf the person already exists, use \"Set PIN\" or \"Change PIN\" on their row. That PIN is what they will use to sign in at the kiosk."
+            "body": "In Administration, menu People → People, press \"Add person\". Enter name, e-mail and site, tick the Security role and set a 4 to 8 digit PIN (avoid 1234 or repeated digits).\nIf the person already exists, use \"Set PIN\" or \"Change PIN\" on their row. That PIN is what they will use to sign in at the kiosk."
           },
           "device": {
             "title": "Register the device",
-            "body": "Under Administration → Kiosk devices type a name that identifies the equipment (for example \"Reception tablet A2\"), choose the gate where it will be (the list is grouped by site) and press \"Create device\".\nEach tablet or PC is a separate device, tied to a single gate."
+            "body": "In Administration, menu Kiosks, type a name that identifies the equipment (for example \"Reception tablet A2\"), choose the gate where it will be (the list is grouped by site) and press \"Create device\".\nEach tablet or PC is a separate device, tied to a single gate."
           },
           "code": {
             "title": "Copy the enrollment code",
-            "body": "When you create the device a green card appears at the top of the \"Kiosk devices\" page, titled \"Enrollment code\", with the code in large type. It is valid for 15 minutes and a single use.\nIf it expires before use, press \"Generate code\" on the device card to get another."
+            "body": "When you create the device a green card appears at the top of the Kiosks page (\"Kiosk devices\"), titled \"Enrollment code\", with the code in large type. It is valid for 15 minutes and a single use.\nIf it expires before use, press \"Generate code\" on the device card to get another."
           },
           "enroll": {
             "title": "Enroll the reception tablet or PC",
-            "body": "On the reception computer open the Visitas address followed by /guard, or on the sign-in page press \"Security or reception? Open kiosk mode\". No email sign-in is needed.\nType the code and press \"Enroll\". The browser is now permanently linked to that gate: always use the same browser and never clear its browsing data.\nIf a device was enrolled at the wrong site or gate, press \"Change device\" on the PIN screen: it drops the enrollment and asks for a new code."
+            "body": "On the reception computer open the Visitas address followed by /guard, or on the sign-in page press \"Security or reception? Open kiosk mode\". No email sign-in is needed.\nType the code and press \"Enroll\". The browser is now permanently linked to that gate: always use the same browser and never clear its browsing data.\nIf a device was enrolled at the wrong site or gate, press \"Change device\" on the PIN screen: it drops the enrollment and asks for a code again. The old code no longer works: an administrator presses \"Generate code\" on the device card (which now says \"Not enrolled\") and that code also lasts 15 minutes."
           },
           "pin": {
             "title": "Sign in with the guard's PIN",
@@ -2155,11 +2194,11 @@
           },
           "printer": {
             "title": "Badge printer (optional)",
-            "body": "To print badges on the Zebra ZP450 connected by USB to the reception PC, IT installs the print agent on that PC and in Administration → Sites → the gate selects \"Print agent\" and the shared printer name.\nWithout a printer configured, the kiosk downloads the badge file for manual printing. The technical guide is docs/BADGES.md in the repository."
+            "body": "To print badges on the Zebra ZP450 connected by USB to the reception PC, IT installs the print agent on that PC and in Administration, Setup → Sites → the gate selects \"Print agent\" and the shared printer name.\nWithout a printer configured, the kiosk downloads the badge file for manual printing. The technical guide is docs/BADGES.md in the repository."
           },
           "checkpoint": {
             "title": "Checkpoint on the second floor (verification)",
-            "body": "If there is a security post after reception (the stairs to the second floor, the corridor to the secure areas), create under Sites a gate of kind \"Checkpoint\" and tick the areas it controls. Enroll another tablet there just like the reception one.\nAt that kiosk the guard only scans the badge or the QR: it shows that the person entered through reception, who invited them and whether their pass includes that area. It records no entries, exits or unannounced visits; nobody should go upstairs without a badge."
+            "body": "If there is a security post after reception (the stairs to the second floor, the corridor to the secure areas), create under Setup → Sites a gate of kind \"Checkpoint\" and tick the areas it controls. Enroll another tablet there just like the reception one.\nAt that kiosk the guard only scans the badge or the QR: it shows that the person entered through reception, who invited them and whether their pass includes that area. It records no entries, exits or unannounced visits; nobody should go upstairs without a badge."
           }
         }
       },
@@ -2169,15 +2208,15 @@
         "steps": {
           "scan": {
             "title": "Scan the visitor's QR",
-            "body": "Press \"Scan QR\" and turn on the camera. The visitor shows the QR from their link, their e-mail or their frequent-visitor card.\nIf the camera does not work, paste the code content into \"Manual code\" and press \"Validate\". A second scan of the same pass records the exit."
+            "body": "Press \"Scan QR\" and then \"Turn on camera\". The status strip (\"Online · No pending scans · Cached passes: N\") tells you the kiosk is connected and ready to work offline. The visitor shows the QR from their link, their e-mail or their frequent-visitor card.\nIf the camera does not work, paste the code content into \"Manual code\" and press \"Validate\". A second scan of the same pass records the exit."
           },
           "result": {
             "title": "Read the result",
-            "body": "Green: entry recorded, with the name, company, host, allowed areas and warnings (escort required, NDA, reception only). The host gets an automatic notification.\nRed: cannot enter, with the reason (expired pass, other site, pending approval, blacklist, blocked company, NDA not accepted…). On a blacklist hit, Security has already been alerted.\nIf the pass carries a face photo, it shows next to the name: compare it with the person before printing the badge.\nThe ID photos appear below to compare with the physical document."
+            "body": "Green: entry recorded, with the name, company, host, allowed areas and warnings (escort required, NDA, reception only). The host gets an automatic notification.\nRed: they cannot enter, and why. The most frequent and what to do: \"The pass expired\" (the host extends the validity from their panel; the same link works); \"The pass was already used\" (a single-entry pass is not valid for two people: the second needs their own); \"Must register their devices\" or \"Has not completed registration\" (have them open their link on the phone and complete it; the QR appears at once); \"Pending approval\" (the visitor does not even see a QR until approved); another site, blacklist, blocked company, policy not accepted. On a blacklist hit Security was already notified. A pending pass is approved from the web panel (Approvals), not at the kiosk.\nIf the pass carries a face photo, it shows next to the name: compare it with the person before printing the badge.\nThe ID photos appear below to compare with the physical document."
           },
           "badge": {
             "title": "Print the badge",
-            "body": "After a valid entry the badge panel opens. Take a quick photo with the kiosk camera (printed in black and white) or continue without one, then press \"Print badge\".\nThe badge carries the visit QR, name, company, host, area and warnings. To reprint it, open it from \"Inside now\"."
+            "body": "After a valid entry the badge panel opens. If the pass carries the face photo, it prints on the badge. Press \"Print badge\"; \"Done\" closes the panel. If the gate has no printer assigned, the kiosk downloads the badge file (ZPL) to send to the Zebra from the PC; IT sets it up under Setup → Sites → the gate.\nThe badge carries the visit QR, name, company, host, area and warnings. To reprint it, open it from \"Inside now\"."
           },
           "pin": {
             "title": "Visitor without QR: PIN entry",
@@ -2185,7 +2224,7 @@
           },
           "unannounced": {
             "title": "Unannounced visit",
-            "body": "Press \"Unannounced visit\", search the host by name or department, fill in the visitor's details (type, name, company, ID, plate) and press \"Notify host\".\nThe visit appears under \"Waiting at the gate\". When the host approves from their panel or confirms in person, press \"Record entry\". If nobody answers within the configured time, it escalates to Security."
+            "body": "Press \"Unannounced visit\", find the host under \"Host\" (by name or department), fill in the visitor's details (type, name, company, ID, plate and their personal devices) and press \"Notify host\".\nThe visit appears under \"Waiting at the gate\". If the host confirms by phone or in person, press \"Approved in person\": the entry is registered at once and the badge comes out. If they approve from their phone (it reaches their notifications bell, Teams or push), the card changes to \"Approved\" and you press \"Register entry\". If nobody answers within the configured time, it escalates to Security.\nIf the kiosk warns that the host has no Visitas account yet, they will not get the notice: call their extension and use \"Approved in person\"."
           },
           "inside": {
             "title": "Inside now and check-outs",
@@ -2209,11 +2248,11 @@
           },
           "checkpoint": {
             "title": "Verify at a checkpoint",
-            "body": "On tablets configured as a checkpoint, \"Verify access\" shows in green that the visitor is inside, their host, the allowed areas and the entry time. In red: they did not go through reception, their pass does not include this post's areas, or the visit is already closed. Alert Security and send them to reception.\nThis kiosk needs a connection; there is no PIN entry or badge printing."
+            "body": "On tablets configured as a checkpoint, \"Verify access\" shows in green that the visitor is inside, their host, the allowed areas and the entry time. In red: they did not go through reception, their pass does not include this post's areas, or the visit is already closed. Alert Security and send them to reception.\nThe guard signs in with their PIN as at reception. The home screen has \"Verify access\" (instead of \"Scan QR\"), \"Inside now\", \"Evacuation list\" and \"Log\"; there is no \"Unannounced visit\", no sign-outs and no badge printing. This kiosk needs a connection."
           },
           "devices": {
             "title": "Personal devices (phone, laptop, watch)",
-            "body": "If the visit type's form asks for \"Personal devices\", the scan result shows what the visitor carries: kind, make and model, colour and IMEI or serial. If the form marks it required and the visitor registered nothing nor declared bringing none, the kiosk refuses entry until they complete it from their link.\nTo trace a device, type or scan its IMEI or serial under \"Manual code\": the kiosk says whose it is, which pass registered it and whether its owner is inside. An IMEI not registered on any pass of the day shows in red.\nWith \"Device registration required\" on for the site (the default), every visitor registers on their link each device they bring: phone (IMEI, serial, model, colour, capacity), laptop (serial, model, colour, SSD/HDD and RAM), tablet or watch (serial, model, colour, capacity), or declares bringing none. Without it their QR does not appear."
+            "body": "If the visit type's form asks for \"Personal devices\", the scan result shows what the visitor carries: kind, make and model, colour and IMEI or serial. If the form marks it required and the visitor registered nothing nor declared bringing none, the kiosk refuses entry until they complete it from their link: ask them to open their link on the phone and register their devices or tick \"I bring no devices\"; the QR appears at once. If they cannot, Security or HR correct it from the web panel (Reports → Invitations → \"View\" → \"Save devices\"), not at the kiosk.\nTo trace a device, type or scan its IMEI or serial under \"Manual code\": the kiosk says whose it is, which pass registered it and whether its owner is inside. An IMEI not registered on any pass of the day shows in red.\nWith \"Device registration required\" on for the site (the default), every visitor registers on their link each device they bring: phone (IMEI, serial, model, colour, capacity), laptop (serial, model, colour, SSD/HDD and RAM), tablet or watch (serial, model, colour, capacity), or declares bringing none. Without it their QR does not appear."
           }
         }
       },
@@ -2231,7 +2270,7 @@
           },
           "detail": {
             "title": "Share the link",
-            "body": "After creating the pass you see its detail with the visitor link. Copy it and send it by WhatsApp or use \"Send by e-mail\": the visitor receives the QR, the address and the instructions.\nIf the visitor has no phone, tick \"Generate 6-digit PIN\": it is shown once and lets them enter at the kiosk. From here you can also cancel, duplicate or rename the pass.\nIf the visitor arrives after the end or the visit moves to another day, use \"Change validity\" to extend or shift the dates: the link and the QR stay the same.\nThe detail also shows what the visitor registered, and you can correct their devices if they got them wrong."
+            "body": "After creating the pass you see its detail with the visitor link. Copy it and send it by WhatsApp or use \"Send by e-mail\": the visitor receives the QR, the address and the instructions.\nIf the visitor has no phone, tick \"Generate 6-digit PIN\": it is shown once and lets them enter at the kiosk. From here you can also cancel, duplicate or rename the pass.\nIf the visitor arrives after the end or the visit moves to another day, use \"Change validity\" to extend or shift the dates: the link and the QR stay the same.\nThe detail also shows what the visitor registered, and you can correct their devices if they got them wrong, as long as the pass has not been used yet."
           },
           "visitor": {
             "title": "What the visitor sees",
@@ -2243,7 +2282,7 @@
           },
           "arrival": {
             "title": "When the visitor arrives",
-            "body": "You get a notification (push, Teams or e-mail according to your preferences) when their entry is recorded and, if they came without a pass, a request to approve the unannounced visit from \"Approvals\".\nWhen the check-out is recorded at the kiosk, the pass becomes \"Used\" and shows in your history."
+            "body": "You get a notification (push, Teams or e-mail according to your preferences) when their entry is recorded and, if they came without a pass, a request to approve the unannounced visit: it appears in the notifications bell (and via Teams or push), with \"Approve\", \"On my way\" and \"Reject\".\nWhen the check-out is recorded at the kiosk, the pass becomes \"Used\" and shows in your history."
           },
           "selfRegister": {
             "title": "Invitation link: the visitor fills in their details",
@@ -2251,7 +2290,7 @@
           },
           "onBehalf": {
             "title": "Security or Administration generate the link for you",
-            "body": "If you prefer to request the link by e-mail (\"I have a visit at such time\"), Security or Administration open \"New pass\", pick your name under \"Host of the visit\" and create it. You get the notifications and approve as host; they see the pass in their list to resend the link."
+            "body": "If you prefer to request the link by e-mail (\"I have a visit at such time\"), Security or Administration open Visits → \"Invite visitor\" (in the Host panel, \"New pass\"), pick your name under \"Host of the visit\" and create it. You get the notifications and approve as host; they see the pass in their list to resend the link."
           }
         }
       },
@@ -2261,7 +2300,7 @@
         "steps": {
           "list": {
             "title": "Review what is pending",
-            "body": "Open the Host panel (panels icon in the header → \"Host\") and press \"Approvals\" in the top bar; it is not in the Administration menu. There you see the passes and the unannounced visits waiting for your answer: visitor, type, host, site, window and areas. Each row says with which role you approve (host, approver or security)."
+            "body": "As an administrator: menu Visits → \"Approvals\". As an approver or Security: Host panel (panels icon in the header → \"Host\") → \"Approvals\". There you see the passes and the unannounced visits waiting for your answer: visitor, type, host, site, window and areas. Each row says with which role you approve (host, approver or security).\nApprovals happen on the web panel, not at the kiosk: the guard needs an account (not just a PIN) to approve."
           },
           "decide": {
             "title": "Approve or deny",
@@ -2281,29 +2320,33 @@
             "title": "Panels by role",
             "body": "After signing in you pick a panel: Administration, Security, Host, Approver or Fire warden, per site or for all sites. The panels icon in the header lets you switch at any time.\nAn administrator with \"all sites\" scope sees and configures Airlink 2 and Airlink 3; a site administrator only their own."
           },
+          "menu": {
+            "title": "The Administration menu",
+            "body": "At the top of every Administration page is the menu by sections. \"Overview\" is the home. \"Visits\" drops down Invite visitor, Approvals, Frequent visitors and Evacuation list. \"Setup\" drops down Sites, Visit policies, Forms and Visitor policy. \"People\" drops down People, Companies and Blacklist. \"Kiosks\", \"Reports\" and \"Help\" open directly.\nPress a section name to open its list and choose the option; the section of the page you are on shows in red. In this guide paths are written like this: Setup → Sites."
+          },
           "sites": {
             "title": "Sites, gates and areas",
-            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry.\nThe \"Identifier (URL)\" when creating a site is its short unique web-style name (lowercase, digits and hyphens, e.g. airlink-2): it identifies the site permanently in the audit log and integrations even if you later rename it, and cannot be edited afterwards.\nThe kiosk lets visitors in before the pass time according to the site's \"Early-arrival minutes\" (60 by default): a 10:00 visit may enter from 9:00, never the day before.\nThe site settings also hold the guest Wi-Fi (network name and password; once saved, the host sees the \"Share the guest Wi-Fi\" box on each invitation) and whether the kiosk accepts \"Unannounced visit\"; turn it off if Security should only scan.\n\"Photos required of every visitor\" (on by default) demands from any visitor, whatever the type, a face photo and both sides of their ID from their link; without them their QR does not appear and the kiosk refuses entry. They are deleted automatically when the site's photo retention expires.\n\"Device registration required of every visitor\" (on by default) demands on the link the devices they bring with IMEI or serial, model, colour and capacity, or a declaration of bringing none."
+            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Under Setup → Sites, inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry.\nThe \"Identifier (URL)\" when creating a site is its short unique web-style name (lowercase, digits and hyphens, e.g. airlink-2): it identifies the site permanently in the audit log and integrations even if you later rename it, and cannot be edited afterwards.\nThe kiosk lets visitors in before the pass time according to the site's \"Early-arrival minutes\" (60 by default): a 10:00 visit may enter from 9:00, never the day before.\nThe site settings also hold the guest Wi-Fi (network name and password; once saved, the host sees the \"Share the guest Wi-Fi\" box on each invitation) and whether the kiosk accepts \"Unannounced visit\"; turn it off if Security should only scan.\n\"Photos required of every visitor\" (on by default) demands from any visitor, whatever the type, a face photo and both sides of their ID from their link; without them their QR does not appear and the kiosk refuses entry. They are deleted automatically when the site's photo retention expires.\n\"Device registration required of every visitor\" (on by default) demands on the link the devices they bring with IMEI or serial, model, colour and capacity, or a declaration of bringing none."
           },
           "policies": {
             "title": "Policies per visit type",
-            "body": "For each site and type (visit, candidate, contractor, vendor, auditor, carrier, delivery, recurring) you decide whether it needs approval and from whom, whether it asks for ID, NDA, escort and badge, the allowed gates, the maximum duration and whether it is reception only.\nYou can also disable a type, set an automatic sign-out time, e-mail fixed addresses on entry, print the badge automatically and assign the sign-in form. \"Defaults\" restores the original policy.\n\"Requires a face photo\" demands a photo of the visitor (from their link or the kiosk camera) before entering; it is printed on the badge."
+            "body": "Under Setup → Visit policies, for each site and type (visit, candidate, contractor, vendor, auditor, carrier, delivery, recurring) you decide whether it needs approval and from whom, whether it asks for ID, NDA, escort and badge, the allowed gates, the maximum duration and whether it is reception only.\nYou can also disable a type, set an automatic sign-out time, e-mail fixed addresses on entry, print the badge automatically and assign the sign-in form. \"Defaults\" restores the original policy.\n\"Requires a face photo\" demands a photo of the visitor (from their link or the kiosk camera) before entering; it is printed on the badge."
           },
           "companies": {
             "title": "Companies and blacklist",
-            "body": "Under \"Companies\" you register vendors, contractors, clients and carriers (with tax ID and notes) and can block a company: its visitors get no passes.\nUnder \"Blacklist\" you ban people by ID or passport, or vehicles by plate, with a reason and optional expiry. The ID is never stored in full. The kiosk blocks the entry and alerts Security."
+            "body": "Under People → \"Companies\" you register vendors, contractors, clients and carriers (with tax ID and notes) and can block a company: its visitors get no passes.\nUnder People → \"Blacklist\" you ban people by ID or passport, or vehicles by plate, with a reason and optional expiry. The ID is never stored in full. The kiosk blocks the entry and alerts Security."
           },
           "frequent": {
             "title": "Frequent visitors",
-            "body": "Permanent contractors, temps or regular drivers are registered once as frequent visitors with a long-lived recurring pass. From their record you print an 85 × 54 mm card with a QR, or assign a PIN if they enter without a card.\nWhen creating a pass, the host can pick a frequent visitor and the form fills itself."
+            "body": "Permanent contractors, temps or regular drivers are registered once as frequent visitors (menu Visits → Frequent visitors) with a long-lived recurring pass. From their record you print an 85 × 54 mm card with a QR, or assign a PIN if they enter without a card.\nWhen creating a pass, the host can pick a frequent visitor and the form fills itself."
           },
           "devices": {
             "title": "Security kiosks",
-            "body": "Reception devices are registered under \"Kiosk devices\" and enrolled with a code. The guide \"Activate a security kiosk\" explains it step by step."
+            "body": "Reception equipment is registered under the Kiosks menu (\"Kiosk devices\") and enrolled with a code. The guide \"Activate a security kiosk\" explains it step by step."
           },
           "nda": {
             "title": "Visitor policy (NDA) in Spanish and English",
-            "body": "Under \"Visitor policy\" you publish the text every visitor accepts from their link when the visit type requires it (contractors, auditors, recurring). Write it in Spanish and, optionally, in English: the visitor sees it in the language of their link. You can attach the full document as a PDF.\nEach version is immutable and recorded with the acceptance; to correct it, publish a new version. A site's own version overrides the global one."
+            "body": "Under Setup → \"Visitor policy\" you publish the text every visitor accepts from their link when the visit type requires it (contractors, auditors, recurring). Write it in Spanish and, optionally, in English: the visitor sees it in the language of their link. You can attach the full document as a PDF.\nEach version is immutable and recorded with the acceptance; to correct it, publish a new version. A site's own version overrides the global one."
           },
           "sitesDelete": {
             "title": "Delete sites and gates",
@@ -2317,7 +2360,7 @@
         "steps": {
           "directory": {
             "title": "People directory",
-            "body": "\"People\" brings together employees synced from SPN and Microsoft Entra (hosts) and local users. Tabs filter hosts, admins, security, wardens, with PIN and inactive; search accepts name, e-mail or department."
+            "body": "People → \"People\" brings together employees synced from SPN and Microsoft Entra (hosts) and local users. Tabs filter hosts, admins, security, wardens, with PIN and inactive; search accepts name, e-mail or department."
           },
           "add": {
             "title": "Add a person",
@@ -2347,7 +2390,7 @@
         "steps": {
           "list": {
             "title": "Forms per visit type",
-            "body": "Under \"Forms\" you create templates with a name and site (or shared by all sites). Each visit type uses a template or the default form with the standard fields.\nYou can duplicate, rename, deactivate or see which visit types use each one."
+            "body": "Under Setup → \"Forms\" you create templates with a name and site (or shared by all sites). Each visit type uses a template or the default form with the standard fields.\nYou can duplicate, rename, deactivate or see which visit types use each one."
           },
           "editor": {
             "title": "Build the form",
@@ -2355,7 +2398,7 @@
           },
           "assign": {
             "title": "Assign it to a visit type",
-            "body": "In \"Visit policies\", on the matching type, choose the template under \"Registration form\" and press \"Save\". From then on the card shows the \"Edit form\" link, which opens the editor for that template (\"Manage forms\" leads to the list)."
+            "body": "In Setup → \"Visit policies\", on the matching type, choose the template under \"Registration form\" and press \"Save\". From then on the card shows the \"Edit form\" link, which opens the editor for that template (\"Manage forms\" leads to the list)."
           },
           "result": {
             "title": "Where it shows",
@@ -2373,7 +2416,7 @@
         "steps": {
           "overview": {
             "title": "Reports",
-            "body": "Under \"Reports\" you have Visits, Audit, Shift log and Invitations. Use the quick ranges (today, yesterday, this week, this month) or dates, and filter by site, gate, type, status, host, area, company or free search. The top shows inside now, entries and exits for the period."
+            "body": "Under the Reports menu you have Visits, Audit, Shift log and Invitations. Use the quick ranges (today, yesterday, this week, this month) or dates, and filter by site, gate, type, status, host, area, company or free search. The top shows inside now, entries and exits for the period."
           },
           "export": {
             "title": "Export to CSV",
@@ -2411,7 +2454,7 @@
           },
           "kiosk": {
             "title": "At the kiosk",
-            "body": "The reception kiosk has the same list under \"Evacuation list\", also offline, and can print it."
+            "body": "The reception kiosk has the same list under \"Evacuation list\", also offline, and can print it. At the kiosk there is only \"Print\": the roll call and \"Send to wardens\" are on the web panel."
           }
         }
       },
@@ -2429,7 +2472,7 @@
           },
           "language": {
             "title": "Language and theme",
-            "body": "In the header, the \"ES/EN\" selector followed by \"OK\" changes the language (Spanish/English): choose and press OK. The moon/sun icon switches the light or dark theme. The kiosk always uses the device language."
+            "body": "In the header, the \"ES/EN\" selector followed by \"OK\" changes the language (Spanish/English): choose EN or ES and press OK. The moon/sun icon switches the light or dark theme. The kiosk always uses the device language."
           }
         }
       }

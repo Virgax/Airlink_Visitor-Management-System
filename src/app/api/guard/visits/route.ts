@@ -32,7 +32,9 @@ async function enterOrApprove(visitId: string, siteId: string, userId: string) {
 
 /** Guard actions on a visit of the kiosk's site. */
 export async function POST(request: NextRequest): Promise<Response> {
-  return kioskRoute(async ({ user, site }) => {
+  return kioskRoute(async ({ user, site, gate }) => {
+    // A checkpoint verifies; it enters, approves, denies or closes nobody.
+    if (gate.kind === "checkpoint") return Response.json({ ok: false, error: "checkpoint" }, { status: 403 });
     const parsed = actionSchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) return Response.json({ ok: false, error: "invalid_body" }, { status: 400 });
     const { visitId, action } = parsed.data;

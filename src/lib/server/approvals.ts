@@ -25,6 +25,16 @@ export async function getApproverTenants(): Promise<ApproverTenants> {
       if (err instanceof AuthError && err.code === "unauthenticated") throw err;
     }
   }
+  // Administrators approve with Security's say, without needing a second role.
+  if (!tenants.security) {
+    try {
+      const admin = await getMembershipOrThrow("admin");
+      tenants.security = admin;
+      user = admin.user;
+    } catch (err) {
+      if (err instanceof AuthError && err.code === "unauthenticated") throw err;
+    }
+  }
   const roles = APPROVER_ROLES.filter((r) => tenants[r]);
   if (!user || roles.length === 0) throw new AuthError("forbidden");
   return { user, tenants, roles };

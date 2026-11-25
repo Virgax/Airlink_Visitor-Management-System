@@ -75,7 +75,6 @@ test("visits and shift-log reports: filters, CSV export, dashboard counts and ki
   // Kiosk: enroll a device at Airlink 2 and sign in with the guard's PIN
   await page.goto("/admin/devices");
   await page.getByLabel("Nombre del dispositivo").fill(`Tablet Log ${stamp}`);
-  await page.getByLabel("Sitio").selectOption({ label: "Airlink 2" });
   await page.getByLabel("Puerta").selectOption({ label: "Airlink 2 · Recepción" });
   await page.getByRole("button", { name: "Crear dispositivo" }).click();
   const code = (await page.getByTestId("enroll-code").textContent())!.trim();

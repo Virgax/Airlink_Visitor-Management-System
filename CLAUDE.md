@@ -29,7 +29,9 @@ Full brief: `docs/PLAN.md`.
   passes on behalf of a host (`canInviteForOthers`, `requireHostTenant`); `ownPassWhere` gives them the site's passes.
 - `Gate.kind = checkpoint` (verification post, e.g. the stairs upstairs): the kiosk scan runs `verifyAtCheckpoint`
   (never enters/exits/consumes, audited as `visit.checkpoint`), allowed when the visit's areas intersect
-  `Gate.settings.checkpointAreaIds` (empty = anyone inside). No PIN, no badge, no offline on checkpoint devices.
+  `Gate.settings.checkpointAreaIds` (empty = anyone inside). The guard signs in with PIN as at reception; the walk-in
+  page/action, check-outs (`/guard/inside`, `/api/guard/visits`) and the printer/self-sign-in controls are refused or
+  hidden for checkpoint devices; checkpoints are not offered as entry gates. No badge, no offline.
 - Passes: QR payload `passId.exp.sig` (HMAC `PASS_SIGNING_KEY`, 16-byte base64url) or `passId.r<step>.sig` for the
   rotating TOTP QR of recurring passes; validation only in `src/lib/passes/validate.ts` (pure, unit-tested) +
   atomic `uses` increment in `src/lib/server/passes.ts` (`consumePassUse`). Policies (`VisitPolicy`) are data,
@@ -78,6 +80,10 @@ Full brief: `docs/PLAN.md`.
 - Audit important events with `audit()` (`src/lib/audit.ts`, typed `AuditAction`): pass created/approved/revoked,
   visit approved/denied/entered/left, blacklist hit, NDA accepted, policy/settings changed, device enrolled, member
   added, employee sync, logins.
+- Panel menus: `MenuBar` (`src/components/nav/MenuBar.tsx`, client) renders sections with dropdowns (Visitas,
+  Configuración, Personas…) plus direct links; server layouts pass icon *names* (`MenuIcon`), never components. Admin
+  sections live in `src/app/admin/layout.tsx`, the host bar in `HostNav`. Guides write paths as "Configuración → Sitios";
+  a menu change means updating `help.guides.*` texts, `npm run help:screenshots` and `npm run help:pdf`.
 - Icons: Lucide via `<Icon>`; no emojis in UI. Light/dark via CSS variables in `src/app/globals.css`; Airlink brand
   tokens in `src/styles/brand.css` (black wordmark + red chevron; white/red in light, black/red in dark).
   Wordmark `<Logo>` and square `<LogoMark>` in `src/components/Logo.tsx`; PWA icons in `public/icons`
@@ -108,6 +114,11 @@ Full brief: `docs/PLAN.md`.
 - Domain `visitas.airlinkdr.com` at Cloudflare (proxied, SSL Full).
 - Integrations: Entra ID app registration "Airlink Visitas"; Power Automate HTTP flow for Teams; SPN read-only;
   Zebra printers; AirlinkCast lobby screen (phase 2).
+
+## QA
+- `docs/QA.md` keeps the findings of each QA round (scenario testers as admin/host, kiosk guard and visitor, driven
+  with Playwright against a local build following the guides) and what was fixed. Re-run the same three scenarios after
+  changes to the link, the kiosk or the guides.
 
 ## Working method
 - Phases are split into slices; each slice runs in its own git worktree with its own DB (`visitas_<slice>`), port and QA,
