@@ -59,7 +59,8 @@
       "entra": "No se pudo iniciar sesión con Microsoft. Inténtalo de nuevo.",
       "disabled": "Tu cuenta está deshabilitada. Contacta a IT."
     },
-    "localOnly": "Acceso local de emergencia"
+    "localOnly": "Acceso local de emergencia",
+    "kiosk": "¿Eres de Seguridad o recepción? Abrir el modo kiosco"
   },
   "selectPanel": {
     "title": "¿A dónde vas?",
@@ -2130,15 +2131,15 @@
           },
           "device": {
             "title": "Registra el dispositivo",
-            "body": "En Administración → Dispositivos de kiosco escribe un nombre que identifique el equipo (por ejemplo \"Tablet Recepción A2\"), elige el sitio y la puerta donde estará, y pulsa \"Crear dispositivo\".\nCada tablet o PC es un dispositivo distinto y queda ligado a una sola puerta."
+            "body": "En Administración → Dispositivos de kiosco escribe un nombre que identifique el equipo (por ejemplo \"Tablet Recepción A2\"), elige la puerta donde estará (la lista va agrupada por sitio) y pulsa \"Crear dispositivo\".\nCada tablet o PC es un dispositivo distinto y queda ligado a una sola puerta."
           },
           "code": {
             "title": "Copia el código de enrolamiento",
-            "body": "Al crear el dispositivo aparece un código en grande. Vale 15 minutos y una sola vez.\nSi se vence antes de usarlo, pulsa \"Generar código\" en la tarjeta del dispositivo para obtener otro."
+            "body": "Al crear el dispositivo aparece una tarjeta verde arriba de la página \"Dispositivos de kiosco\", con el título \"Código de enrolamiento\" y el código en grande. Vale 15 minutos y una sola vez.\nSi se vence antes de usarlo, pulsa \"Generar código\" en la tarjeta del dispositivo para obtener otro."
           },
           "enroll": {
             "title": "Enrola la tablet o PC de recepción",
-            "body": "En el equipo de recepción abre la dirección de Visitas seguida de /guard. No hace falta iniciar sesión.\nEscribe el código y pulsa \"Enrolar\". El navegador queda vinculado a esa puerta de forma permanente: usa siempre el mismo navegador y no borres sus datos de navegación.\nSi un equipo quedó enrolado en el sitio o la puerta equivocada, en la pantalla del PIN pulsa \"Cambiar de dispositivo\": suelta el enrolamiento y vuelve a pedir un código nuevo."
+            "body": "En el equipo de recepción abre la dirección de Visitas seguida de /guard, o en la pantalla de inicio de sesión pulsa \"¿Eres de Seguridad o recepción? Abrir el modo kiosco\". No hace falta iniciar sesión con correo.\nEscribe el código y pulsa \"Enrolar\". El navegador queda vinculado a esa puerta de forma permanente: usa siempre el mismo navegador y no borres sus datos de navegación.\nSi un equipo quedó enrolado en el sitio o la puerta equivocada, en la pantalla del PIN pulsa \"Cambiar de dispositivo\": suelta el enrolamiento y vuelve a pedir un código nuevo."
           },
           "pin": {
             "title": "Entra con el PIN del guardia",
@@ -2222,7 +2223,7 @@
         "steps": {
           "home": {
             "title": "Tu panel de anfitrión",
-            "body": "En \"Mis visitas\" ves tus pases próximos y anteriores con su estado. Desde la barra superior accedes a \"Nuevo pase\", \"Aprobaciones\" y, si eres brigadista, a \"Evacuación\".\nEntras con tu cuenta de Microsoft de Airlink; si tienes acceso a varios sitios, el icono de paneles te permite cambiar."
+            "body": "En \"Mis visitas\" ves tus pases próximos y anteriores con su estado. En la barra superior tienes \"Mis pases\" y \"Nuevo pase\" (y el botón rojo \"Invitar visitante\"); \"Aprobaciones\" aparece solo si tienes rol de aprobador, seguridad o administración, y \"Evacuación\" si eres brigadista.\nEntras en /login con tu cuenta de Microsoft de Airlink o con la contraseña local que te puso Administración; si tienes varios paneles o sitios, el icono de paneles de la cabecera te permite cambiar."
           },
           "new": {
             "title": "Crea un pase",
@@ -2246,7 +2247,7 @@
           },
           "selfRegister": {
             "title": "Enlace de invitación: el visitante llena sus datos",
-            "body": "Marca \"El visitante completa sus datos desde el enlace\" cuando solo sepas el tipo de visita, las áreas, las fechas y cuántas personas vienen. Indica el tamaño del grupo y se genera un enlace por persona; copia todos los enlaces desde el detalle y envía a cada uno el suyo.\nCada persona abre su enlace, escribe su nombre, cédula, teléfono y lo que pida el formulario, y al terminar aparece su QR. El enlace queda ligado a esa persona y no admite cambios; el kiosco no deja entrar a quien no completó su registro."
+            "body": "Marca \"El visitante completa sus datos desde el enlace\" cuando solo sepas el tipo de visita, las áreas, las fechas y cuántas personas vienen. Indica el tamaño del grupo y se genera un enlace por persona; copia todos los enlaces desde el detalle y envía a cada uno el suyo.\nAl marcarlo desaparecen los \"Datos adicionales\" y los dispositivos del formulario: cada persona abre su enlace, escribe su nombre, cédula, teléfono, sus dispositivos y lo que pida el formulario, y al terminar aparece su QR. El enlace queda ligado a esa persona y no admite cambios; el kiosco no deja entrar a quien no completó su registro."
           },
           "onBehalf": {
             "title": "Seguridad o Administración generan el enlace por ti",
@@ -2260,7 +2261,7 @@
         "steps": {
           "list": {
             "title": "Revisa los pendientes",
-            "body": "En \"Aprobaciones\" ves los pases y las visitas no anunciadas que esperan tu respuesta: visitante, tipo, anfitrión, sitio, ventana y áreas. Cada fila indica con qué rol apruebas (anfitrión, aprobador o seguridad)."
+            "body": "Abre el panel Anfitrión (icono de paneles en la cabecera → \"Anfitrión\") y pulsa \"Aprobaciones\" en la barra superior; no está en el menú de Administración. Ahí ves los pases y las visitas no anunciadas que esperan tu respuesta: visitante, tipo, anfitrión, sitio, ventana y áreas. Cada fila indica con qué rol apruebas (anfitrión, aprobador o seguridad)."
           },
           "decide": {
             "title": "Aprueba o rechaza",
@@ -2282,7 +2283,7 @@
           },
           "sites": {
             "title": "Sitios, puertas y áreas",
-            "body": "Cada planta es un sitio con su zona horaria, retención de fotos y minutos de espera para escalar visitas no anunciadas. Dentro del sitio defines las puertas (peatonal, vehicular, muelle), la impresora de gafete de cada puerta y el QR de auto-registro para imprimir en recepción.\nLas áreas pueden marcarse como restringidas o con acompañante obligatorio; el kiosco lo muestra como aviso al entrar.\nEl \"Identificador (URL)\" al crear un sitio es su nombre corto y único en formato web (minúsculas, números y guiones, ej. airlink-2): identifica el sitio de forma fija en la auditoría y las integraciones aunque luego cambies el nombre visible, y no se puede editar después.\nEl kiosco deja entrar antes de la hora del pase según los \"Minutos de llegada anticipada\" del sitio (60 por defecto): si la visita es a las 10:00, puede entrar desde las 9:00, nunca el día anterior.\nEn la configuración del sitio también defines el Wi-Fi de invitados (el anfitrión decide en cada invitación si lo comparte) y si el kiosco admite \"Visita no anunciada\"; desactívalo si Seguridad solo debe escanear.\n\"Fotos obligatorias para todo visitante\" (activado por defecto) exige a cualquier visitante, sin importar el tipo, una foto de la cara y de la cédula por delante y por detrás desde su enlace; sin ellas no aparece su QR y el kiosco no lo deja entrar. Se borran solas al cumplirse la retención de fotos del sitio.\n\"Registro de dispositivos obligatorio para todo visitante\" (activado por defecto) exige en el enlace los dispositivos que trae con IMEI o serial, modelo, color y capacidad, o la declaración de que no trae ninguno."
+            "body": "Cada planta es un sitio con su zona horaria, retención de fotos y minutos de espera para escalar visitas no anunciadas. Dentro del sitio defines las puertas (peatonal, vehicular, muelle), la impresora de gafete de cada puerta y el QR de auto-registro para imprimir en recepción.\nLas áreas pueden marcarse como restringidas o con acompañante obligatorio; el kiosco lo muestra como aviso al entrar.\nEl \"Identificador (URL)\" al crear un sitio es su nombre corto y único en formato web (minúsculas, números y guiones, ej. airlink-2): identifica el sitio de forma fija en la auditoría y las integraciones aunque luego cambies el nombre visible, y no se puede editar después.\nEl kiosco deja entrar antes de la hora del pase según los \"Minutos de llegada anticipada\" del sitio (60 por defecto): si la visita es a las 10:00, puede entrar desde las 9:00, nunca el día anterior.\nEn la configuración del sitio también defines el Wi-Fi de invitados (nombre de la red y clave; cuando están guardados, el anfitrión ve en cada invitación la casilla \"Compartir el Wi-Fi de invitados\") y si el kiosco admite \"Visita no anunciada\"; desactívalo si Seguridad solo debe escanear.\n\"Fotos obligatorias para todo visitante\" (activado por defecto) exige a cualquier visitante, sin importar el tipo, una foto de la cara y de la cédula por delante y por detrás desde su enlace; sin ellas no aparece su QR y el kiosco no lo deja entrar. Se borran solas al cumplirse la retención de fotos del sitio.\n\"Registro de dispositivos obligatorio para todo visitante\" (activado por defecto) exige en el enlace los dispositivos que trae con IMEI o serial, modelo, color y capacidad, o la declaración de que no trae ninguno."
           },
           "policies": {
             "title": "Políticas por tipo de visita",
@@ -2320,7 +2321,7 @@
           },
           "add": {
             "title": "Agrega una persona",
-            "body": "Pulsa \"Agregar persona\": nombre, correo, departamento, extensión, teléfono y sitio. Marca los roles que necesita y, si va a usar el kiosco, un PIN inicial.\nAdministración, Seguridad y Aprobador abren paneles; Brigadista recibe la lista de evacuación; sin rol, la persona solo puede recibir visitas como anfitrión. Si el correo ya pertenece a una cuenta, agrega los roles desde su fila en lugar de crearla de nuevo."
+            "body": "Pulsa \"Agregar persona\": nombre, correo, departamento, extensión, teléfono y sitio. Marca los roles que necesita y, si va a usar el kiosco, un PIN inicial.\nNo existe un rol \"Anfitrión\": todo empleado activo con correo ya puede invitar visitantes. Para alguien que solo invitará, deja las cuatro casillas de rol sin marcar. Administración, Seguridad y Aprobador abren paneles; Brigadista recibe la lista de evacuación. Si el correo ya pertenece a una cuenta, agrega los roles desde su fila en lugar de crearla de nuevo.\nCrear la persona no le da todavía una forma de entrar: si usará una cuenta local (sin Microsoft), pulsa luego \"Editar\" en su fila y ponle una contraseña en \"Acceso\". Con Microsoft entra directamente con su correo de Airlink."
           },
           "roles": {
             "title": "Roles en línea",
@@ -2336,7 +2337,7 @@
           },
           "edit": {
             "title": "Editar una persona: datos, permisos, contraseña, eliminar",
-            "body": "El botón \"Editar\" de cada fila abre su ficha. Arriba corriges nombre, correo, departamento, extensión, teléfono y sitio (solo personas manuales; las que vienen de SPN o Microsoft se corrigen en el origen).\nEn \"Permisos\" ves cada rol con su sitio, lo quitas con \"Quitar\" o agregas otro eligiendo rol y sitio (o todos los sitios si eres administrador global). En \"Acceso\" le pones una contraseña nueva para entrar por /login (se cierran sus sesiones y puedes reiniciar su verificación en dos pasos) y cambias su PIN de kiosco. Al final, \"Eliminar persona\" borra la ficha y el acceso si no tiene historial; con historial, desactívala."
+            "body": "El botón \"Editar\" de cada fila abre su ficha. Arriba corriges nombre, correo, departamento, extensión, teléfono y sitio (solo personas manuales; las que vienen de SPN o Microsoft se corrigen en el origen).\nEn \"Permisos\" ves cada rol con su sitio, lo quitas con \"Quitar\" (el navegador pide confirmar) o agregas otro eligiendo rol y sitio (o todos los sitios si eres administrador global). En \"Acceso\" le pones una contraseña nueva para entrar por /login (se cierran sus sesiones y puedes reiniciar su verificación en dos pasos) y cambias su PIN de kiosco.\nAl final, en la tarjeta \"Eliminar persona\", el botón \"Eliminar definitivamente\" borra la ficha y el acceso si no tiene historial (pide confirmar); con historial, desactívala."
           }
         }
       },
@@ -2354,7 +2355,7 @@
           },
           "assign": {
             "title": "Asígnalo a un tipo de visita",
-            "body": "En \"Políticas de visita\", en el tipo que corresponde, elige la plantilla en \"Formulario de registro\" y pulsa \"Guardar\". Desde ahí mismo puedes abrir el editor con \"Editar formulario\"."
+            "body": "En \"Políticas de visita\", en el tipo que corresponde, elige la plantilla en \"Formulario de registro\" y pulsa \"Guardar\". A partir de entonces la tarjeta muestra el enlace \"Editar formulario\", que abre el editor de esa plantilla (\"Administrar formularios\" lleva a la lista)."
           },
           "result": {
             "title": "Dónde se ve",
@@ -2362,7 +2363,7 @@
           },
           "contractor": {
             "title": "Formulario de contratistas: herramientas, normas y firma",
-            "body": "Para contratistas agrega una pregunta de tipo \"Lista (una por línea)\" llamada por ejemplo \"Herramientas y equipos que trae\" y márcala obligatoria: el visitante escribe escalera, taladro, bultos… y Seguridad lo ve al escanear y al salir.\nAgrega bloques de \"Texto / instrucciones\" con lo permitido y lo prohibido en planta, el Wi-Fi de visitantes y la ruta de evacuación como \"Documento o imagen\" (mapa). Cada elemento tiene campos opcionales en inglés para visitantes extranjeros. Cierra con \"Firma\" obligatoria junto a la política de visitantes para dejar constancia de que leyó las instrucciones.\nAgrega también \"Dispositivos personales\" y márcalo obligatorio: el visitante registra teléfono, laptop, tablet o reloj con IMEI o serial, marca y modelo y color, o declara que no trae nada; Seguridad lo ve al escanear y puede buscar cualquier IMEI desde el kiosco."
+            "body": "Para contratistas agrega una pregunta de tipo \"Lista (una por línea)\" llamada por ejemplo \"Herramientas y equipos que trae\" y márcala obligatoria: el visitante escribe escalera, taladro, bultos… y Seguridad lo ve al escanear y al salir.\nAgrega bloques de \"Texto / instrucciones\" con lo permitido y lo prohibido en planta, el Wi-Fi de visitantes y la ruta de evacuación como \"Documento o imagen\" (mapa). Cada elemento tiene campos opcionales en inglés para visitantes extranjeros. Cierra con \"Firma\" obligatoria junto a la política de visitantes para dejar constancia de que leyó las instrucciones.\nAgrega también \"Dispositivos personales\" y márcalo obligatorio: el visitante registra teléfono, laptop, tablet o reloj con IMEI o serial, marca y modelo y color, o declara que no trae nada; Seguridad lo ve al escanear y puede buscar cualquier IMEI desde el kiosco.\nCon un enlace de invitación (\"El visitante completa sus datos desde el enlace\") estas preguntas y los dispositivos se le piden al visitante desde su enlace, no al anfitrión al crear el pase."
           }
         }
       },
@@ -2428,7 +2429,7 @@
           },
           "language": {
             "title": "Idioma y tema",
-            "body": "Los iconos de la cabecera cambian el idioma (español/inglés) y el tema claro u oscuro. El kiosco usa siempre el idioma del dispositivo."
+            "body": "En la cabecera, el selector \"ES/EN\" seguido de \"OK\" cambia el idioma (español/inglés): elige y pulsa OK. El icono de luna/sol cambia el tema claro u oscuro. El kiosco usa siempre el idioma del dispositivo."
           }
         }
       }

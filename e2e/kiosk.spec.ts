@@ -21,7 +21,6 @@ test("admin creates a guard with PIN, enrolls a kiosk, guard signs in with PIN; 
   // Kiosk device at Airlink 3 (guard above must NOT appear there)
   await page.goto("/admin/devices");
   await page.getByLabel("Nombre del dispositivo").fill(`Tablet A3 ${stamp}`);
-  await page.getByLabel("Sitio").selectOption({ label: "Airlink 3" });
   await page.getByLabel("Puerta").selectOption({ label: "Airlink 3 · Recepción" });
   await page.getByRole("button", { name: "Crear dispositivo" }).click();
   const codeA3 = (await page.getByTestId("enroll-code").textContent())!.trim();
@@ -39,7 +38,6 @@ test("admin creates a guard with PIN, enrolls a kiosk, guard signs in with PIN; 
   // Kiosk device at Airlink 2
   await page.goto("/admin/devices");
   await page.getByLabel("Nombre del dispositivo").fill(`Tablet A2 ${stamp}`);
-  await page.getByLabel("Sitio").selectOption({ label: "Airlink 2" });
   await page.getByLabel("Puerta").selectOption({ label: "Airlink 2 · Recepción" });
   await page.getByRole("button", { name: "Crear dispositivo" }).click();
   const codeA2 = (await page.getByTestId("enroll-code").textContent())!.trim();
@@ -82,7 +80,6 @@ test("a kiosk can drop its enrollment from the PIN screen and take a new code", 
   await loginAsAdmin(page);
   await page.goto("/admin/devices");
   await page.getByLabel("Nombre del dispositivo").fill(`Tablet Movil ${stamp}`);
-  await page.getByLabel("Sitio").selectOption({ label: "Airlink 2" });
   await page.getByLabel("Puerta").selectOption({ label: "Airlink 2 · Recepción" });
   await page.getByRole("button", { name: "Crear dispositivo" }).click();
   const code = (await page.getByTestId("enroll-code").textContent())!.trim();

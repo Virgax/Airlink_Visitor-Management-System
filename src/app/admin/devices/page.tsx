@@ -35,16 +35,14 @@ export default async function DevicesPage({ searchParams }: { searchParams: Prom
           <label className="label" htmlFor="name">{t("name")}</label>
           <input id="name" name="name" required minLength={2} placeholder={t("namePlaceholder")} className="input" />
         </div>
-        <div>
-          <label className="label" htmlFor="siteId">{t("site")}</label>
-          <select id="siteId" name="siteId" className="input" required>
-            {sites.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </select>
-        </div>
-        <div>
+        <div className="sm:col-span-2">
           <label className="label" htmlFor="gateId">{t("gate")}</label>
           <select id="gateId" name="gateId" className="input" required>
-            {sites.flatMap((s) => s.gates.map((g) => <option key={g.id} value={g.id}>{s.name} · {g.name}</option>))}
+            {sites.map((s) => (
+              <optgroup key={s.id} label={s.name}>
+                {s.gates.map((g) => <option key={g.id} value={g.id}>{s.name} · {g.name}</option>)}
+              </optgroup>
+            ))}
           </select>
         </div>
         <div className="sm:col-span-4">

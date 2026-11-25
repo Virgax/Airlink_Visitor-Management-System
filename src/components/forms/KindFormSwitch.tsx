@@ -30,6 +30,14 @@ export function KindFormSwitch({ selectId, rules }: { selectId: string; rules: K
           el.disabled = !active;
         });
       });
+      // (the visitor-fills rule below re-disables the custom fieldsets when needed)
+      // Custom questions and device blocks are the visitor's to answer from the link: hide and disable them.
+      form.querySelectorAll<HTMLElement>("[data-visitor-fills]").forEach((card) => {
+        card.hidden = visitorFills;
+        card.querySelectorAll<HTMLFieldSetElement>("fieldset[data-kind-fields]").forEach((fs) => {
+          fs.disabled = visitorFills || fs.closest<HTMLElement>("[data-kind-section]")?.dataset.kindSection !== kind;
+        });
+      });
       form.querySelectorAll<HTMLElement>("[data-builtin]").forEach((box) => {
         const type = box.dataset.builtin ?? "";
         box.hidden = rule.hidden.includes(type);

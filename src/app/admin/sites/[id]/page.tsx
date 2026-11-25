@@ -115,12 +115,12 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
           </div>
           <div className="flex items-end">
             <label className="flex items-start gap-2 py-2">
-              <input type="checkbox" name="requirePhotos" defaultChecked={settings.requirePhotos} className="mt-1" data-testid="require-photos" /> <span>{t("requirePhotos")}<span className="muted block text-xs">{t("requirePhotosHelp")}</span></span>
+              <input type="checkbox" name="requirePhotos" defaultChecked={settings.requirePhotos} className="mt-1 h-4 w-4 shrink-0" data-testid="require-photos" /> <span>{t("requirePhotos")}<span className="muted block text-xs">{t("requirePhotosHelp")}</span></span>
             </label>
           </div>
           <div className="flex items-end">
             <label className="flex items-start gap-2 py-2">
-              <input type="checkbox" name="requireDevices" defaultChecked={settings.requireDevices} className="mt-1" data-testid="require-devices" /> <span>{t("requireDevices")}<span className="muted block text-xs">{t("requireDevicesHelp")}</span></span>
+              <input type="checkbox" name="requireDevices" defaultChecked={settings.requireDevices} className="mt-1 h-4 w-4 shrink-0" data-testid="require-devices" /> <span>{t("requireDevices")}<span className="muted block text-xs">{t("requireDevicesHelp")}</span></span>
             </label>
           </div>
           <div>
@@ -174,13 +174,15 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
                       <p className="font-medium">{g.name}</p>
                       <p className="muted">{tg(g.kind)} · {g.active ? tc("active") : tc("inactive")}</p>
                     </div>
-                    <form action={toggleSelfSignInAction}>
-                      <input type="hidden" name="gateId" value={g.id} />
-                      <button type="submit" className="btn-secondary text-sm" data-testid="toggle-self-sign-in">
-                        <Icon icon={QrCode} /> {g.selfSignInToken ? ts("disable") : ts("enable")}
-                      </button>
-                    </form>
-                    {g.selfSignInToken ? (
+                    {g.kind !== "checkpoint" ? (
+                      <form action={toggleSelfSignInAction}>
+                        <input type="hidden" name="gateId" value={g.id} />
+                        <button type="submit" className="btn-secondary text-sm" data-testid="toggle-self-sign-in">
+                          <Icon icon={QrCode} /> {g.selfSignInToken ? ts("disable") : ts("enable")}
+                        </button>
+                      </form>
+                    ) : null}
+                    {g.selfSignInToken && g.kind !== "checkpoint" ? (
                       <Link href={`/admin/sites/${site.id}/gates/${g.id}/poster`} className="btn-secondary text-sm" data-testid="poster-link">
                         <Icon icon={Printer} /> {ts("poster")}
                       </Link>
@@ -196,6 +198,7 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
                       </form>
                     )}
                   </div>
+                  {g.kind === "checkpoint" ? null : (
                   <form action={updateGatePrinterAction} className="flex flex-wrap items-end gap-2 rounded-lg bg-surface-2 p-3" aria-label={`${tb("admin.printer")} · ${g.name}`}>
                     <input type="hidden" name="gateId" value={g.id} />
                     <div>
@@ -211,6 +214,7 @@ export default async function SiteDetailPage({ params, searchParams }: { params:
                     </div>
                     <button type="submit" className="btn-secondary text-sm">{tb("admin.savePrinter")}</button>
                   </form>
+                  )}
                   {g.kind === "checkpoint" ? (
                     <form action={updateCheckpointAreasAction} className="rounded-lg bg-surface-2 p-3" data-testid="checkpoint-settings">
                       <input type="hidden" name="gateId" value={g.id} />

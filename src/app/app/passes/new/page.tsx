@@ -180,13 +180,13 @@ export default async function NewPassPage({ searchParams }: { searchParams: Prom
       </div>
 
       {VISIT_KINDS.some((kind) => elementsFor(forms[kind].form.elements, "host").some((e) => e.type !== "signature" && !BUILTIN_TYPES.includes(e.type as BuiltinType))) ? (
-        <div className="card space-y-4" data-testid="custom-fields">
+        <div className="card space-y-4" data-testid="custom-fields" data-visitor-fills hidden={from?.selfRegistration ? true : undefined}>
           <h2 className="font-medium">{t("customFields")}</h2>
           {VISIT_KINDS.map((kind) => {
             const active = kind === initialKind;
             return (
               <div key={kind} data-kind-section={kind} hidden={!active || undefined} className="space-y-4">
-                <fieldset disabled={!active || undefined} className="space-y-4">
+                <fieldset disabled={!active || from?.selfRegistration || undefined} data-kind-fields className="space-y-4">
                   <FormFields elements={forms[kind].form.elements} surface="host" labels={labels} answers={storedAnswers} exclude={["signature"]} idPrefix={`${kind}-`} locale={locale} />
                 </fieldset>
               </div>

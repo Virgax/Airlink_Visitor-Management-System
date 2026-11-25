@@ -105,9 +105,10 @@ export async function createPassAction(formData: FormData): Promise<void> {
   const t = await getTranslations("host.new");
   // Custom questions of the sign-in form for this kind (host surface).
   const { form } = await loadPolicyAndForm(site.id, d.kind);
-  const collected = collectAnswers(form.elements, "host", formData);
+  // With an invitation link the visitor answers the form (questions, devices) from the link: nothing is taken here.
+  const collected = selfRegistration ? { answers: {}, invalid: [] } : collectAnswers(form.elements, "host", formData);
   if (collected.invalid.length) fail(site.id, "invalid");
-  const devices = collectDevices(form.elements, "host", formData);
+  const devices = selfRegistration ? { devices: [], none: false, invalid: false, present: false } : collectDevices(form.elements, "host", formData);
   if (devices.invalid) fail(site.id, "devices");
 
   // A frequent visitor picked in the form: copy the hashed document (never re-typed) when no document was given.

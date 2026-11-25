@@ -59,7 +59,8 @@
       "entra": "Microsoft sign-in failed. Please try again.",
       "disabled": "Your account is disabled. Contact IT."
     },
-    "localOnly": "Emergency local access"
+    "localOnly": "Emergency local access",
+    "kiosk": "Security or reception? Open kiosk mode"
   },
   "selectPanel": {
     "title": "Where to?",
@@ -2130,15 +2131,15 @@
           },
           "device": {
             "title": "Register the device",
-            "body": "In Administration → Kiosk devices enter a name that identifies the equipment (for example \"Reception Tablet A2\"), choose the site and the gate where it will sit, and press \"Create device\".\nEach tablet or PC is a separate device tied to a single gate."
+            "body": "Under Administration → Kiosk devices type a name that identifies the equipment (for example \"Reception tablet A2\"), choose the gate where it will be (the list is grouped by site) and press \"Create device\".\nEach tablet or PC is a separate device, tied to a single gate."
           },
           "code": {
             "title": "Copy the enrollment code",
-            "body": "After creating the device a large code appears. It is valid for 15 minutes and a single use.\nIf it expires before you use it, press \"Generate code\" on the device card to get another one."
+            "body": "When you create the device a green card appears at the top of the \"Kiosk devices\" page, titled \"Enrollment code\", with the code in large type. It is valid for 15 minutes and a single use.\nIf it expires before use, press \"Generate code\" on the device card to get another."
           },
           "enroll": {
             "title": "Enroll the reception tablet or PC",
-            "body": "On the reception computer open the Visitas address followed by /guard. No sign-in is needed.\nType the code and press \"Enroll\". The browser is now permanently linked to that gate: always use the same browser and never clear its browsing data.\nIf a device was enrolled at the wrong site or gate, press \"Change device\" on the PIN screen: it drops the enrollment and asks for a new code."
+            "body": "On the reception computer open the Visitas address followed by /guard, or on the sign-in page press \"Security or reception? Open kiosk mode\". No email sign-in is needed.\nType the code and press \"Enroll\". The browser is now permanently linked to that gate: always use the same browser and never clear its browsing data.\nIf a device was enrolled at the wrong site or gate, press \"Change device\" on the PIN screen: it drops the enrollment and asks for a new code."
           },
           "pin": {
             "title": "Sign in with the guard's PIN",
@@ -2222,7 +2223,7 @@
         "steps": {
           "home": {
             "title": "Your host panel",
-            "body": "\"My visits\" shows your upcoming and past passes with their status. The top bar takes you to \"New pass\", \"Approvals\" and, if you are a fire warden, \"Evacuation\".\nSign in with your Airlink Microsoft account; if you have access to several sites, the panels icon lets you switch."
+            "body": "Under \"My visits\" you see your upcoming and past passes with their status. The top bar has \"My passes\" and \"New pass\" (and the red \"Invite visitor\" button); \"Approvals\" appears only if you have the approver, security or administration role, and \"Evacuation\" if you are a warden.\nYou sign in at /login with your Airlink Microsoft account or with the local password Administration set for you; with several panels or sites, the panels icon in the header lets you switch."
           },
           "new": {
             "title": "Create a pass",
@@ -2246,7 +2247,7 @@
           },
           "selfRegister": {
             "title": "Invitation link: the visitor fills in their details",
-            "body": "Tick \"The visitor fills in their own details from the link\" when you only know the visit type, areas, dates and how many people are coming. Set the group size and one link per person is generated; copy all links from the detail and send each person theirs.\nEach person opens their link, enters name, ID, phone and whatever the form asks, and their QR appears when done. The link is tied to that person and accepts no changes; the kiosk refuses anyone who has not completed their registration."
+            "body": "Tick \"The visitor fills in their own details from the link\" when you only know the visit type, areas, dates and how many people are coming. Set the group size and one link per person is generated; copy all links from the detail and send each person theirs.\nWhen you tick it, the \"Additional details\" and the devices disappear from the form: each person opens their link, enters name, ID, phone, their devices and whatever the form asks, and their QR appears when done. The link is tied to that person and accepts no changes; the kiosk refuses anyone who has not completed their registration."
           },
           "onBehalf": {
             "title": "Security or Administration generate the link for you",
@@ -2260,7 +2261,7 @@
         "steps": {
           "list": {
             "title": "Review what is pending",
-            "body": "\"Approvals\" lists the passes and unannounced visits waiting for your answer: visitor, type, host, site, window and areas. Each row states the role you approve with (host, approver or security)."
+            "body": "Open the Host panel (panels icon in the header → \"Host\") and press \"Approvals\" in the top bar; it is not in the Administration menu. There you see the passes and the unannounced visits waiting for your answer: visitor, type, host, site, window and areas. Each row says with which role you approve (host, approver or security)."
           },
           "decide": {
             "title": "Approve or deny",
@@ -2282,7 +2283,7 @@
           },
           "sites": {
             "title": "Sites, gates and areas",
-            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry.\nThe \"Identifier (URL)\" when creating a site is its short unique web-style name (lowercase, digits and hyphens, e.g. airlink-2): it identifies the site permanently in the audit log and integrations even if you later rename it, and cannot be edited afterwards.\nThe kiosk lets visitors in before the pass time according to the site's \"Early-arrival minutes\" (60 by default): a 10:00 visit may enter from 9:00, never the day before.\nThe site settings also hold the guest Wi-Fi (each invitation decides whether to share it) and whether the kiosk accepts \"Unannounced visit\"; turn it off if Security should only scan.\n\"Photos required of every visitor\" (on by default) demands from any visitor, whatever the type, a face photo and both sides of their ID from their link; without them their QR does not appear and the kiosk refuses entry. They are deleted automatically when the site's photo retention expires.\n\"Device registration required of every visitor\" (on by default) demands on the link the devices they bring with IMEI or serial, model, colour and capacity, or a declaration of bringing none."
+            "body": "Each plant is a site with its time zone, photo retention and minutes to wait before escalating an unannounced visit. Inside the site you define gates (pedestrian, vehicle, dock), the badge printer of each gate and the self sign-in QR to print at reception.\nAreas can be marked restricted or escort-required; the kiosk shows it as a warning on entry.\nThe \"Identifier (URL)\" when creating a site is its short unique web-style name (lowercase, digits and hyphens, e.g. airlink-2): it identifies the site permanently in the audit log and integrations even if you later rename it, and cannot be edited afterwards.\nThe kiosk lets visitors in before the pass time according to the site's \"Early-arrival minutes\" (60 by default): a 10:00 visit may enter from 9:00, never the day before.\nThe site settings also hold the guest Wi-Fi (network name and password; once saved, the host sees the \"Share the guest Wi-Fi\" box on each invitation) and whether the kiosk accepts \"Unannounced visit\"; turn it off if Security should only scan.\n\"Photos required of every visitor\" (on by default) demands from any visitor, whatever the type, a face photo and both sides of their ID from their link; without them their QR does not appear and the kiosk refuses entry. They are deleted automatically when the site's photo retention expires.\n\"Device registration required of every visitor\" (on by default) demands on the link the devices they bring with IMEI or serial, model, colour and capacity, or a declaration of bringing none."
           },
           "policies": {
             "title": "Policies per visit type",
@@ -2320,7 +2321,7 @@
           },
           "add": {
             "title": "Add a person",
-            "body": "Press \"Add person\": name, e-mail, department, extension, phone and site. Tick the roles they need and, if they will use the kiosk, an initial PIN.\nAdministration, Security and Approver open panels; Fire warden receives the evacuation list; with no role, the person can only receive visits as a host. If the e-mail already belongs to an account, add the roles from its row instead of creating it again."
+            "body": "Press \"Add person\": name, email, department, extension, phone and site. Tick the roles they need and, if they will use the kiosk, an initial PIN.\nThere is no \"Host\" role: every active employee with an email can already invite visitors. For someone who will only invite, leave the four role boxes unticked. Administration, Security and Approver open panels; Warden receives the evacuation list. If the email already belongs to an account, add the roles from its row instead of creating it again.\nCreating the person does not yet give them a way in: if they will use a local account (no Microsoft), then press \"Edit\" on their row and set a password under \"Access\". With Microsoft they sign in directly with their Airlink email."
           },
           "roles": {
             "title": "Inline roles",
@@ -2336,7 +2337,7 @@
           },
           "edit": {
             "title": "Edit a person: details, permissions, password, delete",
-            "body": "The \"Edit\" button on each row opens their record. At the top you correct name, e-mail, department, extension, phone and site (manual people only; those from SPN or Microsoft are corrected at the source).\nUnder \"Permissions\" you see each role with its site, remove it with \"Remove\" or add another by picking role and site (or every site if you are a global admin). Under \"Access\" you set a new password for signing in at /login (their sessions close and you can reset their two-step verification) and change their kiosk PIN. At the bottom, \"Delete person\" removes the record and access when there is no history; with history, deactivate instead."
+            "body": "The \"Edit\" button on each row opens their record. At the top you correct name, email, department, extension, phone and site (manual people only; those from SPN or Microsoft are corrected at the source).\nUnder \"Permissions\" you see each role with its site, remove it with \"Remove\" (the browser asks you to confirm) or add another by choosing role and site (or all sites if you are a global administrator). Under \"Access\" you set a new password to sign in at /login (their sessions are closed and you can reset their two-step verification) and change their kiosk PIN.\nAt the bottom, in the \"Delete person\" card, the \"Delete permanently\" button removes the record and the access if they have no history (it asks you to confirm); with history, deactivate them."
           }
         }
       },
@@ -2354,7 +2355,7 @@
           },
           "assign": {
             "title": "Assign it to a visit type",
-            "body": "Under \"Visit policies\", on the matching type, pick the template under \"Sign-in form\" and press \"Save\". From there you can open the editor with \"Edit form\"."
+            "body": "In \"Visit policies\", on the matching type, choose the template under \"Registration form\" and press \"Save\". From then on the card shows the \"Edit form\" link, which opens the editor for that template (\"Manage forms\" leads to the list)."
           },
           "result": {
             "title": "Where it shows",
@@ -2362,7 +2363,7 @@
           },
           "contractor": {
             "title": "Contractor form: tools, rules and signature",
-            "body": "For contractors add a question of type \"List (one per line)\" named for example \"Tools and equipment brought\" and make it required: the visitor types ladder, drill, bags… and Security sees it at the scan and on the way out.\nAdd \"Text / instructions\" blocks with what is allowed and forbidden on the floor, the visitor Wi-Fi and the evacuation route as a \"Document or image\" (map). Each element has optional English texts for foreign visitors. Close with a required \"Signature\" next to the visitor policy to record that they read the instructions.\nAlso add \"Personal devices\" and make it required: the visitor registers phone, laptop, tablet or watch with IMEI or serial, make and model and colour, or declares bringing none; Security sees it at the scan and can look up any IMEI from the kiosk."
+            "body": "For contractors add a question of type \"List (one per line)\" named for example \"Tools and equipment brought\" and make it required: the visitor types ladder, drill, bags… and Security sees it at the scan and on the way out.\nAdd \"Text / instructions\" blocks with what is allowed and forbidden on the floor, the visitor Wi-Fi and the evacuation route as a \"Document or image\" (map). Each element has optional English texts for foreign visitors. Close with a required \"Signature\" next to the visitor policy to record that they read the instructions.\nAlso add \"Personal devices\" and make it required: the visitor registers phone, laptop, tablet or watch with IMEI or serial, make and model and colour, or declares bringing none; Security sees it at the scan and can look up any IMEI from the kiosk.\nWith an invitation link (\"The visitor fills in their details from the link\") these questions and the devices are asked of the visitor from their link, not of the host when creating the pass."
           }
         }
       },
@@ -2428,7 +2429,7 @@
           },
           "language": {
             "title": "Language and theme",
-            "body": "The header icons switch the language (Spanish/English) and the light or dark theme. The kiosk always uses the device language."
+            "body": "In the header, the \"ES/EN\" selector followed by \"OK\" changes the language (Spanish/English): choose and press OK. The moon/sun icon switches the light or dark theme. The kiosk always uses the device language."
           }
         }
       }

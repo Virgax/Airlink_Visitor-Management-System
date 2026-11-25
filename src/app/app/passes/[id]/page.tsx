@@ -224,8 +224,8 @@ export default async function PassDetailPage({ params, searchParams }: { params:
                 <input type="hidden" name="passId" value={pass.id} />
                 <label className="label" htmlFor="inviteEmail">{tp("email.to")}</label>
                 <div className="flex gap-2">
-                  <input id="inviteEmail" name="email" type="email" required maxLength={200} className="input" defaultValue={pass.visitorEmail ?? ""} autoComplete="off" />
-                  <button type="submit" className="btn-secondary whitespace-nowrap">{tp("email.send")}</button>
+                  <input id="inviteEmail" name="email" type="email" required maxLength={200} className="input min-w-0 flex-1" defaultValue={pass.visitorEmail ?? ""} autoComplete="off" />
+                  <button type="submit" className="btn-secondary shrink-0 whitespace-nowrap">{tp("email.send")}</button>
                 </div>
               </form>
             </section>

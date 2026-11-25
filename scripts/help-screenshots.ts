@@ -147,7 +147,6 @@ async function main() {
   await step("admin-devices", async () => {
     await admin.goto("/admin/devices");
     await admin.getByLabel("Nombre del dispositivo").fill("Tablet Recepción A2");
-    await admin.getByLabel("Sitio").selectOption({ label: "Airlink 2" });
     await admin.getByLabel("Puerta").selectOption({ label: "Airlink 2 · Recepción" });
     await shot(admin, "admin-devices-create");
     await admin.getByRole("button", { name: "Crear dispositivo" }).click();
